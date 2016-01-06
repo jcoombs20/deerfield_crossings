@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Leaflet</title>
+    <title>Deerfield Watershed Road-Stream Crossing Explorer</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
     <link rel="stylesheet" href="http://colorbrewer2.org/export/colorbrewer.css" />
-    <link rel="stylesheet" href="Control.BingGeocoder.css" />
-    <link rel="stylesheet" href="Control.maxExtent.css" />
-    <link rel="stylesheet" href="dc.min.css" />
+    <link rel="stylesheet" href="styles/Control.BingGeocoder.css" />
+    <link rel="stylesheet" href="styles/Control.maxExtent.css" />
+    <link rel="stylesheet" href="styles/app.css" />
+    <link rel="stylesheet" href="styles/deerfield_crossings.css" />
 
     <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
     <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
@@ -20,157 +22,6 @@
     <script src="http://colorbrewer2.org/export/colorbrewer.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
     <script src="crossfilter.min.js"></script>
-    <script src="dc.min.js"></script>
-
-    <style>
-      body, html {
-        width: 100%;
-        height: 100%;
-      }
-
-      #map {
-        width: 100%;
-        height: 100%;
-      }
-
-      .streams {
-        stroke: blue;
-        stroke-width: 1px;
-        fill: none;
-      }
-
-      .crossings {
-        stroke: black;
-        fill: yellow;
-        opacity: 1;
-      }
-
-      .crossings:hover {
-        cursor: crosshair;
-      }
-
-      .huc8 {
-        fill: tan;
-        stroke: black;
-        stroke-width: 3px;
-        fill-opacity: 0.2;
-        stroke-opacity: 1;
-      }
-
-      .catchments {
-        fill: red;
-        stroke: black;
-        stroke-width: 1.5px;
-        fill-opacity: 0.1;
-        stroke-opacity: 0.3;
-      }
-
-      .catchments:hover {
-        fill-opacity: 0.3;
-        stroke-opacity: 0.8;
-      }
-
-      .tooltip {
-        background: rgba(0,0,0,0.7);
-        border-style: solid;
-        border-color: white;
-        border-width: 2px;
-        border-radius: 4px;
-        color: yellow;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 1em;
-        font-weight: bold;
-        padding: 7px;
-        background-opacity: 0.7;
-        position: absolute;
-        z-index: 10;
-        visibility: hidden;
-      }
-
-      .leaflet-bar a {
-        opacity: 0.6; 
-      }
-
-      .leaflet-bar a:hover {
-        opacity: 1;
-      }
-
-      .leaflet-control-scale-line, .leaflet-control-scale-line:not(:first-child) {
-        background: rgba(255,255,0,0.6);
-        border-style: solid;
-        border-width: 2px;
-        border-radius: 4px;
-        border-color: black;
-        margin: 5px;
-        margin-left: 0px;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 1.5em;
-        font-weight: bold;
-        color: black;
-        text-align: center;
-      }
-
-      #crossListDiv {
-        position: absolute;
-        right: 47%;
-        top: 5px;
-        z-index: 2;
-      }
-
-      #crossList {
-        border-style: solid;
-        border-width: 2px;
-        border-radius: 4px;
-        border-color: black;
-        margin: 2px;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 1em;
-        font-weight: bold;
-        text-align: center;
-        margin-top: 10px;
-        opacity: 0.7;
-      }
-
-      #crossList:hover {
-        opacity: 1;
-      }
-
-      #legend {
-        position: absolute;
-        right: 34%;
-        top: 40px;
-        max-width: 500px;
-        width: 100%;
-      }
-
-      .list-inline {
-        padding: 0px;
-        margin: 0px;
-        display: flex;
-        flex-direction: row;
-      }        
-
-      li.key {
-        background: rgba(255,255,255,0.75);
-        border-top-width: 15px;
-        border-top-style: solid;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 0.75em;
-        font-weight: bold;
-        text-align: left;
-        padding-left: 0;
-        padding-right: 0;
-        display: inline-block;
-        float: left;
-        flex-grow: 1;
-        flex-basis: 0;
-      }
-
-     li.key:hover {
-        background: rgba(255,255,255,1);
-     }
-
-    </style>
 
   </head>
 
@@ -223,213 +74,468 @@
         maxZoom: 20
       });
 
-      var gsStreams = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
-        layers: 'crossings:deerfield_streams',
+      var gsTowns = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
+        layers: 'crossings:deerfield_towns',
         format: 'image/png',
         transparent: true,
         version: '1.1.0',
         maxZoom: 20
       });
 
+      var gsCounties = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
+        layers: 'crossings:deerfield_counties',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.0',
+        maxZoom: 20
+      });
+
+      var gsDOTDistricts = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
+        layers: 'crossings:deerfield_dot_districts',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.0',
+        maxZoom: 20
+      });
+
+
       //******Make d3 vector layers variable
       var topoSVG = d3.select(map.getPanes().overlayPane).append("svg");
       var topoG = topoSVG.append("g").attr("class", "leaflet-zoom-hide");
+      var streamG = topoSVG.append("g").attr("class", "leaflet-zoom-hide");
 
       //******Make dummy layer variables for layer controller
       var crossTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
-      var crossTogG = crossTogSVG.append("g").attr("class", "leaflet-zoom-hide");
+      //var crossTogG = crossTogSVG.append("g").attr("class", "leaflet-zoom-hide");
 
       crossTogSVG.onAdd = function(map) {
-        var tmpFeats = topoG.selectAll(".crossings");
-        tmpFeats.on("mouseover", function(d) { showIt(this.id); })
-        tmpFeats.style("opacity", 1);
+        //******Add Deerfield road/stream crossings
+        var tmpFeats = topoG.selectAll(".crossings")
+            .data(crossings.features)
+          .enter().append("path")
+            .attr("d", path)
+            .attr("class", "crossings")
+            .on("mouseover", function(data) { showIt(this.id); })
+            .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
+            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
+        crossStyle(d3.select("#crossSelect").node().value);
+        d3.select("#crossLegend").style("display", "block");
       }
 
       crossTogSVG.onRemove = function(map) {
         var tmpFeats = topoG.selectAll(".crossings");
-        tmpFeats.on("mouseover", function(d) { })
-        tmpFeats.style("opacity", 0);
+        tmpFeats.remove();
+        d3.select("#crossLegend").style("display", "none");
       }
 
-      /*
       var streamTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
-      var streamTogG = streamTogSVG.append("g").attr("class", "leaflet-zoom-hide");
+      //var streamTogG = streamTogSVG.append("g").attr("class", "leaflet-zoom-hide");
   
       streamTogSVG.onAdd = function(map) {
-        var tmpFeats = topoG.selectAll(".streams");
-        tmpFeats.style("opacity", 1);
-      }
+        //******Add Deerfield streams
+        var tmpFeats = topoG.selectAll(".streams")
+            .data(streams.features)
+          .enter().insert("path", ":first-child")
+            .attr("d", path)
+            .attr("class", "streams")
+            .attr("id", function(data) { return ("str_order: " + data.properties.str_order); })
+            .style("stroke-width", function(data) { return (0.5 + (0.5 * data.properties.str_order) + "px") ; })
+            .style("stroke", function(data) { return streamColor(10 - data.properties.str_order); })
+            .on("mouseover", function(data) { showIt(this.id); })
+            .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
+            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
+       }
 
       streamTogSVG.onRemove = function(map) {
         var tmpFeats = topoG.selectAll(".streams");
-        tmpFeats.style("opacity", 0);
+        tmpFeats.remove();
       }
-      */
 
       var catchTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
-      var catchTogG = catchTogSVG.append("g").attr("class", "leaflet-zoom-hide");
+      //var catchTogG = catchTogSVG.append("g").attr("class", "leaflet-zoom-hide");
 
       catchTogSVG.onAdd = function(map) {
-        //var tmpFeats = topoG.selectAll(".catchments");
-        //tmpFeats.style("opacity", 1);
         //******Add Deerfield catchments
         var tmpFeats = topoG.selectAll(".catchments")
             .data(catchments.features)
           .enter().insert("path", ":first-child")
             .attr("d", path)
             .attr("class", "catchments")
-            .attr("id", function(data) { return (data.id); })
+            .on("mouseover", function(data) { showIt(this.id); })
+            .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
             .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
-
+        catchStyle(d3.select("#catchSelect").node().value);
+        d3.select("#catchLegend").style("display", "block");
       }
 
       catchTogSVG.onRemove = function(map) {
         var tmpFeats = topoG.selectAll(".catchments");
-        //tmpFeats.style("opacity", 0);
         tmpFeats.remove();
+        d3.select("#catchLegend").style("display", "none");
       } 
 
       map.addLayer(gsHuc8);
-      //map.addLayer(catchTogSVG);
-      map.addLayer(gsStreams);
-      //map.addLayer(streamTogSVG);
-      map.addLayer(crossTogSVG);
 
       //******Make layer controller
       var baseLayers = {"Google Hybrid": googleHybrid, "Google Satellite": googleSatellite, "Google Street": googleStreet, "Google Terrain": googleTerrain, "Bing Hybrid": bingHybrid, "Bing Satellite": bingSatellite, "Bing Street": bingStreet};
-      var overlays = {"HUC 8": gsHuc8, "Catchments": catchTogSVG, "Streams": gsStreams, "Crossings": crossTogSVG};
+      var overlays = {"DOT Districts": gsDOTDistricts, "Counties": gsCounties, "Towns": gsTowns, "Deerfield Watershed": gsHuc8, "Catchments": catchTogSVG, "Streams": streamTogSVG, "Crossings": crossTogSVG};
       L.control.layers(baseLayers, overlays).addTo(map);
-   
+
+/*
+      //******Make header div
+      d3.select("body")
+        .append("div")
+        .attr("class", "header");
+*/
+
       //******Make tooltip for displaying attribute data
       var tooltip = d3.select("body")
         .append("div")
-        .attr("class", "tooltip");
+        .attr("class", "d3Tooltip");
 
       //******Make div for legend
       d3.select("body")
         .append("div")
-        .attr("id", "legend");
+        .attr("class", "legend")
+        .attr("id", "legendDiv");
 
-      //******Make variables for d3 topoJSON data
-      //var streams; //global stream variable
-      var crossings; //global crossings variable
-      var catchments; //global catchments variable
+      d3.select("#legendDiv")
+        .append("div")
+        .attr("id", "crossLegend");
+
+      d3.select("#crossLegend")
+        .append("h4")
+        .text("Crossing Attributes")
+        .attr("class", "legTitle");
+
+      d3.select("#legendDiv")
+        .append("div")
+        .attr("id", "catchLegend")
+        .style("display", "none");
+
+      d3.select("#catchLegend")
+        .append("h4")
+        .text("Catchment Attributes")
+        .attr("class", "legTitle")
+        .style("margin-top", "20px");
+
+ 
+
+      //******Make divs for filter titles and selects
+      d3.select("body")
+        .append("div")
+        .attr("class", "legend")
+        .attr("id", "filters");
+
+      d3.select("#filters")
+        .append("h4")
+        .text("Filters")
+        .attr("class", "legTitle");
+
+      d3.select("#filters")
+        .append("div")
+        .attr("id", "filterTitle");
+
+      d3.select("#filters")
+        .append("div")
+        .attr("class", "legAttrSel")
+        .attr("id", "filterSelect");
+
+      //*******Add checkbox for linking crossfilters
+      d3.select("#filters")
+        .append("input")
+        .attr({type: "checkbox", name: "cfLink", value: "linked"})
+        .attr("id", "cfLink")
+        .attr("checked", true)
+        .style("margin", "9px");
+
+      d3.select("#filters")
+        .append("label")
+        .text("Link Filters")
+        .attr("id", "linkLabel");
+
+      //*******Add div for histograms
+      d3.select("#filters")
+        .append("hr")
+        .attr("class", "hr");
+
+      d3.select("#filters")
+        .append("div")
+          .attr("id", "charts")
+        .append("div")
+          .attr("id", "totals");
+
+
+
+
+
+      //******Make color scale for streams
+      var streamColor = d3.scale.quantize()
+        .domain([1, 9])
+        .range(colorbrewer.YlGnBu[9]);
+
+
+
+
+
+
+      //******Make variables for d3 topoJSON and TSV data
+      var streams;  //global stream topojson variable
+      var crossings;  //global crossings topojson variable
+      var catchments;  //global catchments topojson variable
       var bounds;  //global bounds variable
       var path;    //global path variable
+      var crossCov;   //global crossing covariate data variable
+      var catchCov;   //global catchment covariate data variable
+      var crossKeys;  //global crossing keys variable
+      var catchKeys;  //global crossing keys variable
+      var cfCrossings; //global crossfilter crossings variable
+      var cfCatchments; //global crossfilter crossings variable
+      var crossingFilters = {}    //global cross filter dimension variable
+      var catchmentFilters = {}    //global cross filter dimension variable
+      var covType = {};   //global covariate data type variable
+      var binWidth = {};   //global histogram width variable
+      var brush = {};   //global brush variable
+      var hists = {};   //global histogram object variable
+      var graphs = [];   //global list of current graphs variable
 
       //******Wait for all topoJSON files to load
       queue()
-        //.defer(d3.json, 'streams_topo.json')
+        .defer(d3.json, 'streams_topo.json')
         .defer(d3.json, 'crossings_topo.json')
         .defer(d3.json, 'catchments_topo.json')
+        .defer(d3.tsv, 'crossing_covariates.tsv')
+        .defer(d3.tsv, 'catchment_covariates.tsv')
         .await(displayIt);
 
+
+
+
+
+
       //******Bind topoJSON data
-      //function displayIt(error, streamData, crossingData, catchData) {
-      function displayIt(error, crossingData, catchData) {
-        //streams = topojson.feature(streamData, streamData.objects.edges_nodes_fbar_tbar_wgs84);
-        crossings = topojson.feature(crossingData, crossingData.objects.Deerfield_barriers_merged_09_08_15_10M_snap_nodups_wgs84);
+      function displayIt(error, streamData, crossingData, catchData, crossCov, catchCov) {
+        streams = topojson.feature(streamData, streamData.objects.edges_nodes_fbar_tbar_wgs84);
+        crossings = topojson.feature(crossingData, crossingData.objects.Deerfield_barriers_merged_09_08_15_10M_snap_nodups_featureid_wgs84);
         catchments = topojson.feature(catchData, catchData.objects.Deerfield_NHD_Hi_Res_Catchments_wgs84);
 
-        /*
-        //******Get stream color panel
-        var streamColor = d3.scale.quantize()
-          .domain([1, 9])
-          .range(colorbrewer.YlGnBu[9]);
-        */
+        crossCov = readTSV(crossCov, crossings, "unique_id", "crossings");
+        catchCov = readTSV(catchCov, catchments, "featureid", "catchments");
 
         bounds = d3.geo.bounds(catchments);
-        path = d3.geo.path().projection(projectPoint);
-
-        /*
-        //******Add Deerfield catchments
-        var feature = topoG.selectAll(".catchments")
-            .data(catchments.features)
-          .enter().append("path")
-            .attr("d", path)
-            .attr("class", "catchments")
-            .attr("id", function(data) { return (data.id); })
-            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
-        */
-
-        /*
-        //******Add Deerfield hi-res streams
-        var feature = topoG.selectAll(".streams")
-            .data(streams.features)
-          .enter().append("path")
-            .attr("d", path)
-            .attr("class", "streams")
-            .attr("id", function(data) { return (data.properties.str_order); })
-            .style("stroke-width", function(data) { return (0.5 + (0.5 * data.properties.str_order) + "px") ; })
-            .style("stroke", function(data) { return streamColor(10 - data.properties.str_order); })
-            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
-        */
-
-        //******Add Deerfield road/stream crossings
-        var feature = topoG.selectAll(".crossings")
-            .data(crossings.features)
-          .enter().append("path")
-            .attr("d", path)
-            .attr("class", "crossings")
-            //.attr("id", function(data) { return ("Aquatic Score: " + data.properties.score); })
-            .on("mouseover", function(data) { showIt(this.id); })
-            .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
-            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
-
-        //******Add drop down box to select crossing attribute to visualise
-        var tmpKeys = d3.keys(crossings.features[0].properties);
-
-        var select = d3.select("body")
-          .append("div")
-          .attr("id", "crossListDiv")
-          .append("select")
-          .attr("id", "crossList")
-          .on("change", function () { crossStyle(this.value); });
-
-        select.selectAll("option")
-          .data(tmpKeys)
-          .enter().append("option")
-          .attr("value", function (d, i) { return tmpKeys[i]; })
-          .text(function (d, i) { return tmpKeys[i]; });
+        path = d3.geo.path()
+                 .projection(projectPoint)
+                 .pointRadius(3.5);
         
-        crossStyle(tmpKeys[0]);
+        //******Get keys for crossings and catchment properties
+        crossKeys = d3.keys(crossCov[0]);
+        catchKeys = d3.keys(catchCov[0]);
+
+        //******Make crossfilter dimensions
+        cfDimension("crossings", crossingFilters, crossCov, cfCrossings);
+        cfDimension("catchments", catchmentFilters, catchCov, cfCatchments);
+
+        //******Add drop down box to select crossing attribute for styling
+        addLegend("cross", crossStyle, crossKeys);
+        addLegend("catch", catchStyle, catchKeys);
+
+        //******Add drop down box to select attributes for filtering
+        addFilterSelect("crossings", crossKeys, crossingFilters);
+        addFilterSelect("catchments", catchKeys, catchmentFilters);
         
+        //******Add crossings layer
+        map.addLayer(streamTogSVG);
+        map.addLayer(crossTogSVG);
+        d3.select("#catchSelect").property("selectedIndex", function() {return 1;});
+        map.addLayer(catchTogSVG);
+       
         //******Set map view
         map.on("viewreset", reset);
         reset();
-}
-        //*****Reposition the SVG to cover the features.
-        function reset() {
-          //******Select all layers
-          var feature = topoG.selectAll("path");
+      }
+      
 
-          //******Set bounds (using Deerfield HUC 8 bounds)
-          var bottomLeft = projectPoint(bounds[0]);
-          var topRight = projectPoint(bounds[1]);
+     
+
+
+
+     function addFilterSelect(layer, keys, filter) {
+        //******Add drop down box to select crossing attribute for filtering
+        d3.select("#filterTitle")
+          .append("h5")
+          .attr("id", layer + "FilterTitle")
+          .text(layer.charAt(0).toUpperCase() + layer.slice(1));
+
+        var select = d3.select("#filterSelect")
+          .append("select")
+          .attr("class", "legAttrList")
+          .attr("id", layer + "FilterSelect")
+          .on("change", function () { addFilter(this.value, layer); });
+
+        plusKeys = keys;
+        plusKeys.splice(0,0, "none");
+        select.selectAll("option")
+          .data(plusKeys)
+          .enter().append("option")
+          .attr("value", function (d, i) { return plusKeys[i]; })
+          .text(function (d, i) { return plusKeys[i]; });
+
+        d3.select("#totals")
+          .append("div")
+          .html('<span id="active">' + filter.all.value() + '</span> of <span id="total">' + filter.all.value() + '</span> ' + layer + ' selected'); ;
+      }
+
+
+
+
+      function addLegend(layer, style, keys) {
+        var select = d3.select("#" + layer + "Legend")
+          .append("div")
+          .attr("class", "legAttrSel")
+          .append("select")
+          .attr("class", "legAttrList")
+          .attr("id", layer + "Select")
+          .on("change", function () { style(this.value); });
+
+        select.selectAll("option")
+          .data(keys)
+          .enter().append("option")
+          .attr("value", function (d, i) { return keys[i]; })
+          .text(function (d, i) { return keys[i]; });
+      }
+
+
+
+
+
+      //*****Reposition the SVG to cover the features.
+      function reset() {
+        //******Select all layers
+        var feature = topoG.selectAll("path");
+
+        //******Set bounds (using Deerfield HUC 8 bounds)
+        var bottomLeft = projectPoint(bounds[0]);
+        var topRight = projectPoint(bounds[1]);
           
-          topoSVG.attr('width', topRight[0] - bottomLeft[0])
-            .attr('height', bottomLeft[1] - topRight[1])
-            .style('margin-left', bottomLeft[0] + 'px')
-            .style('margin-top', topRight[1] + 'px');
+        topoSVG.attr('width', topRight[0] - bottomLeft[0])
+          .attr('height', bottomLeft[1] - topRight[1])
+          .style('margin-left', bottomLeft[0] + 'px')
+          .style('margin-top', topRight[1] + 'px');
 
-          var translation = -bottomLeft[0] + ',' + -topRight[1];
-          topoG.attr('transform', 'translate(' + -bottomLeft[0] + ',' + -topRight[1] + ')');
+        var translation = -bottomLeft[0] + ',' + -topRight[1];
+        topoG.attr('transform', 'translate(' + -bottomLeft[0] + ',' + -topRight[1] + ')');
 
-          feature.attr("d", path);
-          }
-
-        //******Use Leaflet to implement a D3 geometric transformation.
-        function projectPoint(x) {
-          var point = map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
-          return [point.x, point.y];
+        feature.attr("d", path);
         }
-      //}
 
-      //*******Show crossings attribute
+
+
+
+
+
+      //******Use Leaflet to implement a D3 geometric transformation.
+      function projectPoint(x) {
+        var point = map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+        return [point.x, point.y];
+      }
+
+
+
+
+
+
+      //******Transform TSV strings to values if appropriate and add to topojson
+      function readTSV(tmpData, tmpTopo, ID_key, layer) {
+        //******Get keys and values from TSV data and fill out covariate data type
+        var tmpKeys = d3.keys(tmpData[0]);
+        var tmpVals = d3.values(tmpData[0]);
+        covType[layer] = {};
+        tmpVals.forEach(function(val,i){
+          if (isNaN(val) == false) {
+            covType[layer][tmpKeys[i]] = "number";
+          }
+          else {
+            covType[layer][tmpKeys[i]] = "string";
+          }
+        });
+
+        //******Change TSV attribute strings to values if appropriate
+        var tmpCov = tmpData.map(function(d) {
+          var tmpJSON = {};
+          tmpVals.forEach(function(val,i){ 
+            if (isNaN(val) == false) {
+              tmpJSON[tmpKeys[i]] = +d[tmpKeys[i]];
+            }
+            else {
+              tmpJSON[tmpKeys[i]] = d[tmpKeys[i]];
+            }
+          });
+          return tmpJSON;
+        });    
+
+        //*******Map TSV to ID_key attribute (in this case either unique_id (crossings) or featureid (catchments)
+        var tmpMap = d3.map(tmpCov, function(d) {return d[ID_key];});
+
+        //*******Add TSV data to topojson
+        tmpTopo.features.forEach(function(d) { 
+          try {
+            tmpKeys.forEach(function(key) {
+              d.properties[key] = tmpMap.get(d.id)[key];
+            });
+          }
+          catch(err) { 
+            console.log("No TSV data for id " + d.id);
+          }
+        });
+
+        return tmpCov;
+      }
+
+
+
+
+
+      //*******Make crossfilter dimensions and grouped dimensions
+      function cfDimension(layer, filter, covariates, cross_filter) {
+        //******Assign crossing covariates to a crossfilter variable
+
+        cross_filter = crossfilter(covariates);
+        filter.all = cross_filter.groupAll();
+        binWidth[layer] = {};
+
+        //******Dimension and group each covariate
+        crossKeys.forEach(function(key, i) {
+          filter[key] = cross_filter.dimension(function(d) { return d[key]; } );
+          if (covType["crossings"][key] == "number") {
+            var tmpTop = filter[key].top(1);
+            var tmpBot = filter[key].bottom(1);
+            var divVal = (tmpTop[0][key] - tmpBot[0][key]) / 40;
+            binWidth[layer][key] = divVal;
+            filter[key + "s"] = filter[key].group(function(d) {return Math.floor(d / divVal) * divVal;});
+          }
+          else {
+            filter[key + "s"] = filter[key].group();
+          }
+        });
+       }
+
+
+
+
+
+
+
+
+      //*******Show crossings attribute in tooltip
       function showIt(tmpID) {
         tooltip.text(tmpID);
         tooltip.style("visibility", "visible");
       }
+
+
+
+
+
 
       //*******Change crossings style
       function crossStyle(tmpAtt) {
@@ -440,31 +546,31 @@
         var tmpVals = d3.values(crossings.features).map(function(d) { return d.properties[tmpAtt]; });
 
         var tmpSet = d3.set(tmpVals);
-        var tmpMin = d3.min([10, tmpSet.size()])
+        var tmpMin = d3.min([5, tmpSet.size()])
 
         //*******Make a color scale
         if (tmpMin > 2) {
           var crossColor = d3.scale.quantize()
             .domain([d3.max([0,d3.min(tmpVals)]), d3.max(tmpVals)])
-            .range(colorbrewer.RdYlBu[tmpMin ]);
+            .range(colorbrewer.RdYlBu[tmpMin]);
         }
         else {
           var crossColor = d3.scale.quantize()
-            .domain([0, 1])
-            .range(["red", "blue"]);
+            .domain([1, 2])
+            .range(["#d7191c", "#2c7bb6"]);
         }
 
         //*******Style and label crossings by attribute value
         tmpFeat.style("fill", function(d) {return crossColor(d.properties[tmpAtt]); });
-        tmpFeat.attr("id", function(d) { return (d.properties[tmpAtt]); })
+        tmpFeat.attr("id", function(d) { return (tmpAtt + ": " + d.properties[tmpAtt]); })
 
        //*******Make a legend
-       var list = d3.select(".list-inline");
+       var list = d3.select(".cross-list-inline");
        list.remove();
 
-       var legend = d3.select('#legend')
+       var legend = d3.select('#crossLegend')
          .append('ul')
-         .attr('class', 'list-inline');
+         .attr('class', 'cross-list-inline');
 
        var keys = legend.selectAll('li.key')
          .data(crossColor.range());
@@ -477,6 +583,304 @@
            return r[0].toFixed(1);
          });
       }
+
+      //*******Change catchments style
+      function catchStyle(tmpAtt) {
+        //*******Select catchment class
+        var tmpFeat = topoG.selectAll(".catchments");
+
+        //*******Get data for passed in attribute
+        var tmpVals = d3.values(catchments.features).map(function(d) { return d.properties[tmpAtt]; });
+
+        var tmpSet = d3.set(tmpVals);
+        var tmpMin = d3.min([5, tmpSet.size()])
+
+        //*******Make a color scale
+        if (tmpMin > 2) {
+          /*
+          var catchColor = d3.scale.linear()
+            .domain([d3.max([0,d3.min(tmpVals)]), d3.max(tmpVals)])
+            .range(["hsl(62,100%,90%)", "hsl(222,30%,20%)"]).clamp(true).interpolate(d3.interpolateHcl);
+          */
+          
+          var catchColor = d3.scale.quantize()
+            .domain([d3.max([0,d3.min(tmpVals)]), d3.max(tmpVals)])
+            .range(colorbrewer.YlGn[tmpMin]);
+          
+        }
+        else {
+          var catchColor = d3.scale.quantize()
+            .domain([0, 1])
+            .range(["red", "blue"]);
+        }
+
+        //*******Style and label crossings by attribute value
+        tmpFeat.style("fill", function(d) {return catchColor(d.properties[tmpAtt]); });
+        tmpFeat.attr("id", function(d) { return (tmpAtt + ": " + d.properties[tmpAtt]); })
+
+       //*******Make a legend
+       var list = d3.select(".catch-list-inline");
+       list.remove();
+
+       var legend = d3.select('#catchLegend')
+         .append('ul')
+         .attr('class', 'catch-list-inline');
+
+       var keys = legend.selectAll('li.key')
+         .data(catchColor.range());
+
+       keys.enter().append('li')
+         .attr('class', 'key')
+         .style('border-top-color', String)
+         .text(function(d) {
+           var r = catchColor.invertExtent(d);
+           return r[0].toFixed(1);
+         });
+      }
+
+
+
+
+      //*******Add crossfilter histogram
+      function addFilter(tmpKey, layer) {
+        if (graphs.indexOf(tmpKey) > -1) {
+          return;
+        }
+        else if (tmpKey == "none") {
+          var tmpGraphs = graphs.slice();
+          tmpGraphs.forEach(function(d) {removeFilter(d);});
+          return;
+        }
+        else {
+          graphs.push(tmpKey);
+        }
+
+        //******Define graph attributes
+        var margin = {top: 10, right: 10, bottom: 20, left: 10},
+          width = 390 - margin.left - margin.right,
+          height = 100 - margin.top - margin.bottom;
+
+        var x = d3.scale.linear()
+          .rangeRound([0, width]);
+
+        var y = d3.scale.linear()
+          .range([height, 0]);
+
+        var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom")
+          .ticks(10);
+
+
+        //******Add brush
+        brush[tmpKey] = d3.svg.brush()
+          .x(x)
+          .on("brushstart", function() { brushStart(tmpKey); })
+          .on("brush", function() { brushMove(tmpKey); })
+          .on("brushend", function() { brushEnd(tmpKey); });
+
+
+        //******Add chart div, title div, and reset option
+        d3.select("#charts")
+          .append("div")
+            .attr("class", "chart")
+            .attr("id", tmpKey)
+          .append("div")
+            .attr("class", "title")
+            .attr("id", "title-" + tmpKey)
+            .style("margin-left", "2px")
+            .text(tmpKey)
+          .append("a")
+            .attr("class", "reset")
+            .text("reset")
+            .on("click", function() { brushReset(tmpKey); });
+
+
+        //******Add remove button
+        d3.select("#title-" + tmpKey)
+          .append("div")
+            .attr("class", "btn btn-default btn-xs pull-right")
+            .attr("title", tmpKey)
+            .text("x")
+            .on("click", function() { removeFilter(this.title); });
+
+
+        //******Add stats div and extent
+        d3.select("#" + tmpKey)
+          .append("div")
+            .attr("class", "stats")
+            .attr("id", "stats-" + tmpKey)
+          .append("span")
+            .attr("class", "extent")
+            .attr("id", "extent-" + tmpKey);
+
+
+        //******Add mean to stats div
+        d3.select("#stats-" + tmpKey)
+          .append("span")
+            .attr("class", "mean pull-right")
+            .attr("id", "mean-" + tmpKey);
+
+
+        //******Add svg
+        var svg = d3.select("#" + tmpKey)
+          .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .attr("id", "svg-" + tmpKey)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .attr("id", "g-" + tmpKey);
+
+
+        //******Get data and make graph
+        var tmpData = crossingFilters[tmpKey + "s"].all();
+
+        x.domain([tmpData[0].key, tmpData[tmpData.length - 1].key + binWidth["crossings"][tmpKey]]);
+        y.domain([0, d3.max(tmpData, function(d) { return d.value; })]);
+
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+        var tmpData = crossingFilters[tmpKey + "s"].all();
+        hists[tmpKey] = {"x": x, "y": y, "height": height, "width": width};
+      
+        svg.selectAll(".bar")
+            .data(tmpData)
+          .enter().append("rect")
+            .attr("class", "foreground bar")
+            .attr("x", function(d) { return x(d.key); })
+            .attr("width", (x.range()[1] - x.range()[0])/40)  
+            .attr("y", function(d) { return y(d.value); })
+            .attr("height", function(d) { return height - y(d.value); });
+      
+        var gBrush = svg.append("g")
+          .attr("class", "brush")
+          .attr("id", "brush-" + tmpKey)
+          .call(brush[tmpKey]);
+
+        gBrush.selectAll("rect").attr("height", height);
+        gBrush.selectAll(".resize").append("path").attr("d", resizePath);
+
+        brushReset(tmpKey);
+
+        function resizePath(d) {
+          var e = +(d == "e"),
+            x = e ? 1 : -1,
+            y = height / 3;
+          return "M" + (0.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (0.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
+        }
+      }
+
+
+
+
+
+
+
+
+      //******Remove graph from window
+      function removeFilter(tmpKey) {
+        graphs.splice(graphs.indexOf(tmpKey), 1);
+        brushReset(tmpKey);
+        var select = d3.select("#" + tmpKey);
+        select.remove();
+      }
+
+
+
+      function brushStart(tmpKey) {
+       //console.log(tmpKey);
+      }
+
+
+      function brushMove(tmpKey) {
+        crossingFilters[tmpKey].filterRange([brush[tmpKey].extent()[0], brush[tmpKey].extent()[1]]);
+        filterMap(tmpKey);
+      }
+
+      function brushEnd(tmpKey) {
+        crossingFilters[tmpKey].filterRange([brush[tmpKey].extent()[0], brush[tmpKey].extent()[1]]);       
+        filterMap(tmpKey);
+      }
+
+      function brushReset(tmpKey) {
+        d3.select("#brush-" + tmpKey).call(brush[tmpKey].clear());
+        crossingFilters[tmpKey].filterAll();
+        filterMap(tmpKey);
+      }
+
+      function filterMap(tmpKey) {
+        var tmpSubset = crossingFilters["unique_id"].top(Infinity);
+        var tmpID = tmpSubset.map(function(d) {return d.unique_id;});
+        var tmpData = d3.selectAll(".crossings").data();
+        var tmpSel = d3.selectAll(".crossings");
+        tmpSel.style("opacity", function(d, i) { 
+          if (tmpID.indexOf(tmpData[i].properties.unique_id) > -1) {
+            return 1;
+          }
+          else {
+            return 0;
+          }
+        });
+
+        //******Update crossings selected
+        d3.select("#active").html(crossingFilters.all.value());
+
+        //******Update filter range
+        if (brush[tmpKey].empty()) {
+          d3.select("#extent-" + tmpKey).html(crossingFilters[tmpKey].bottom(1)[0][tmpKey].toFixed(1) + " - " + crossingFilters[tmpKey].top(1)[0][tmpKey].toFixed(1));
+        }
+        else {
+          d3.select("#extent-" + tmpKey).html(brush[tmpKey].extent()[0].toFixed(1) + " - " + brush[tmpKey].extent()[1].toFixed(1));
+        }
+
+        updateStats(tmpKey);
+
+        updateHistogram(tmpKey);
+      }
+
+      function updateStats(tmpKey) {
+        //******Update filter mean
+        graphs.forEach(function(key) {
+          if (crossingFilters["all"].value() > 0 ) {
+            d3.select("#mean-" + key).html("Mean: " + d3.mean(crossingFilters[key].top(Infinity), function(d) { return d[key]; }).toFixed(1));       
+          }
+          else {
+            d3.select("#mean-" + key).html("Mean: 0.0");
+          }
+        });
+      }
+
+      function updateHistogram(tmpKey) {
+        graphs.forEach(function(d) {
+          if (d != tmpKey) {
+
+            var tmpData = crossingFilters[d + "s"].all();
+            var svg = d3.select("#g-" + d);
+            var x = hists[d].x;
+            var y = hists[d].y;
+            var height = hists[d].height;
+            var width = hists[d].width;
+            y.domain([0, d3.max(tmpData, function(d) { return d.value; })]);
+
+            var update = svg.selectAll(".bar")
+              .data(tmpData);
+
+            update.exit().remove();
+            update.enter().insert("rect", ":first-child")
+              .attr("class", "foreground bar");
+            update
+                .attr("x", function(d) { return x(d.key); })
+                .attr("width", (x.range()[1] - x.range()[0])/40)  
+                .attr("y", function(d) { return y(d.value); })
+                .attr("height", function(d) { return height - y(d.value); });
+          }
+        });
+      }
+
 
     </script>
   </body>

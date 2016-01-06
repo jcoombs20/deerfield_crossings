@@ -34,16 +34,19 @@ body, html {
 
 .catchments {
   fill: red;
-  stroke: black;
-  stroke-width: 1.5px;
-  fill-opacity: 0.1;
-  stroke-opacity: 0.3;
+  stroke: whitesmoke;
+  stroke-width: 1px;
+  fill-opacity: 1;
+  stroke-opacity: 1;
 }
 
+
 .catchments:hover {
-  fill-opacity: 0.3;
-  stroke-opacity: 0.8;
+  stroke: magenta;
+  stroke-width: 2px;
+  cursor: crosshair;
 }
+
 
 .d3Tooltip {
   background: rgba(0,0,0,0.7);
@@ -109,17 +112,106 @@ body, html {
   opacity: 1;
 }
 
-#legend {
-  position: absolute;
-  right: 34%;
-  top: 40px;
-  max-width: 500px;
-  width: 100%;
+.hr {
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
-.list-inline {
-  padding: 0px;
+.legend {
+  position: absolute;
+  top: 5px;
+  max-width: 300px;
+  width: 100%;
+  background: rgba(255,255,255,0.8);
+  border: solid;
+  border-color: black;
+  border-width: 2px;
+  border-radius: 4px;
+}
+
+#legendDiv {
+  left: 5%;
+}
+
+#filters {
+  right: 5%;
+  max-width: 410px;
+}
+
+#crossingsFilterTitle {
+  font-weight: bold;
   margin: 0px;
+  margin-left: 9px;
+  display: inline-block;
+}
+
+#catchmentsFilterTitle {
+  font-weight: bold;
+  float: right;
+  margin: 0px;
+  margin-right: 9px;
+  margin-top: 3px;
+  display: inline-block;
+}
+
+#crossingsFilterSelect {
+  margin-top: 0px;
+}
+
+#catchmentsFilterSelect {
+  position: absolute;
+  right: 5px;
+  margin-top: 0px;
+}
+
+
+#charts {
+  background: rgba(255,255,255,1);
+  padding: 0px;
+  max-height: 500px;
+}
+
+.chart {
+  margin: 7px;
+}
+
+.legTitle {
+  text-align: center;
+  margin: 2px;
+  font-weight: bold;
+  }
+
+.legAttrSel {
+  width: 35%;
+  margin: 0 auto;
+}
+
+#filterSelect {
+  width: 100%;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.legAttrList {
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 4px;
+  border-color: black;
+  margin: 2px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1em;
+  font-weight: bold;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.legAttrList:hover {
+  opacity: 1;
+}
+
+.cross-list-inline, .catch-list-inline {
+  padding: 0px;
+  margin: 2px;
   display: flex;
   flex-direction: row;
 }  

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Deerfield Watershed Road-Stream Crossing Explorer</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <link rel="stylesheet" href="http://colorbrewer2.org/export/colorbrewer.css" />
+    <link rel="stylesheet" href="styles/Control.BingGeocoder.css" />
+    <link rel="stylesheet" href="styles/Control.maxExtent.css" />
+    <link rel="stylesheet" href="styles/deerfield_crossings.css" />
+
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
+    <script src="Bing_tile.js"></script>
+    <script src="Google_tile.js"></script>
+    <script src="Control.BingGeocoder.js"></script>
+    <script src="Control.maxExtent.js"></script>
+
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="http://colorbrewer2.org/export/colorbrewer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+    <script src="crossfilter.min.js"></script>
+
+  </head>
+
+
+  <body>
+    <div id="map"></div>
+
+    <script type='text/javascript'>
+      //******Add Map
+      var map = new L.Map('map', {center: new L.LatLng(42.74, -72.83), zoomControl: false, zoom: 10, minZoom: 2, maxZoom: 20, inertiaDeceleration: 1000});
+
+      //******Add map controls
+      L.control.scale({ maxWidth: 200 }).addTo(map);
+      L.control.zoom({ position: 'topleft', zoomInText: '+', zoomOutText: '-' }).addTo(map);
+      var maxExtent = new L.Control.maxExtent();
+      map.addControl(maxExtent);
+
+      //******Bing geocoder control
+      var tmpPoint = new L.marker;
+      var bingGeocoder = new L.Control.BingGeocoder('At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn', { callback: function (results) {
+        var bbox = results.resourceSets[0].resources[0].bbox,
+          first = new L.LatLng(bbox[0], bbox[1]),
+          second = new L.LatLng(bbox[2], bbox[3]),
+          tmpBounds = new L.LatLngBounds([first, second]);
+
+        this._map.fitBounds(tmpBounds);
+        this._map.removeLayer(tmpPoint);
+        tmpPoint = new L.marker(results.resourceSets[0].resources[0].point.coordinates).bindPopup(results.resourceSets[0].resources[0].address.formattedAddress);
+        this._map.addLayer(tmpPoint);
+        }
+      });
+
+      map.addControl(bingGeocoder);
+
+      //******Add basemaps
+      var googleHybrid = new L.Google('HYBRID');
+      var googleSatellite = new L.Google('SATELLITE');
+      var googleStreet = new L.Google('ROADMAP');
+      var googleTerrain = new L.Google('TERRAIN');
+      var bingHybrid = new L.BingLayer("At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn", {type: 'AerialWithLabels'});
+      var bingSatellite = new L.BingLayer("At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn", {type: 'Aerial'});
+      var bingStreet = new L.BingLayer("At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn", {type: 'Road'});
+
+      map.addLayer(googleHybrid);
+
+      //******Add Geoserver Layers
+      var gsHuc8 = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
+        layers: 'crossings:deerfield_huc8',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.0',
+        maxZoom: 20
+      });
+
+      var gsStreams = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
+        layers: 'crossings:deerfield_streams',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.0',
+        maxZoom: 20,
+        pane: 'overlayPane'
+      });
+
+      //******Make d3 vector layers variable
+      var svgArray = []; //global variable to hold d3 svg layers
+      //var topoSVG = d3.select(map.getPanes().overlayPane).append("svg");
+      //var topoG = topoSVG.append("g").attr("class", "leaflet-zoom-hide");
+
+      //******Make dummy layer variables for layer controller
+      var crossTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
+      var crossTogG = crossTogSVG.append("g").attr("class", "leaflet-zoom-hide");
+
+      crossTogSVG.onAdd = function(map) {
+        //******Add Deerfield road/stream crossings
+        var tmpFeats = crossTogG.selectAll(".crossings")
+            .data(crossings.features)
+          .enter().append("path")
+            .attr("d", path)
+            .attr("class", "crossings")
+            .on("mouseover", function(data) { showIt(this.id); })
+            .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
+            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
+        crossStyle(tmpKeys[0]);
+        svgArray.push(crossTogSVG);
+        console.log(svgArray);
+      }
+
+      crossTogSVG.onRemove = function(map) {
+        var tmpFeats = crossTogG.selectAll(".crossings");
+        tmpFeats.remove();
+        svgArray.splice(svgArray.indexOf(crossTogSVG),1);
+        console.log(svgArray);
+      }
+
+      var catchTogSVG = d3.select(map.getPanes().overlayPane).insert("svg", ":first-child");
+      var catchTogG = catchTogSVG.append("g").attr("class", "leaflet-zoom-hide");
+
+      catchTogSVG.onAdd = function(map) {
+       //******Add Deerfield catchments
+        var tmpFeats = catchTogG.selectAll(".catchments")
+            .data(catchments.features)
+          .enter().append("path")  //insert("path", ":first-child")
+            .attr("d", path)
+            .attr("class", "catchments")
+            .attr("id", function(data) { return (data.id); })
+            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
+        svgArray.push(catchTogSVG);
+        console.log(svgArray);
+        reset();
+      }
+
+      catchTogSVG.onRemove = function(map) {
+        var tmpFeats = catchTogG.selectAll(".catchments");
+        tmpFeats.remove();
+        svgArray.splice(svgArray.indexOf(catchTogSVG),1);
+        console.log(svgArray);
+      } 
+
+      //*******Add SVG layers to array
+      //svgArray.push(crossTogSVG);
+      //svgArray.push(catchTogSVG);
+
+      //map.addLayer(gsHuc8);
+      //map.addLayer(gsStreams);
+
+      //******Make layer controller
+      var baseLayers = {"Google Hybrid": googleHybrid, "Google Satellite": googleSatellite, "Google Street": googleStreet, "Google Terrain": googleTerrain, "Bing Hybrid": bingHybrid, "Bing Satellite": bingSatellite, "Bing Street": bingStreet};
+      var overlays = {"HUC 8": gsHuc8, "Catchments": catchTogSVG, "Streams": gsStreams, "Crossings": crossTogSVG};
+      L.control.layers(baseLayers, overlays).addTo(map);
+
+      console.log(map.getPanes());
+  
+      //******Make tooltip for displaying attribute data
+      var tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "d3Tooltip");
+
+      //******Make div for legend
+      d3.select("body")
+        .append("div")
+        .attr("id", "legend");
+
+
+
+
+      //******Make variables for d3 topoJSON data
+      var crossings; //global crossings variable
+      var catchments; //global catchments variable
+      var bounds;  //global bounds variable
+      var path;    //global path variable
+      var tmpKeys;  //global crossing keys variable
+      var cfCrossings; //global cross filter crossings variable
+
+      //******Wait for all topoJSON files to load
+      queue()
+        .defer(d3.json, 'crossings_topo.json')
+        .defer(d3.json, 'catchments_topo.json')
+        .await(displayIt);
+
+
+
+
+      //******Bind topoJSON data
+      function displayIt(error, crossingData, catchData) {
+        crossings = topojson.feature(crossingData, crossingData.objects.Deerfield_barriers_merged_09_08_15_10M_snap_nodups_wgs84);
+        catchments = topojson.feature(catchData, catchData.objects.Deerfield_NHD_Hi_Res_Catchments_wgs84);
+
+        bounds = d3.geo.bounds(catchments);
+        path = d3.geo.path().projection(projectPoint);
+
+        //******Get keys for crossings properties
+        tmpKeys = d3.keys(crossings.features[0].properties);
+
+        //******Map crossing attribute data to a temporary variable
+        var tmpCross = [];
+        crossings.features.forEach(function(d) {tmpCross.push(d.properties);});
+
+        //******Assign crossing attributes to a crossfilter variable
+        cfCrossings = crossfilter(tmpCross);
+        var n = cfCrossings.groupAll().reduceCount().value();
+        console.log(n);
+
+        //******Add drop down box to select crossing attribute to visualise
+
+        var select = d3.select("body")
+          .append("div")
+          .attr("id", "crossListDiv")
+          .append("select")
+          .attr("id", "crossList")
+          .on("change", function () { crossStyle(this.value); });
+
+        select.selectAll("option")
+          .data(tmpKeys)
+          .enter().append("option")
+          .attr("value", function (d, i) { return tmpKeys[i]; })
+          .text(function (d, i) { return tmpKeys[i]; });
+        
+        //******Add crossings layer
+        map.addLayer(crossTogSVG);
+       
+        //******Set map view
+        map.on("viewreset", reset);
+        reset();
+      }
+
+
+
+
+      //*****Reposition the SVG to cover the features.
+      function reset() {
+        svgArray.forEach(function(tmpSVG) {
+          tmpG = tmpSVG.selectAll("g");
+
+          //******Select all layers
+          var feature = tmpG.selectAll("path");
+          console.log(Date.now());
+
+          //******Set bounds (using Deerfield HUC 8 bounds)
+          var bottomLeft = projectPoint(bounds[0]);
+          var topRight = projectPoint(bounds[1]);
+          
+          tmpSVG.attr('width', topRight[0] - bottomLeft[0])
+            .attr('height', bottomLeft[1] - topRight[1])
+            .style('margin-left', bottomLeft[0] + 'px')
+            .style('margin-top', topRight[1] + 'px');
+
+          var translation = -bottomLeft[0] + ',' + -topRight[1];
+          tmpG.attr('transform', 'translate(' + -bottomLeft[0] + ',' + -topRight[1] + ')');
+
+          feature.attr("d", path);
+        });
+      }
+
+
+
+
+      //******Use Leaflet to implement a D3 geometric transformation.
+      function projectPoint(x) {
+        var point = map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+        return [point.x, point.y];
+      }
+
+
+
+
+      //*******Display crossings attribute in popup
+      function showIt(tmpID) {
+        tooltip.text(tmpID);
+        tooltip.style("visibility", "visible");
+      }
+
+ 
+
+
+      //*******Change crossings style
+      function crossStyle(tmpAtt) {
+        //*******Select crossing class
+        var tmpFeat = crossTogG.selectAll(".crossings");
+
+        //*******Get data for passed in attribute
+        var tmpVals = d3.values(crossings.features).map(function(d) { return d.properties[tmpAtt]; });
+
+        var tmpSet = d3.set(tmpVals);
+        var tmpMin = d3.min([5, tmpSet.size()])
+
+        //*******Make a color scale
+        if (tmpMin > 2) {
+          var crossColor = d3.scale.quantize()
+            .domain([d3.max([0,d3.min(tmpVals)]), d3.max(tmpVals)])
+            .range(colorbrewer.RdYlBu[tmpMin ]);
+        }
+        else {
+          var crossColor = d3.scale.quantize()
+            .domain([0, 1])
+            .range(["red", "blue"]);
+        }
+
+        //*******Style and label crossings by attribute value
+        tmpFeat.style("fill", function(d) {return crossColor(d.properties[tmpAtt]); });
+        tmpFeat.attr("id", function(d) { return (d.properties[tmpAtt]); })
+
+       //*******Make a legend
+       var list = d3.select(".list-inline");
+       list.remove();
+
+       var legend = d3.select('#legend')
+         .append('ul')
+         .attr('class', 'list-inline');
+
+       var keys = legend.selectAll('li.key')
+         .data(crossColor.range());
+
+       keys.enter().append('li')
+         .attr('class', 'key')
+         .style('border-top-color', String)
+         .text(function(d) {
+           var r = crossColor.invertExtent(d);
+           return r[0].toFixed(1);
+         });
+      }
+
+    </script>
+  </body>
+</html>
