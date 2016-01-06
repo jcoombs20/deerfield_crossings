@@ -101,16 +101,16 @@
 
       //******Make d3 vector layers variable
       var topoSVG = d3.select(map.getPanes().overlayPane).append("svg");
-      var topoG = topoSVG.append("g").attr("class", "leaflet-zoom-hide");
-      var streamG = topoSVG.append("g").attr("class", "leaflet-zoom-hide");
+      var catchG = topoSVG.append("g").attr("class", "leaflet-zoom-hide").attr("id", "catchG");
+      var streamG = topoSVG.append("g").attr("class", "leaflet-zoom-hide").attr("id", "streamG");
+      var crossG = topoSVG.append("g").attr("class", "leaflet-zoom-hide").attr("id", "crossG");
 
       //******Make dummy layer variables for layer controller
       var crossTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
-      //var crossTogG = crossTogSVG.append("g").attr("class", "leaflet-zoom-hide");
 
       crossTogSVG.onAdd = function(map) {
         //******Add Deerfield road/stream crossings
-        var tmpFeats = topoG.selectAll(".crossings")
+        var tmpFeats = crossG.selectAll(".crossings")
             .data(crossings.features)
           .enter().append("path")
             .attr("d", path)
@@ -118,14 +118,14 @@
             .on("mouseover", function(data) { showIt(this.id); })
             .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
             .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
-        crossStyle(d3.select("#crossSelect").node().value);
-        d3.select("#crossLegend").style("display", "block");
+        changeStyle(d3.select("#crossingsSelect").node().value, crossG, "crossings", crossings);
+        d3.select("#crossingsLegend").style("display", "block");
       }
 
       crossTogSVG.onRemove = function(map) {
-        var tmpFeats = topoG.selectAll(".crossings");
+        var tmpFeats = crossG.selectAll(".crossings");
         tmpFeats.remove();
-        d3.select("#crossLegend").style("display", "none");
+        d3.select("#crossingsLegend").style("display", "none");
       }
 
       var streamTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
@@ -133,7 +133,7 @@
   
       streamTogSVG.onAdd = function(map) {
         //******Add Deerfield streams
-        var tmpFeats = topoG.selectAll(".streams")
+        var tmpFeats = streamG.selectAll(".streams")
             .data(streams.features)
           .enter().insert("path", ":first-child")
             .attr("d", path)
@@ -147,7 +147,7 @@
        }
 
       streamTogSVG.onRemove = function(map) {
-        var tmpFeats = topoG.selectAll(".streams");
+        var tmpFeats = streamG.selectAll(".streams");
         tmpFeats.remove();
       }
 
@@ -156,7 +156,7 @@
 
       catchTogSVG.onAdd = function(map) {
         //******Add Deerfield catchments
-        var tmpFeats = topoG.selectAll(".catchments")
+        var tmpFeats = catchG.selectAll(".catchments")
             .data(catchments.features)
           .enter().insert("path", ":first-child")
             .attr("d", path)
@@ -164,14 +164,14 @@
             .on("mouseover", function(data) { showIt(this.id); })
             .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
             .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
-        catchStyle(d3.select("#catchSelect").node().value);
-        d3.select("#catchLegend").style("display", "block");
+        changeStyle(d3.select("#catchmentsSelect").node().value, catchG, "catchments", catchments);
+        d3.select("#catchmentsLegend").style("display", "block");
       }
 
       catchTogSVG.onRemove = function(map) {
-        var tmpFeats = topoG.selectAll(".catchments");
+        var tmpFeats = catchG.selectAll(".catchments");
         tmpFeats.remove();
-        d3.select("#catchLegend").style("display", "none");
+        d3.select("#catchmentsLegend").style("display", "none");
       } 
 
       map.addLayer(gsHuc8);
@@ -201,19 +201,19 @@
 
       d3.select("#legendDiv")
         .append("div")
-        .attr("id", "crossLegend");
+        .attr("id", "crossingsLegend");
 
-      d3.select("#crossLegend")
+      d3.select("#crossingsLegend")
         .append("h4")
         .text("Crossing Attributes")
         .attr("class", "legTitle");
 
       d3.select("#legendDiv")
         .append("div")
-        .attr("id", "catchLegend")
+        .attr("id", "catchmentsLegend")
         .style("display", "none");
 
-      d3.select("#catchLegend")
+      d3.select("#catchmentsLegend")
         .append("h4")
         .text("Catchment Attributes")
         .attr("class", "legTitle")
@@ -336,8 +336,8 @@
         cfDimension("catchments", catchmentFilters, catchCov, cfCatchments);
 
         //******Add drop down box to select crossing attribute for styling
-        addLegend("cross", crossStyle, crossKeys);
-        addLegend("catch", catchStyle, catchKeys);
+        addLegend("crossings", crossKeys, crossG, crossings);
+        addLegend("catchments", catchKeys, catchG, catchments);
 
         //******Add drop down box to select attributes for filtering
         addFilterSelect("crossings", crossKeys, crossingFilters);
@@ -346,7 +346,7 @@
         //******Add crossings layer
         map.addLayer(streamTogSVG);
         map.addLayer(crossTogSVG);
-        d3.select("#catchSelect").property("selectedIndex", function() {return 1;});
+        d3.select("#catchmentsSelect").property("selectedIndex", function() {return 1;});
         map.addLayer(catchTogSVG);
        
         //******Set map view
@@ -388,14 +388,14 @@
 
 
 
-      function addLegend(layer, style, keys) {
+      function addLegend(layer, keys, g, topo) {
         var select = d3.select("#" + layer + "Legend")
           .append("div")
           .attr("class", "legAttrSel")
           .append("select")
           .attr("class", "legAttrList")
           .attr("id", layer + "Select")
-          .on("change", function () { style(this.value); });
+          .on("change", function () { changeStyle(this.value, g, layer, topo); });
 
         select.selectAll("option")
           .data(keys)
@@ -410,9 +410,6 @@
 
       //*****Reposition the SVG to cover the features.
       function reset() {
-        //******Select all layers
-        var feature = topoG.selectAll("path");
-
         //******Set bounds (using Deerfield HUC 8 bounds)
         var bottomLeft = projectPoint(bounds[0]);
         var topRight = projectPoint(bounds[1]);
@@ -423,10 +420,18 @@
           .style('margin-top', topRight[1] + 'px');
 
         var translation = -bottomLeft[0] + ',' + -topRight[1];
-        topoG.attr('transform', 'translate(' + -bottomLeft[0] + ',' + -topRight[1] + ')');
 
-        feature.attr("d", path);
-        }
+        //******Select all layer g elements
+        var tmpG = topoSVG.selectAll("g");
+
+        //******Loop through each g element and transform the path
+        tmpG[0].forEach(function(g) {
+          var curG = d3.select(g);
+          var feature = curG.selectAll("path");
+          curG.attr('transform', 'translate(' + -bottomLeft[0] + ',' + -topRight[1] + ')');
+          feature.attr("d", path);
+        });  
+      }
 
 
 
@@ -537,106 +542,67 @@
 
 
 
-      //*******Change crossings style
-      function crossStyle(tmpAtt) {
-        //*******Select crossing class
-        var tmpFeat = topoG.selectAll(".crossings");
+      //*******Change feature styles
+      function changeStyle(tmpAtt, tmpG, tmpClass, tmpTopo) {
+        //*******Select features
+        var curG = d3.select(tmpG[0][0]);
+        var tmpFeat = curG.selectAll("." + tmpClass);
 
         //*******Get data for passed in attribute
-        var tmpVals = d3.values(crossings.features).map(function(d) { return d.properties[tmpAtt]; });
+        console.log(tmpTopo.features[0]);
+        var tmpVals = d3.values(tmpTopo.features).map(function(d) { return d.properties[tmpAtt]; });
 
         var tmpSet = d3.set(tmpVals);
         var tmpMin = d3.min([5, tmpSet.size()])
 
         //*******Make a color scale
         if (tmpMin > 2) {
-          var crossColor = d3.scale.quantize()
-            .domain([d3.max([0,d3.min(tmpVals)]), d3.max(tmpVals)])
-            .range(colorbrewer.RdYlBu[tmpMin]);
+          var newColor = d3.scale.quantize()
+            .domain([d3.max([0,d3.min(tmpVals)]), d3.max(tmpVals)]);
+
+          switch(tmpClass) {
+            case "crossings":
+              newColor.range(colorbrewer.RdYlBu[tmpMin]);
+              break;
+            case "catchments":
+              newColor.range(colorbrewer.YlGn[tmpMin]);
+              break;
+            case "streams":
+              newColor.range(colorbrewer.YlGnBu[9]);
+              break;
+          }
         }
         else {
-          var crossColor = d3.scale.quantize()
+          var newColor = d3.scale.quantize()
             .domain([1, 2])
             .range(["#d7191c", "#2c7bb6"]);
         }
 
         //*******Style and label crossings by attribute value
-        tmpFeat.style("fill", function(d) {return crossColor(d.properties[tmpAtt]); });
+        tmpFeat.style("fill", function(d) {return newColor(d.properties[tmpAtt]); });
         tmpFeat.attr("id", function(d) { return (tmpAtt + ": " + d.properties[tmpAtt]); })
 
-       //*******Make a legend
-       var list = d3.select(".cross-list-inline");
-       list.remove();
+        //*******Make a legend
+        var list = d3.select("." + tmpClass + "-list-inline");
+        list.remove();
 
-       var legend = d3.select('#crossLegend')
-         .append('ul')
-         .attr('class', 'cross-list-inline');
+        var legend = d3.select("#" + tmpClass + "Legend")
+         .append("ul")
+         .attr("class", tmpClass + "-list-inline");
 
-       var keys = legend.selectAll('li.key')
-         .data(crossColor.range());
+        var keys = legend.selectAll("li.key")
+          .data(newColor.range());
 
-       keys.enter().append('li')
-         .attr('class', 'key')
-         .style('border-top-color', String)
-         .text(function(d) {
-           var r = crossColor.invertExtent(d);
-           return r[0].toFixed(1);
-         });
-      }
+        keys.enter().append("li")
+          .attr("class", "key")
+          .style("border-top-color", String)
+          .text(function(d) {
+            var r = newColor.invertExtent(d);
+            return r[0].toFixed(1);
+          });
+       }
 
-      //*******Change catchments style
-      function catchStyle(tmpAtt) {
-        //*******Select catchment class
-        var tmpFeat = topoG.selectAll(".catchments");
 
-        //*******Get data for passed in attribute
-        var tmpVals = d3.values(catchments.features).map(function(d) { return d.properties[tmpAtt]; });
-
-        var tmpSet = d3.set(tmpVals);
-        var tmpMin = d3.min([5, tmpSet.size()])
-
-        //*******Make a color scale
-        if (tmpMin > 2) {
-          /*
-          var catchColor = d3.scale.linear()
-            .domain([d3.max([0,d3.min(tmpVals)]), d3.max(tmpVals)])
-            .range(["hsl(62,100%,90%)", "hsl(222,30%,20%)"]).clamp(true).interpolate(d3.interpolateHcl);
-          */
-          
-          var catchColor = d3.scale.quantize()
-            .domain([d3.max([0,d3.min(tmpVals)]), d3.max(tmpVals)])
-            .range(colorbrewer.YlGn[tmpMin]);
-          
-        }
-        else {
-          var catchColor = d3.scale.quantize()
-            .domain([0, 1])
-            .range(["red", "blue"]);
-        }
-
-        //*******Style and label crossings by attribute value
-        tmpFeat.style("fill", function(d) {return catchColor(d.properties[tmpAtt]); });
-        tmpFeat.attr("id", function(d) { return (tmpAtt + ": " + d.properties[tmpAtt]); })
-
-       //*******Make a legend
-       var list = d3.select(".catch-list-inline");
-       list.remove();
-
-       var legend = d3.select('#catchLegend')
-         .append('ul')
-         .attr('class', 'catch-list-inline');
-
-       var keys = legend.selectAll('li.key')
-         .data(catchColor.range());
-
-       keys.enter().append('li')
-         .attr('class', 'key')
-         .style('border-top-color', String)
-         .text(function(d) {
-           var r = catchColor.invertExtent(d);
-           return r[0].toFixed(1);
-         });
-      }
 
 
 

@@ -47,6 +47,9 @@ body, html {
   cursor: crosshair;
 }
 
+.streams:hover {
+  cursor: crosshair;
+}
 
 .d3Tooltip {
   background: rgba(0,0,0,0.7);
@@ -209,7 +212,7 @@ body, html {
   opacity: 1;
 }
 
-.cross-list-inline, .catch-list-inline {
+.crossings-list-inline, .catchments-list-inline {
   padding: 0px;
   margin: 2px;
   display: flex;
