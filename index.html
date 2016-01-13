@@ -105,75 +105,68 @@
       var streamG = topoSVG.append("g").attr("class", "leaflet-zoom-hide").attr("id", "streamG");
       var crossG = topoSVG.append("g").attr("class", "leaflet-zoom-hide").attr("id", "crossG");
 
-      //******Make dummy layer variables for layer controller
+
+      //******Add and remove crossings topo layer
       var crossTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
 
       crossTogSVG.onAdd = function(map) {
-        //******Add Deerfield road/stream crossings
-        var tmpFeats = crossG.selectAll(".crossings")
-            .data(topos.crossings.features)
-          .enter().append("path")
-            .attr("d", path)
-            .attr("class", "crossings")
-            .on("mouseover", function(data) { showIt(this.id); })
-            .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
-            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
-        changeStyle(d3.select("#crossingsSelect").node().value, topos.crossings);
-        d3.select("#crossingsLegend").style("display", "block");
+        addTopo(topos.crossings);
       }
 
       crossTogSVG.onRemove = function(map) {
-        var tmpFeats = crossG.selectAll(".crossings");
-        tmpFeats.remove();
-        d3.select("#crossingsLegend").style("display", "none");
+        removeTopo(topos.crossings);
       }
 
-      var streamTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
-  
-      streamTogSVG.onAdd = function(map) {
-        //******Add Deerfield streams
-        var tmpFeats = streamG.selectAll(".streams")
-            .data(topos.streams.features)
-          .enter().insert("path", ":first-child")
-            .attr("d", path)
-            .attr("class", "streams")
-            .attr("id", function(data) { return ("str_order: " + data.properties.str_order); })
-            //.style("stroke-width", function(data) { return (0.5 + (0.5 * data.properties.str_order) + "px") ; })
-            //.style("stroke", function(data) { return streamColor(10 - data.properties.str_order); })
-            .on("mouseover", function(data) { showIt(this.id); })
-            .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
-            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
-        changeStyle(d3.select("#streamsSelect").node().value, topos.streams);
-        d3.select("#streamsLegend").style("display", "block");
-       }
 
-      streamTogSVG.onRemove = function(map) {
-        var tmpFeats = streamG.selectAll(".streams");
-        tmpFeats.remove();
-      }
-
+      //******Add and remove catchments topo layer
       var catchTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
 
       catchTogSVG.onAdd = function(map) {
-        //******Add Deerfield catchments
-        var tmpFeats = catchG.selectAll(".catchments")
-            .data(topos.catchments.features)
-          .enter().insert("path", ":first-child")
-            .attr("d", path)
-            .attr("class", "catchments")
-            .on("mouseover", function(data) { showIt(this.id); })
-            .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
-            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
-        changeStyle(d3.select("#catchmentsSelect").node().value, topos.catchments);
-        d3.select("#catchmentsLegend").style("display", "block");
+        addTopo(topos.catchments);
       }
 
       catchTogSVG.onRemove = function(map) {
-        var tmpFeats = catchG.selectAll(".catchments");
-        tmpFeats.remove();
-        d3.select("#catchmentsLegend").style("display", "none");
+        removeTopo(topos.catchments);
       } 
 
+
+      //******Add and remove streams topo layer
+      var streamTogSVG = d3.select(map.getPanes().overlayPane).append("svg");
+  
+      streamTogSVG.onAdd = function(map) {
+        addTopo(topos.streams);
+       }
+
+      streamTogSVG.onRemove = function(map) {
+        removeTopo(topos.streams);
+      }
+
+
+      //******Add topo layer to map
+      function addTopo(topo) {
+        var tmpFeats = topo.g.selectAll("." + topo.class)
+            .data(topo.features)
+          .enter().append("path")
+            .attr("d", path)
+            .attr("class", topo.class)
+            .on("mouseover", function(data) { showIt(this.id); })
+            .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-10) + "px").style("left", (d3.event.pageX+10) + "px"); })
+            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
+        changeStyle(d3.select("#" + topo.class + "Select").node().value, topo);
+        filterMap("featureid", topo, true);
+        d3.select("#" + topo.class + "Legend").style("display", "block");
+      }
+
+
+      //******Remove topo layer to map
+      function removeTopo(topo) {
+        var tmpFeats = topo.g.selectAll("." + topo.class);
+        tmpFeats.remove();
+        d3.select("#" + topo.class + "Legend").style("display", "none");
+      }
+
+
+      //******Add Geoserver Deerfield HUC8 layer to map
       map.addLayer(gsHuc8);
 
       //******Make layer controller
@@ -262,6 +255,8 @@
       var hist = {};   //global histogram object variable
       var graphs = [];   //global list of current graphs variable
       var layers = [];   //global list of topoJSON map layers
+
+      //******Add in custom color pallate for streams
       colorbrewer.streams = {};
       colorbrewer.streams["5"] = ["#081d58","#253494","#225ea8","#1d91c0","#41b6c4"];
 
@@ -273,6 +268,7 @@
         .defer(d3.tsv, 'crossings_covariates.tsv')
         .defer(d3.tsv, 'catchments_covariates.tsv')
         .defer(d3.tsv, 'streams_covariates.tsv')
+        .defer(d3.tsv, 'catchments_political.tsv')
         .await(displayIt);
 
 
@@ -282,7 +278,7 @@
 
 
       //******Bind topoJSON data
-      function displayIt(error, streamData, crossingData, catchData, crossCov, catchCov, streamCov) {
+      function displayIt(error, streamData, crossingData, catchData, crossCov, catchCov, streamCov, political) {
         topos.crossings = topojson.feature(crossingData, crossingData.objects.Deerfield_barriers_merged_09_08_15_10M_snap_nodups_featureid_wgs84);
         topos.catchments = topojson.feature(catchData, catchData.objects.Deerfield_NHD_Hi_Res_Catchments_wgs84);
         topos.streams = topojson.feature(streamData, streamData.objects.edges_nodes_fbar_tbar_wgs84);
@@ -301,6 +297,9 @@
         topos.crossings.keys = d3.keys(crossCov[0]);
         topos.catchments.keys = d3.keys(catchCov[0]);
         topos.streams.keys = d3.keys(streamCov[0]);
+
+        //******Read in political featureids
+        topos.political = strToNum(political);
 
         //******Make crossfilter dimensions
         cfDimension(topos.crossings, crossCov);
@@ -510,6 +509,27 @@
 
 
 
+      //******Change number strings to values
+      function strToNum(tmpData) {
+        var tmpKeys = d3.keys(tmpData[0]);
+        var tmpCov = tmpData.map(function(d) {
+          var tmpJSON = {};
+          var tmpVals = d3.values(d);
+          tmpVals.forEach(function(val,i){ 
+            if (isNaN(val) == false) {
+              tmpJSON[tmpKeys[i]] = +d[tmpKeys[i]];
+            }
+            else {
+              tmpJSON[tmpKeys[i]] = d[tmpKeys[i]];
+            }
+          });
+          return tmpJSON;
+        });
+        return tmpCov
+      }
+
+
+
       //******Transform TSV strings to values if appropriate and add to topojson
       function readTSV(tmpData, topo) {
         //******Get keys and values from TSV data and fill out covariate data type
@@ -526,18 +546,7 @@
         });
 
         //******Change TSV attribute strings to values if appropriate
-        var tmpCov = tmpData.map(function(d) {
-          var tmpJSON = {};
-          tmpVals.forEach(function(val,i){ 
-            if (isNaN(val) == false) {
-              tmpJSON[tmpKeys[i]] = +d[tmpKeys[i]];
-            }
-            else {
-              tmpJSON[tmpKeys[i]] = d[tmpKeys[i]];
-            }
-          });
-          return tmpJSON;
-        });    
+        var tmpCov = strToNum(tmpData);
 
         //*******Map TSV to ID_key attribute (in this case either unique_id (crossings, streams) or featureid (catchments)
         var tmpMap = d3.map(tmpCov, function(d) {return d[topo.uniqueID];});
@@ -911,7 +920,7 @@
                 });
               }
               else {
-                IDsFilter = IDs.filter(function(val) {
+                var IDsFilter = IDs.filter(function(val) {
                   return (tmpID1.indexOf(val) != -1 && tmpID2.indexOf(val) != -1);
                 });
                 IDs = IDsFilter;
