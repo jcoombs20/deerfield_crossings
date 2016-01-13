@@ -363,7 +363,7 @@
                 .attr("id", layer1 + "-" + layer2 + "-check")
                 .attr("class", "linkCheck")
                 .property("checked", false)
-                .on("click", function() { linkClick(this.id, this.checked); });
+                .on("click", function() { checkLink("featureid", layer1, true) });   //Layer1 doesn't matter, just a placeholder
 
               d3.select("#" + layer1 + "-" + layer2 + "-link")
                 .append("label")
@@ -714,7 +714,7 @@
             .attr("class", "title")
             .attr("id", "title-" + topo.class + "-" + tmpKey)
             .style("margin-left", "2px")
-            .text(tmpKey)
+            .text(topo.class + ": " + tmpKey)
           .append("a")
             .attr("class", "reset")
             .text("reset")
@@ -822,29 +822,27 @@
 
       function brushStart(tmpKey, topo) {
         topo.filter[tmpKey].filterRange([brush[topo.class][tmpKey].extent()[0], brush[topo.class][tmpKey].extent()[1]]);
-        filterMap(tmpKey, topo, true);
+        checkLink(tmpKey, topo, false);
       }
 
 
       function brushMove(tmpKey, topo) {
         topo.filter[tmpKey].filterRange([brush[topo.class][tmpKey].extent()[0], brush[topo.class][tmpKey].extent()[1]]);
-        filterMap(tmpKey, topo, true);
+        checkLink(tmpKey, topo, false);
       }
 
       function brushEnd(tmpKey, topo) {
         topo.filter[tmpKey].filterRange([brush[topo.class][tmpKey].extent()[0], brush[topo.class][tmpKey].extent()[1]]);       
-        filterMap(tmpKey, topo, true);
+        checkLink(tmpKey, topo, false);
       }
 
       function brushReset(tmpKey, topo) {
         d3.select("#brush-" + topo.class + "-" + tmpKey).call(brush[topo.class][tmpKey].clear());
         topo.filter[tmpKey].filterAll();
-        topo.filter["featureid"].filterAll();
-        checkLink(topo, true);
-        filterMap(tmpKey, topo, true);
+        checkLink(tmpKey, topo, false);
       }
 
-      function filterMap(tmpKey, topo, runLink) {
+      function filterMap(tmpKey, topo, isLink) {
         var tmpSubset = topo.filter[topo.uniqueID].top(Infinity);
         var tmpID = tmpSubset.map(function(d) {return d[topo.uniqueID];});
         var tmpData = d3.selectAll("." + topo.class).data();
@@ -859,20 +857,16 @@
         });
 
         //******Update crossings selected
-        //console.log(topos[topo.class].filter.all.value());
         d3.select("#active-" + topo.class).html(topo.filter.all.value());
 
-        //******Update filter range (if runLink == true)
-        if (runLink == true) {
+        //******Update filter range (if isLink == false)
+        if (isLink == false) {
           if (brush[topo.class][tmpKey].empty() && topo.filter.all.value() > 0) {
             d3.select("#extent-" + topo.class + "-" + tmpKey).html(topo.filter[tmpKey].bottom(1)[0][tmpKey].toFixed(1) + " - " + topo.filter[tmpKey].top(1)[0][tmpKey].toFixed(1));
           }
           else {
             d3.select("#extent-" + topo.class + "-" + tmpKey).html(brush[topo.class][tmpKey].extent()[0].toFixed(1) + " - " + brush[topo.class][tmpKey].extent()[1].toFixed(1));
           }
-
-          //******Check if filters are linked, and if so update their featureid filter
-          checkLink(topo, false);
         }
 
         updateStats(tmpKey, topo);
@@ -880,108 +874,68 @@
         updateHistogram(tmpKey, topo);
       }
 
+      //******
+      function checkLink(tmpKey, topo, isLink) {
+        var linkLayers = [];
 
-
-      //******Check for linked filters
-      function checkLink(topo, runRecip) {
-        var tmpDirect = [];
         layers.forEach(function(layer1, i) {
-          if (layer1 == topo.class) {
-            layers.forEach(function(layer2, j) {
-              if (layer2 != topo.class) {
-                if (i < j) {
-                  var tmpCheck = d3.select("#" + layer1 + "-" + layer2 + "-check").property("checked");
-                }
-                else {
-                  var tmpCheck = d3.select("#" + layer2 + "-" + layer1 + "-check").property("checked");
-                }
+          layers.forEach(function(layer2, j) {
+            if (j > i) {
+              topos[layer1].filter.featureid.filterAll();
+              topos[layer2].filter.featureid.filterAll();
 
-                if (tmpCheck == true) {
-                  //console.log(layer1 + ", " + layer2);
-                  tmpDirect.push([layer1, layer2]);
+              if (d3.select("#" + layer1 + "-" + layer2 + "-check").property("checked") == true) {
+                if (linkLayers.indexOf(layer1) == -1) {
+                  linkLayers.push(layer1);
+                }
+                if (linkLayers.indexOf(layer2) == -1) {
+                  linkLayers.push(layer2);
                 }
               }
-            });
-          }
-        });
-        
-        //******Check indirect links and update if necessary before running direct links
-        tmpDirect.forEach(function(tmpLayer) {
-          layers.forEach(function(layer1, i) {
-            if (layer1 == tmpLayer[1]) {
-              layers.forEach(function(layer2, j) {
-                if (layer2 != layer1 && layer2 != topo.class) {
-                  if (i < j) {
-                    var tmpCheck = d3.select("#" + layer1 + "-" + layer2 + "-check").property("checked");
-                  }
-                  else {
-                    var tmpCheck = d3.select("#" + layer2 + "-" + layer1 + "-check").property("checked");
-                  }
-
-                  if (tmpCheck == true) {
-                    linkFilter(layer1, layer2);
-                    linkFilter(layer2, layer1);
-                  }
-                }
-              });
             }
           });
         });
 
-        //******Run Direct links
-        tmpDirect.forEach(function(tmpLayers) {
-          linkFilter(tmpLayers[0], tmpLayers[1]);
-          if (runRecip == true) {
-            linkFilter(tmpLayers[1], tmpLayers[0]);
-          }
-        });
-      }
 
-
-      //******Update filters when links are clicked
-      function linkClick(tmpID, tmpCheck) {
-        var layer1 = tmpID.slice(0, tmpID.indexOf("-"));
-        var layer2 = tmpID.slice(tmpID.indexOf("-") + 1, tmpID.lastIndexOf("-"));
-
-        if (tmpCheck == true) {
-          checkLink(topos[layer1], true);
-          checkLink(topos[layer2], true);
-        }
-        else {
-          topos[layer1].filter["featureid"].filterAll();
-          topos[layer2].filter["featureid"].filterAll();
-
-          layers.forEach(function(layer) {
-            if (layer != layer1 && layer != layer2) {
-              topos[layer].filter["featureid"].filterAll();
-              filterMap("featureID", topos[layer], false);
-              console.log(layer);
-              checkLink(topos[layer], true);
+        var IDs = [];
+        linkLayers.forEach(function(layer1, i) {
+          var tmpSubset = topos[layer1].filter.featureid.top(Infinity);
+          var tmpID1 = tmpSubset.map(function(d) {return d["featureid"];});
+          linkLayers.forEach(function(layer2, j) {
+            if (j > i) {
+              tmpSubset = topos[layer2].filter.featureid.top(Infinity);
+              var tmpID2 = tmpSubset.map(function(d) {return d["featureid"];});
+              if (IDs.length == 0) {
+                IDs = tmpID1.filter(function(val) {
+                  return tmpID2.indexOf(val) != -1;
+                });
+              }
+              else {
+                IDsFilter = IDs.filter(function(val) {
+                  return (tmpID1.indexOf(val) != -1 && tmpID2.indexOf(val) != -1);
+                });
+                IDs = IDsFilter;
+              }
             }
           });
+        });
+              
+        linkLayers.forEach(function(layer) {
+          topos[layer].filter.featureid.filterFunction(function(d) { 
+            return IDs.indexOf(d) != -1;
+          });
+        });
 
-          filterMap("featureID", topos[layer1], false);
-          filterMap("featureID", topos[layer2], false);
-        }
-      }
-
-
-      //******Filter layer2 based on layer1 featureid values
-      function linkFilter(layer1, layer2) {
-        var tmpSubset = topos[layer1].filter["featureid"].top(Infinity);
-        var tmpID = tmpSubset.map(function(d) {return d["featureid"];});
-
-        topos[layer2].filter["featureid"].filterAll();
-        topos[layer2].filter["featureid"].filterFunction(function(d) { 
-          if (tmpID.indexOf(d) > -1) {
-            return true;
+        layers.forEach(function(layer) {
+          if (isLink == false && layer == topo.class) {
+            filterMap(tmpKey, topos[layer], false);
           }
           else {
-            return false;
+            filterMap("featureid", topos[layer], true);
           }
         });
-        filterMap("featureid", topos[layer2], false);
       }
+
 
       
       //******Update filter statistics
