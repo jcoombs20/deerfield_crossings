@@ -16,6 +16,8 @@ body, html {
 
 .crossings:hover {
   cursor: crosshair;
+  stroke: yellow;
+  stroke-width: 2px;
 }
 
 .catchments {
@@ -40,6 +42,7 @@ body, html {
 
 .streams:hover {
   cursor: crosshair;
+  stroke-width: 4px;
 }
 
 .d3Tooltip {
