@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<metadata xml:lang="en"><Esri><CreaDate>20150825</CreaDate><CreaTime>09093200</CreaTime><ArcGISFormat>1.0</ArcGISFormat><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="c:\program files (x86)\arcgis\desktop10.1\ArcToolbox\Toolboxes\Data Management Tools.tbx\Dissolve" Date="20150313" Time="164646">Dissolve cb_2013_us_county_500k F:\EBTJV\SHEDS\Layers\US_States.shp US_States.STATE;US_States.STATE_FIPS # MULTI_PART DISSOLVE_LINES</Process></lineage></DataProperties></Esri></metadata>

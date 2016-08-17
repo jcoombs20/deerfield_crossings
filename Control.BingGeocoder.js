@@ -30,11 +30,13 @@ L.Control.BingGeocoder = L.Control.extend({
 		L.DomEvent.disableClickPropagation(container);
 
 		var form = this._form = L.DomUtil.create('form', className + '-form');
+              form.title = "Enter location, address, or coordinates (lat, long) to which to zoom";
 
 		var input = this._input = L.DomUtil.create('input', className + '-input', form);
 		input.type = 'text';
 
 		var submit = this._createButton(className, this.options.text);
+              submit.title = "Click to zoom to specified location";
 		form.appendChild(submit);
 
 		L.DomEvent.on(form, 'submit', this._geocode, this);

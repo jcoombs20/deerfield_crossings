@@ -1,7 +1,7 @@
 .leaflet-control-maxExtent-interior {
-    background-image: url(../images/maxExtent.png);
-    width: 20px;
-    height: 20px;
+    background-image: url(../images/max_Extent_small.png);
+    width: 36px;
+    height: 36px;
     background-position: 50% 50%;
     background-repeat: no-repeat;
     display: block;
@@ -11,14 +11,15 @@
     text-align: center;
     background-color: #FFFFFF;
     cursor: pointer;
-    opacity: 0.6;
-    border-width: 4px;
-    border-style: solid;
-    border-color: gray;
+    opacity: 1;
+    box-shadow: 0 1px 7px #999;
+    //border-width: 1px;
+    //border-style: solid;
+    //border-color: black;
     box-sizing: content-box
 }
 
-    .leaflet-control-maxExtent-interior:hover {
+.leaflet-control-maxExtent-interior:hover {
     background-color: #F4F4F4;
     opacity: 1;
 }

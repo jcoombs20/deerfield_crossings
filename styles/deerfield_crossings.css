@@ -10,18 +10,19 @@ body, html {
 
 .crossings {
   stroke: black;
-  fill: yellow;
-  opacity: 1;
+  fill: gray;
+  opacity: 0.7;
 }
 
 .crossings:hover {
   cursor: crosshair;
   stroke: yellow;
   stroke-width: 2px;
+  opacity: 1;
 }
 
 .catchments {
-  fill: red;
+  fill: gray;
   stroke: whitesmoke;
   stroke-width: 1px;
   fill-opacity: 1;
@@ -35,7 +36,7 @@ body, html {
 }
 
 .streams {
-  stroke: blue;
+  stroke: gray;
   stroke-width: 1.5px;
   fill: none;
 }
@@ -43,6 +44,56 @@ body, html {
 .streams:hover {
   cursor: crosshair;
   stroke-width: 4px;
+}
+
+#loadingDiv {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  background: rgba(40,40,40,0.6);
+  text-align: center;
+  color: black;
+  font-size: 4em;
+}
+
+#loading {
+  margin-top: 200px;
+}
+
+#helpDiv {
+  display: flex;
+  justify-content: center;
+}
+
+#infoDiv {
+  width: 500px;
+  height: 400px;
+  background: rgba(255,255,255,1);
+  border-style: solid;
+  border-color: black;
+  border-width: 2px;
+  border-radius: 4px;
+  font-size: 2em;
+  align-self: center;
+  text-align: center;
+}
+
+.helpHeader {
+  font-size: 0.7em;
+  text-align: left;
+  background: rgba(0,0,255,0.2);
+  padding: 4px;
+}
+
+.brand {
+  font-size: 22pt;
+}
+
+.tooltip-inner {
+  max-width: 200px;
+  width: 200px;
 }
 
 .d3Tooltip {
@@ -61,18 +112,42 @@ body, html {
   visibility: hidden;
 }
 
+.leaflet-container {
+  background-color: white;
+}
+
+.leaflet-top {
+  padding-top: 50px;
+}
+
 .leaflet-bar a {
-  opacity: 0.6; 
+  opacity: 1;
+  box-shadow: 0 1px 7px #999;
+  //border-style: solid;
+  //border-width: 1px;
+  border-radius: 4px;
+  //border-color: black;
+  width: 36px;
+  height: 36px;
+  font-size: 2.5em;
+  font-weight: bold;
+  padding-top: 5px;
 }
 
 .leaflet-bar a:hover {
+  width: 36px;
+  height: 36px;
   opacity: 1;
+}
+
+.leaflet-bottom .leaflet-control-scale {
+  margin-bottom: 0px;
 }
 
 .leaflet-control-scale-line, .leaflet-control-scale-line:not(:first-child) {
   background: rgba(255,255,0,0.6);
   border-style: solid;
-  border-width: 2px;
+  border-width: 1px;
   border-radius: 4px;
   border-color: black;
   margin: 5px;
@@ -84,29 +159,8 @@ body, html {
   text-align: center;
 }
 
-#crossListDiv {
-  position: absolute;
-  right: 47%;
-  top: 5px;
-  z-index: 2;
-}
-
-#crossList {
-  border-style: solid;
-  border-width: 2px;
-  border-radius: 4px;
-  border-color: black;
-  margin: 2px;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1em;
-  font-weight: bold;
-  text-align: center;
-  margin-top: 10px;
-  opacity: 0.7;
-}
-
-#crossList:hover {
-  opacity: 1;
+.leaflet-control-scale-line:hover, .leaflet-control-scale-line:not(:first-child):hover {
+  background: rgba(255,255,0,1);
 }
 
 .hr {
@@ -115,29 +169,62 @@ body, html {
 }
 
 .legend {
-  position: absolute;
-  top: 5px;
-  max-width: 300px;
   width: 100%;
   background: rgba(255,255,255,0.8);
   border: solid;
   border-color: black;
-  border-width: 2px;
-  border-radius: 4px;
+  border-width: 1px;
+  border-radius: 0px 0px 4px 4px;
+  margin: 0px;
 }
 
-#legendDiv {
-  left: 5%;
+#leftSideToolsDiv {
+  position: absolute;
+  top: 50px;
+  left: 60px;
+  width: 362px;
+  max-width: 362px;
+  margin: 0px;
+  z-index: 2000;
 }
 
-#filters {
-  right: 5%;
-  max-width: 420px;
+#polFilterDiv {
+  display: none;
+  margin: 0px;
 }
 
-.filterLayers {
-  display: inline-block;
-  margin: 2px 12px 2px 12px;
+#polFilterSelectDiv {
+  text-align: center;
+  padding-bottom: 5px;
+  border-bottom: 1px solid black; 
+}
+
+.polFilterCond {
+  padding: 5px;
+  margin: 0px;
+  border-top: 1px solid gray; 
+  border-bottom: 1px solid gray; 
+}
+
+.polFilterCond:hover {
+  background: rgba(255,255,255,1);
+}
+
+#filtersDiv {
+  position: absolute;
+  top: 50px;
+  right: 60px;
+  max-width: 410px;
+  margin: 0px;
+}
+
+table {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.cellDiv {
+  text-align: center;
 }
 
 .filterTitle {
@@ -160,18 +247,40 @@ body, html {
   opacity: 0.7;
 }
 
+.filterAttrList:hover {
+  opacity: 1;
+}
+
 input[type="checkbox"]  {
   margin: 0px 2px 0px 2px;
 }
 
+.horBorder {
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  background: rgba(0,0,255,0.2);
+}
+
+.horBorder:hover {
+  background: rgba(0,0,255,0.5);
+}
+
 .linkLabel {
   margin: 0px 2px 0px 2px;
+  font-weight: normal;
 }
 
 #totals {
-  padding-right: 2px;
+  border-bottom: 1px solid black;
+  text-align: left;
+}
+
+.hoverDiv {
+  padding-left: 100px;
+}
+
+.hoverDiv:hover {
   background: rgba(255,255,255,1);
-  border-bottom: 2px solid black;
 }
 
 #charts {
@@ -195,7 +304,33 @@ input[type="checkbox"]  {
   font-weight: bold;
   display: inline-block;
   font-size: 1em;
-  }
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 75px;
+  height: 5px;
+  position: absolute;
+  display: inline-block;
+  margin: 8px;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  background: navy;
+  height: 5px;
+  border: none;
+  border-radius: 3px;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: orange;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  height: 7px;
+  margin-top: -7px;
+  cursor: pointer;
+}
 
 .legAttrList {
   border-style: solid;
@@ -243,3 +378,28 @@ li.key {
 li.key:hover {
   background: rgba(255,255,255,1);
      }
+
+#addWeightContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 2000;
+  background: rgba(0,0,0,0.5);
+  position: relative;
+}
+
+#addWeight {
+  padding: 10px;
+  width: 350px;
+  height: auto;
+  background: lightgray;
+  border-style: solid;
+  border-color: black;
+  border-width: 2px;
+  border-radius: 4px;
+  font-size: 1em;
+  align-self: center;
+  text-align: center;
+  //z-index: 2001;
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shapewrite Test</title>
+  <script src="bundle.js"></script>
+  <script type="text/javascript" src="shpwrite.json"></script> 
+</head>
+<body>
+  Hello World
+<script type='text/javascript'>
+  var shpwrite = require('shp-write');
+
+  var strOutput = shpwrite.zip(tmpGeo);
+
+  var byteCharacters = window.atob(strOutput);
+
+  var byteNumbers = new Array(byteCharacters.length);
+  for (var i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  var byteArray = new Uint8Array(byteNumbers);
+  console.log(Object.prototype.toString.call(byteArray));
+
+  var blob = new Blob([byteArray], {type: 'application/zip'});
+
+</script>
+</body>
+</html>
