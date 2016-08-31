@@ -67,7 +67,7 @@
       //******Add map controls
       L.control.mousePosition().addTo(map);
       L.control.scale({ maxWidth: 200 }).addTo(map);
-      L.control.zoom({ position: 'topleft', zoomInText: '+', zoomOutText: '-', zoomInTitle: "Zoom in (can also be done with mouse wheel, double-click, '+' key, or by pressing the 'shift' key while clicking and dragging a rectangle)", zoomOutTitle: "Zoom out (can also be done with the mouse wheel or the '-' key)" }).addTo(map);
+      L.control.zoom({ position: 'topleft', zoomInTitle: "Zoom in (can also be done with mouse wheel, double-click, '+' key, or by pressing the 'shift' key while clicking and dragging a rectangle)", zoomOutTitle: "Zoom out (can also be done with the mouse wheel or the '-' key)" }).addTo(map);
       L.control.navbar().addTo(map);
       L.control.legend().addTo(map);
       L.control.political().addTo(map);
@@ -393,7 +393,7 @@
         .attr("id", "sjGlyph")
         .attr("data-toggle", "collapse")
         .attr("data-target", "#linkLayers")
-        .property("title", "Click to minimize panel")
+        .property("title", "Click to maximize panel")
         .on("click", function() { changeGlyph(this); });
         
       d3.select("#filtersDiv")
@@ -419,7 +419,7 @@
         .attr("id", "totalsGlyph")
         .attr("data-toggle", "collapse")
         .attr("data-target", "#totals")
-        .property("title", "Click to minimize panel")
+        .property("title", "Click to maximize panel")
         .on("click", function() { changeGlyph(this); });
 
       d3.select("#filtersDiv")
@@ -566,7 +566,7 @@
           topos[d.layer]["data_type"][d.short_heading] = d.data_type;
           topos[d.layer]["scale"][d.short_heading] = d.scale;
           topos[d.layer]["conversion"][d.short_heading] = {};
-          if (Object.keys(d.conversion).length > 0) {
+          if (jQuery.isEmptyObject(d.conversion) == false) {
             topos[d.layer]["conversion"][d.short_heading] = JSON.parse(d.conversion);
           }
           topos[d.layer]["conversion"][d.short_heading]["raw"] = d.conversion;
@@ -1355,19 +1355,30 @@
 
         //******Define graph attributes
         var margin = {top: 10, right: 10, bottom: 20, left: 10},
-          width = 390 - margin.left - margin.right,
+          width = 380 - margin.left - margin.right,
           height = 100 - margin.top - margin.bottom;
 
-        var x = d3.scale.linear()
-          .rangeRound([0, width]);
-
+        var x = d3.scale.linear().rangeRound([0, width]);
         var y = d3.scale.linear()
           .range([height, 0]);
 
         var xAxis = d3.svg.axis()
           .scale(x)
-          .orient("bottom")
-          .ticks(10);
+          .orient("bottom");
+
+        //**Format ticks for special data types
+        switch(topo.data_type[tmpKey]) {
+          case "date":
+            xAxis.tickFormat(function(d) { var tmpDate = d3.time.format("%-m/%y"); return tmpDate(new Date(d)); });
+            xAxis.ticks(10);
+            break;
+          case "text":
+            xAxis.tickFormat(function(d) { if (isNaN(topo.conversion[tmpKey][d])) {return d + " (" + topo.conversion[tmpKey][d] + ")";} else {return topo.conversion[tmpKey][d];} });
+            xAxis.ticks(Object.keys(topo.conversion[tmpKey]).length - 1);
+            break;
+          default:
+            xAxis.ticks(10);
+        }
 
 
         //******Add brush
@@ -1413,11 +1424,29 @@
         d3.select("#" + topo.class + "-" + tmpKey)
           .append("div")
             .attr("class", "stats")
-            .attr("id", "stats-" + topo.class + "-" + tmpKey)
-          .append("span")
+            .attr("id", "stats-" + topo.class + "-" + tmpKey);
+          /*.append("span")
             .attr("class", "extent")
             .attr("id", "extent-" + topo.class + "-" + tmpKey)
             .property("title", "Range of selected values");
+          */
+        var statsDiv = d3.select("#stats-" + topo.class + "-" + tmpKey);
+
+        statsDiv.append("input")
+          .attr({type: function() {if(topo.data_type[tmpKey] == "date") {return "text";} else { return "number"}} })
+          .attr("class", "extent-input")
+          .attr("id", "extent-input-lower-" + topo.class + "-" + tmpKey)
+          .property("title", "Lower value for selected range of " + topo.title[tmpKey] + " distribution");
+
+        statsDiv.append("p")
+          .attr("class", "extent-input-p")
+          .text("-");
+
+        statsDiv.append("input")
+          .attr({type: function() {if(topo.data_type[tmpKey] == "date") {return "text";} else { return "number"}} })
+          .attr("class", "extent-input")
+          .attr("id", "extent-input-upper-" + topo.class + "-" + tmpKey)
+          .property("title", "Upper value for selected range of " + topo.title[tmpKey] + " distribution");
 
 
         //******Add mean to stats div
@@ -1438,6 +1467,12 @@
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .attr("id", "g-" + topo.class + "-" + tmpKey);
 
+        //******Add clip path rectangle
+        svg.append("clipPath")
+          .attr("id", "clip-" + topo.class + "-" + tmpKey)
+          .append("rect")
+            .attr("width", width)
+            .attr("height", height);
 
         //******Get data and make graph
         var tmpData = topo.filter[tmpKey + "s"].all();
@@ -1450,15 +1485,30 @@
         x.domain([tmpData[lowKey].key, tmpData[tmpData.length - 1].key + topo.binWidth[tmpKey]]);
         y.domain([0, d3.max(tmpData, function(d) { return d.value; })]);
 
-        svg.append("g")
+        var tmpX = svg.append("g")
           .attr("class", "x axis")
           .attr("transform", "translate(0," + height + ")")
           .call(xAxis);
 
+        if (topo.data_type[tmpKey] == "text") {
+          tmpX.select("text").style("text-anchor", "start");
+        }
+
         var tmpData = topo.filter[tmpKey + "s"].all();
         hist[topo.class][tmpKey] = {"x": x, "y": y, "height": height, "width": width};
       
-        svg.selectAll(".bar")
+        //******Add background bars
+        svg.selectAll("background.bar")
+            .data(tmpData)
+          .enter().append("rect")
+            .attr("class", "background bar")
+            .attr("x", function(d) { return x(d.key); })
+            .attr("width", (x.range()[1] - x.range()[0])/40)  
+            .attr("y", function(d) { return y(d.value); })
+            .attr("height", function(d) { return height - y(d.value); });
+
+        //******Add foreground bars
+        svg.selectAll(".foreground.bar")
             .data(tmpData)
           .enter().append("rect")
             .attr("class", "foreground bar")
@@ -1466,6 +1516,9 @@
             .attr("width", (x.range()[1] - x.range()[0])/40)  
             .attr("y", function(d) { return y(d.value); })
             .attr("height", function(d) { return height - y(d.value); });
+
+        svg.selectAll(".foreground.bar")
+          .attr("clip-path", "url(#clip-" + topo.class + "-" + tmpKey + ")");
       
         var gBrush = svg.append("g")
           .attr("class", "brush")
@@ -1475,6 +1528,18 @@
         gBrush.selectAll("rect").attr("height", height);
         gBrush.selectAll(".resize").append("path").attr("d", resizePath);
 
+        //******* Set upper and lower brush properties
+        var tmpLower = d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey)
+          .property("min", tmpData[lowKey].key)
+          .property("step", ((tmpData[tmpData.length - 1].key - tmpData[lowKey].key)/100).toFixed(2));
+
+        var tmpUpper = d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey)
+          .property("max", tmpData[tmpData.length - 1].key + topo.binWidth[tmpKey])
+          .property("step", ((tmpData[tmpData.length - 1].key - tmpData[lowKey].key)/100).toFixed(2));
+
+        d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).on("change", function () {extentChange(tmpKey, topo, tmpLower, tmpUpper); });
+        d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).on("change", function () {extentChange(tmpKey, topo, tmpLower, tmpUpper); });      
+
         brushReset(tmpKey, topo);
 
         function resizePath(d) {
@@ -1483,6 +1548,7 @@
             y = height / 3;
           return "M" + (0.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (0.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
         }
+
       }
 
 
@@ -1511,6 +1577,35 @@
 
 
 
+
+
+      function extentChange(tmpKey, topo, tmpLower, tmpUpper) {
+        if (topo.data_type[tmpKey] == "date") {
+          //if (isNaN(new Date(tmpLower.property("value")))) { console.log(tmpLower.attr("id")); document.getElementById(tmpLower.attr("id")).focus(); return; }
+          //if (isNaN(new Date(tmpUpper.property("value")))) { document.getElementById(tmpUpper.attr("id")).focus(); return; }
+          
+          var valLow = Date.parse(tmpLower.property("value"));
+          var valHigh = Date.parse(tmpUpper.property("value"));
+        }
+        else {
+          var valLow = parseFloat(tmpLower.property("value"));
+          var valHigh = parseFloat(tmpUpper.property("value"));
+        }
+
+        if (valLow > valHigh) {
+          var tmpHold = tmpUpper.property("value");
+          tmpUpper.property("value", tmpLower.property("value"));
+          tmpLower.property("value", tmpHold);
+          tmpHold = valHigh;
+          valHigh = valLow;
+          valLow = tmpHold;
+        }
+
+        d3.select("#brush-" + topo.class + "-" + tmpKey).call(brush[topo.class][tmpKey].extent([valLow, valHigh]));
+        brushEnd(tmpKey, topo);
+      }
+
+
       function brushStart(tmpKey, topo) {
        topo.filter[tmpKey].filterRange([brush[topo.class][tmpKey].extent()[0], brush[topo.class][tmpKey].extent()[1]]);
        checkLink(tmpKey, topo, false);
@@ -1522,11 +1617,13 @@
         checkLink(tmpKey, topo, false);
       }
 
+
       function brushEnd(tmpKey, topo) {
         topo.filter[tmpKey].filterRange([brush[topo.class][tmpKey].extent()[0], brush[topo.class][tmpKey].extent()[1]]);       
         checkLink(tmpKey, topo, false);
         d3.select("#reset-" + topo.class + "-" + tmpKey).style("display", "inline-block");
       }
+
 
       function brushReset(tmpKey, topo) {
         d3.select("#brush-" + topo.class + "-" + tmpKey).call(brush[topo.class][tmpKey].clear());
@@ -1534,6 +1631,7 @@
         checkLink(tmpKey, topo, false);
         d3.select("#reset-" + topo.class + "-" + tmpKey).style("display", "none");
       }
+
 
       function filterMap(tmpKey, topo, isLink) {
         var tmpSubset = topo.filter[topo.uniqueID].top(Infinity);
@@ -1558,10 +1656,37 @@
             var tmpVals = topo.filter[tmpKey].top(Infinity);
             tmpVals = tmpVals.map(function(d) { return d[tmpKey]; });
             tmpVals = tmpVals.filter(function(val) {if(val > -9999){return true} else {return false};});
-            d3.select("#extent-" + topo.class + "-" + tmpKey).html(d3.min(tmpVals).toFixed(2) + " - " + topo.filter[tmpKey].top(1)[0][tmpKey].toFixed(2));
+            var tmpMin = d3.min(tmpVals);
+            var tmpMax = topo.filter[tmpKey].top(1)[0][tmpKey] + topo["binWidth"][tmpKey];
+            if (topo.data_type[tmpKey] == "date") {
+              var tmpFormat = d3.time.format("%m/%d/%Y");
+              d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(tmpMin)));
+              d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(tmpMax)));
+            }
+            else {
+              d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpMin.toFixed(2));
+              d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpMax.toFixed(2));
+            }
+            d3.select("#clip-" + topo.class + "-" + tmpKey + " rect")
+              .attr("x", hist[topo.class][tmpKey].x(tmpMin))
+              .attr("width", hist[topo.class][tmpKey].x(tmpMax) - hist[topo.class][tmpKey].x(tmpMin));
           }
-          else { 
-            d3.select("#extent-" + topo.class + "-" + tmpKey).html(brush[topo.class][tmpKey].extent()[0].toFixed(2) + " - " + brush[topo.class][tmpKey].extent()[1].toFixed(2));
+          else {
+            var extMin = brush[topo.class][tmpKey].extent()[0]
+            var extMax = brush[topo.class][tmpKey].extent()[1]
+            if (topo.data_type[tmpKey] == "date") {
+              var tmpFormat = d3.time.format("%m/%d/%Y");
+              d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(extMin)));
+              d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(extMax)));
+            }
+            else {
+              d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", extMin.toFixed(2));
+              d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", extMax.toFixed(2));
+            }
+
+            d3.select("#clip-" + topo.class + "-" + tmpKey + " rect")
+              .attr("x", hist[topo.class][tmpKey].x(extMin))
+              .attr("width", hist[topo.class][tmpKey].x(extMax) - hist[topo.class][tmpKey].x(extMin));            
           }
         }
 
@@ -1674,10 +1799,51 @@
 
           if (class_key.indexOf(topo.class) > -1) {
             if (topo.filter["all"].value() > 0 ) {
-              d3.select("#mean-" + class_key).html("Mean: " + d3.mean(topo.filter[key].top(Infinity), function(d) { if (d[key] > -9999) {return d[key];} }).toFixed(2));       
+              if (topo.data_type[key] == "date") {
+                var tmpFormat = d3.time.format("%-m/%-d/%Y")
+                d3.select("#mean-" + class_key).html("Mean: " + tmpFormat(new Date(d3.mean(topo.filter[key].top(Infinity), function(d) { if (d[key] > -9999) {return d[key];} }))));
+              }
+              else {
+                d3.select("#mean-" + class_key).html("Mean: " + d3.mean(topo.filter[key].top(Infinity), function(d) { if (d[key] > -9999) {return d[key];} }).toFixed(2));
+              }
+
+              if (brush[tmpClass][key].empty()) {
+                var tmpMin = d3.min(topo.filter[key].top(Infinity), function(d) { if (d[key] > -9999) {return d[key];} });
+                var tmpMax = d3.max(topo.filter[key].top(Infinity), function(d) { if (d[key] > -9999) {return d[key];} }) + topo["binWidth"][key];
+
+                d3.select("#clip-" + tmpClass + "-" + key + " rect")
+                  .attr("x", hist[tmpClass][key].x(tmpMin))
+                  .attr("width", hist[tmpClass][key].x(tmpMax) - hist[tmpClass][key].x(tmpMin));
+
+                if (topo.data_type[key] == "date") {
+                  var tmpFormat = d3.time.format("%m/%d/%Y");
+                  d3.select("#extent-input-lower-" + class_key).property("value", tmpFormat(new Date(tmpMin)));
+                  d3.select("#extent-input-upper-" + class_key).property("value", tmpFormat(new Date(tmpMax)));
+                }
+                else {
+                  d3.select("#extent-input-lower-" + class_key).property("value", tmpMin.toFixed(2));
+                  d3.select("#extent-input-upper-" + class_key).property("value", tmpMax.toFixed(2));
+                }
+              }
+              else {
+                if (topo.data_type[key] == "date") {
+                  var tmpFormat = d3.time.format("%m/%d/%Y");
+                  d3.select("#extent-input-lower-" + class_key).property("value", tmpFormat(new Date(brush[tmpClass][key].extent()[0])));
+                  d3.select("#extent-input-upper-" + class_key).property("value", tmpFormat(new Date(brush[tmpClass][key].extent()[1])));
+                }
+                else {
+                  d3.select("#extent-input-lower-" + class_key).property("value", brush[tmpClass][key].extent()[0].toFixed(2));
+                  d3.select("#extent-input-upper-" + class_key).property("value", brush[tmpClass][key].extent()[1].toFixed(2));
+                }
+              }
             }
             else {
-              d3.select("#mean-" + class_key).html("Mean: 0.00");
+              if (topo.data_type[key] == "date") {
+                d3.select("#mean-" + class_key).html("Mean: 0/0/0000");
+              }
+              else {
+                d3.select("#mean-" + class_key).html("Mean: 0.00");
+              }
             }
           }  
         });
@@ -1722,7 +1888,21 @@
         var width = hist[topo.class][key].width;
         y.domain([0, d3.max(tmpData, function(d) { return d.value; })]);
 
-        var update = svg.selectAll(".bar")
+        //******update background bars
+        var update = svg.selectAll(".background.bar")
+          .data(tmpData);
+
+        update.exit().remove();
+        update.enter().insert("rect", ":first-child")
+          .attr("class", "background bar");
+        update
+          .attr("x", function(d) { return x(d.key); })
+          .attr("width", (x.range()[1] - x.range()[0])/40)  
+          .attr("y", function(d) { return y(d.value); })
+          .attr("height", function(d) { return height - y(d.value); });
+
+        //******update foreground bars
+        var update = svg.selectAll(".foreground.bar")
           .data(tmpData);
 
         update.exit().remove();

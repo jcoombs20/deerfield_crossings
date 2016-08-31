@@ -28,7 +28,7 @@ L.Control.customWeight = L.Control.extend({
         hydroLabel.innerHTML = "Hydrologic";
 
         var hydroROF = this._input = L.DomUtil.create('input', className + '-input', hydroDiv);
-        hydroROF.type = 'input';
+        hydroROF.type = 'text';
         hydroROF.value = 1;
         hydroROF.name = "ROF";
         hydroROF.id = "hydroROF";
@@ -41,7 +41,7 @@ L.Control.customWeight = L.Control.extend({
         structLabel.innerHTML = "Structural";
 
         var structROF = this._input = L.DomUtil.create('input', className + '-input', structDiv);
-        structROF.type = 'input';
+        structROF.type = 'text';
         structROF.value = 1;
         structROF.name = "ROF";
         structROF.id = "structROF";
@@ -54,7 +54,7 @@ L.Control.customWeight = L.Control.extend({
         geomorphLabel.innerHTML = "Geomorphic";
 
         var geomorphROF = this._input = L.DomUtil.create('input', className + '-input', geomorphDiv);
-        geomorphROF.type = 'input';
+        geomorphROF.type = 'text';
         geomorphROF.value = 1;
         geomorphROF.name = "ROF";
         geomorphROF.id = "geomorphROF";

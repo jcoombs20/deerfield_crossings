@@ -22,7 +22,7 @@ catchments	forest	Forest Cover	%	forward	decimal	log_rec	Percentage of the catch
 catchments	impervious	Impervious Surface	%	reverse	decimal	log	Percentage of the catchment covered with impervious surface	
 catchments	slope_pcnt	Slope	%	forward	decimal	log	Average slope (percent) of the catchment	
 catchments	water	Water Cover	%	reverse	decimal	log	Percentage of the catchment covered with water	
-streams	str_order	Stream Order		forward	text	categorical	Stream order (Strahler method) of stream reach	{"1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9"}
+streams	str_order	Stream Order		forward	text	categorical	Stream order (Strahler method) of stream reach	{"1":"1","2":"2","3":"3","4":"4","5":"5","6":"6"}
 streams	occ_cur	Habitat Suitability		reverse	decimal	log_rec	Probability of habitat suitability of stream reach for brook trout	
 streams	T_mean_sum	Temperature	Degrees Celsius	forward	decimal	linear	Average summer temperature (degrees celsius) of stream reach	
 streams	T_inertia	Resistance	Degrees Celsius	reverse	decimal	linear	Total summed differences (degrees celsius) between predicted water temperature and air temperature for the spring to fall time period	
