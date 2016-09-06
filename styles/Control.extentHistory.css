@@ -10,7 +10,7 @@ background-image: url(../images/arrow-left_000000_14.png);
 }
 
 .leaflet-control-navbar-home {
-background-image: url(../images/home_000000_14.png);
+background-image: url(../images/home_32x32.png);
 }
 
 
@@ -23,5 +23,5 @@ background-image: url(../images/arrow-left_bbbbbb_14.png);
 }
 
 .leaflet-control-navbar-home-disabled {
-background-image: url(../images/home_bbbbbb_14.png);
+background-image: url(../images/home_32x32.png);
 }

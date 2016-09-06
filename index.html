@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="styles/Control.graph.css"/>
     <link rel="stylesheet" href="styles/Control.customWeight.css"/>
     <link rel="stylesheet" href="styles/Control.downLoadFile.css"/>
+    <link rel="stylesheet" href="styles/Control.print.css"/>
     <link rel="stylesheet" href="styles/app.css" />
     <link rel="stylesheet" href="styles/deerfield_crossings.css"/>
 
@@ -39,6 +40,7 @@
     <script src="Control.graph.js"></script>
     <script src="Control.customWeight.js"></script>
     <script src="Control.downLoadFile.js"></script>
+    <script src="Control.print.js"></script>
 
     <!--script src="http://d3js.org/d3.v3.min.js"></script-->
     <script src="d3.v3.min.js"></script>
@@ -96,11 +98,9 @@
       var bingHybrid = new L.BingLayer("At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn", {type: 'AerialWithLabels'});
       var bingSatellite = new L.BingLayer("At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn", {type: 'Aerial'});
       var bingStreet = new L.BingLayer("At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn", {type: 'Road'});
-      //var usgsTopo = new L.tileLayer.wms("http://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer", {layers: 0});
-      var attribution = '<a href="http://www.doi.gov">U.S. Department of the Interior</a> | <a href="http://www.usgs.gov">U.S. Geological Survey</a> | <a href="http://www.usgs.gov/laws/policies_notices.html">Policies</a>';      
       var usgsTopo = new L.tileLayer('http://basemap.nationalmap.gov/ArcGIS/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 15,
-            attribution: attribution
+            attribution: '<a href="http://www.doi.gov">U.S. Department of the Interior</a> | <a href="http://www.usgs.gov">U.S. Geological Survey</a> | <a href="http://www.usgs.gov/laws/policies_notices.html">Policies</a>'
             });
       var blank = new L.tileLayer('');
     
@@ -235,6 +235,10 @@
       //******Add Download tool
       var downLoadFile = new L.Control.downLoadFile();
       map.addControl(downLoadFile);
+
+      //******Add Print tool
+      var printMap = new L.Control.print();
+      map.addControl(printMap);
 
 
       //******Make tooltip for displaying attribute data

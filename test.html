@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Shapewrite Test</title>
-  <script src="bundle.js"></script>
-  <script type="text/javascript" src="shpwrite.json"></script> 
+  <title>@Media Test</title>
+  <link rel="stylesheet" href="test.css" type="text/css">
+
+  <style>
+    @media print {
+      body {
+        background: lime;
+      }
+      .header {
+        background: orange;
+        color: purple;
+        font-weight: bold;
+      }
+   </style>
 </head>
 <body>
-  Hello World
+<div class="header">
+  <p>Hello World</p>
+</div>
+<button onclick="window.print()">Print</button>
 <script type='text/javascript'>
-  var shpwrite = require('shp-write');
-
-  var strOutput = shpwrite.zip(tmpGeo);
-
-  var byteCharacters = window.atob(strOutput);
-
-  var byteNumbers = new Array(byteCharacters.length);
-  for (var i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-
-  var byteArray = new Uint8Array(byteNumbers);
-  console.log(Object.prototype.toString.call(byteArray));
-
-  var blob = new Blob([byteArray], {type: 'application/zip'});
 
 </script>
 </body>

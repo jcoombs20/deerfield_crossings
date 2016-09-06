@@ -435,3 +435,38 @@ li.key:hover {
   text-align: center;
   //z-index: 2001;
 }
+
+@media print {
+  #leftSideToolsDiv {
+    top: 5px;
+    left: 5px;
+    background: rgba(255,255,255,0.8) !important
+  }
+
+  #filtersDiv {
+    top: 5px;
+    right: 5px;
+    background: rgba(255,255,255,0.8) !important
+  }
+
+  .leaflet-control-scale-line {
+    background: rgba(255,255,0,0.6) !important
+  }
+
+  .leaflet-container .leaflet-control-mouseposition {
+    background: rgba(255, 255, 255, 0.7) !important
+  } 
+
+  .horBorder {
+    background: rgba(0,0,255,0.2) !important
+  }
+
+  #charts {
+    background: rgba(255,255,255,1) !important
+  }
+
+  .header {
+    display: none; 
+  }
+   
+}
