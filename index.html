@@ -1342,17 +1342,6 @@
         if (graphs.indexOf(topo.class + "-" + tmpKey) > -1 || tmpKey == "...") {
           return;
         }
-     /*
-        else if (tmpKey == "...") {
-          var tmpGraphs = graphs.slice();
-          tmpGraphs.forEach(function(d) {
-            if (d.indexOf(topo.class) > -1) {
-              removeFilter(d, topo);
-            }
-          });
-          return;
-        }
-    */
         else {
           graphs.push(topo.class + "-" + tmpKey);
         }
@@ -1584,10 +1573,7 @@
 
 
       function extentChange(tmpKey, topo, tmpLower, tmpUpper) {
-        if (topo.data_type[tmpKey] == "date") {
-          //if (isNaN(new Date(tmpLower.property("value")))) { console.log(tmpLower.attr("id")); document.getElementById(tmpLower.attr("id")).focus(); return; }
-          //if (isNaN(new Date(tmpUpper.property("value")))) { document.getElementById(tmpUpper.attr("id")).focus(); return; }
-          
+        if (topo.data_type[tmpKey] == "date") {         
           var valLow = Date.parse(tmpLower.property("value"));
           var valHigh = Date.parse(tmpUpper.property("value"));
         }
@@ -1662,41 +1648,37 @@
             tmpVals = tmpVals.filter(function(val) {if(val > -9999){return true} else {return false};});
             var tmpMin = d3.min(tmpVals);
             var tmpMax = topo.filter[tmpKey].top(1)[0][tmpKey] + topo["binWidth"][tmpKey];
-            if (topo.data_type[tmpKey] == "date") {
-              var tmpFormat = d3.time.format("%m/%d/%Y");
-              d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(tmpMin)));
-              d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(tmpMax)));
-            }
-            else {
-              d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpMin.toFixed(2));
-              d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpMax.toFixed(2));
-            }
-            d3.select("#clip-" + topo.class + "-" + tmpKey + " rect")
-              .attr("x", hist[topo.class][tmpKey].x(tmpMin))
-              .attr("width", hist[topo.class][tmpKey].x(tmpMax) - hist[topo.class][tmpKey].x(tmpMin));
+            setInputs(topo, tmpKey, tmpMin, tmpMax);
           }
           else {
             var extMin = brush[topo.class][tmpKey].extent()[0]
             var extMax = brush[topo.class][tmpKey].extent()[1]
-            if (topo.data_type[tmpKey] == "date") {
-              var tmpFormat = d3.time.format("%m/%d/%Y");
-              d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(extMin)));
-              d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(extMax)));
-            }
-            else {
-              d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", extMin.toFixed(2));
-              d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", extMax.toFixed(2));
-            }
-
-            d3.select("#clip-" + topo.class + "-" + tmpKey + " rect")
-              .attr("x", hist[topo.class][tmpKey].x(extMin))
-              .attr("width", hist[topo.class][tmpKey].x(extMax) - hist[topo.class][tmpKey].x(extMin));            
+            setInputs(topo, tmpKey, extMin, extMax);
           }
         }
 
         updateStats(tmpKey, topo);
 
         updateHistogram(tmpKey, topo);
+      }
+
+
+
+      //******Set lower and upper input values and adjust clip path
+      function setInputs(topo, tmpKey, tmpMin, tmpMax) {
+        if (topo.data_type[tmpKey] == "date") {
+          var tmpFormat = d3.time.format("%m/%d/%Y");
+          d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(tmpMin)));
+          d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(tmpMax)));
+        }
+        else {
+          d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpMin.toFixed(2));
+          d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpMax.toFixed(2));
+        }
+
+        d3.select("#clip-" + topo.class + "-" + tmpKey + " rect")
+          .attr("x", hist[topo.class][tmpKey].x(tmpMin))
+          .attr("width", hist[topo.class][tmpKey].x(tmpMax) - hist[topo.class][tmpKey].x(tmpMin));
       }
 
 
@@ -1814,31 +1796,10 @@
               if (brush[tmpClass][key].empty()) {
                 var tmpMin = d3.min(topo.filter[key].top(Infinity), function(d) { if (d[key] > -9999) {return d[key];} });
                 var tmpMax = d3.max(topo.filter[key].top(Infinity), function(d) { if (d[key] > -9999) {return d[key];} }) + topo["binWidth"][key];
-
-                d3.select("#clip-" + tmpClass + "-" + key + " rect")
-                  .attr("x", hist[tmpClass][key].x(tmpMin))
-                  .attr("width", hist[tmpClass][key].x(tmpMax) - hist[tmpClass][key].x(tmpMin));
-
-                if (topo.data_type[key] == "date") {
-                  var tmpFormat = d3.time.format("%m/%d/%Y");
-                  d3.select("#extent-input-lower-" + class_key).property("value", tmpFormat(new Date(tmpMin)));
-                  d3.select("#extent-input-upper-" + class_key).property("value", tmpFormat(new Date(tmpMax)));
-                }
-                else {
-                  d3.select("#extent-input-lower-" + class_key).property("value", tmpMin.toFixed(2));
-                  d3.select("#extent-input-upper-" + class_key).property("value", tmpMax.toFixed(2));
-                }
+                setInputs(topo, key, tmpMin, tmpMax);
               }
               else {
-                if (topo.data_type[key] == "date") {
-                  var tmpFormat = d3.time.format("%m/%d/%Y");
-                  d3.select("#extent-input-lower-" + class_key).property("value", tmpFormat(new Date(brush[tmpClass][key].extent()[0])));
-                  d3.select("#extent-input-upper-" + class_key).property("value", tmpFormat(new Date(brush[tmpClass][key].extent()[1])));
-                }
-                else {
-                  d3.select("#extent-input-lower-" + class_key).property("value", brush[tmpClass][key].extent()[0].toFixed(2));
-                  d3.select("#extent-input-upper-" + class_key).property("value", brush[tmpClass][key].extent()[1].toFixed(2));
-                }
+                setInputs(topo, key, brush[tmpClass][key].extent()[0], brush[tmpClass][key].extent()[1]);
               }
             }
             else {
