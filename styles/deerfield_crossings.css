@@ -255,6 +255,7 @@ table {
   font-weight: bold;
   text-align: center;
   opacity: 0.7;
+  width: 108px;
 }
 
 .filterAttrList:hover {

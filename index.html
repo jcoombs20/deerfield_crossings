@@ -542,12 +542,6 @@
         //******Read in political featureids
         topos.political = strToNum(political);        
 
-        //******Get keys for crossings and catchment properties
-        topos.crossings.keys = d3.keys(crossCov[0]);
-        topos.catchments.keys = d3.keys(catchCov[0]);
-        topos.streams.keys = d3.keys(streamCov[0]);
-        topos.political.keys = d3.keys(political[0]);
-
         //******Add covariate title and description information
         var tmpLayers = ["crossings", "catchments", "streams", "political"];
         tmpLayers.forEach(function(d) {
@@ -560,6 +554,11 @@
           topos[d]["data_type"] = {};
           topos[d]["scale"] = {};
           topos[d]["conversion"] = {};
+          topos[d]["minVal"] = {};
+          topos[d]["maxVal"] = {};
+          topos[d]["minClip"] = {};
+          topos[d]["maxClip"] = {};
+          topos[d]["max"] = {};
         });
 
         covInfo.forEach(function(d) {
@@ -575,6 +574,36 @@
           }
           topos[d.layer]["conversion"][d.short_heading]["raw"] = d.conversion;
         });
+
+        //******Get keys for covariate data
+        topos.crossings.keys = d3.keys(crossCov[0]);
+        topos.catchments.keys = d3.keys(catchCov[0]);
+        topos.streams.keys = d3.keys(streamCov[0]);
+        topos.political.keys = d3.keys(political[0]);
+
+        //******Transform covariate data if necessary
+        var tmpLayers = [[crossCov, "crossings"], [catchCov, "catchments"], [streamCov, "streams"]];
+        tmpLayers.forEach(function(d) {
+          topos[d[1]].keys.forEach(function(key) {
+            var tmpMax = d3.max(d[0], function(data) {return data[key];});
+            topos[d[1]]["max"][key] = tmpMax;
+            //topos[d[1]]["min"][key] = d3.min(d[0], function(data) { if(data[key] != -9999) {return data[key];} });
+            d[0].forEach(function(row) {
+              switch(topos[d[1]]["scale"][key]) {
+                case "log":
+                  if (row[key] != -9999) {
+                    row[key] = Math.log(row[key] + 0.1);
+                  }
+                  break;
+                case "log_rec":
+                  if (row[key] != -9999) {
+                    row[key] = -(Math.log(tmpMax + 0.1 - row[key]));
+                  }
+              }
+            });
+          });
+        });
+
 
         //******Make crossfilter dimensions
         cfDimension(topos.crossings, crossCov);
@@ -1088,9 +1117,6 @@
           if (isNaN(val) == false || val == "NA") {
             topo.covType[tmpKeys[i]] = "number";
           }
-          //else if (isNaN(val.getTime()) == false) {
-          //  topo.covType[tmpKeys[i]] = "date";
-          //}
           else {
             topo.covType[tmpKeys[i]] = "string";
           }
@@ -1142,9 +1168,18 @@
                 break;
               }
             }
+            topo.minVal[key] = tmpBot[lowKey][key];
+            topo.maxVal[key] = tmpTop[0][key];
+
             var divVal = (tmpTop[0][key] - tmpBot[lowKey][key]) / 40;
             topo.binWidth[key] = divVal;
             topo.filter[key + "s"] = topo.filter[key].group(function(d) {return Math.floor(d / divVal) * divVal;});
+
+            topo.minClip[key] = topo.filter[key + "s"].all()[0].key;
+            if (topo.minClip[key] <= -9998) {
+              topo.minClip[key] = topo.filter[key + "s"].all()[1].key;
+            }
+            topo.maxClip[key] = topo.filter[key + "s"].all()[topo.filter[key + "s"].size() - 1].key + topo.binWidth[key];
           }
           else {
             topo.filter[key + "s"] = topo.filter[key].group();
@@ -1202,9 +1237,9 @@
             var normVals = data.map(function(d) { return Math.exp(d) - 0.1; });
             break;
           case "log_rec":
-            var normVals = data.map(function(d) { return (tmpMax + 0.1) - Math.exp(-d); });
+            var normVals = data.map(function(d) { return tmpMax + 0.1 - Math.exp(-d); });
             break
-           case "categorical":
+          case "categorical":
             var normVals = data.map(function(d) { return d; });
             break;
         }
@@ -1251,7 +1286,7 @@
         //*******Style and label crossings by attribute value
         if (topo.class == "streams") {
           tmpFeat.style("stroke", function(d) {
-            if (d.properties[tmpAtt] > -9999) {
+            if (d.properties[tmpAtt] > -9999) { //return newColor(d.properties[tmpAtt]); }
               var tVal = transformData(topo.scale[tmpAtt], [d.properties[tmpAtt]], maxVal);
               return newColor(tVal[0])
             }
@@ -1260,7 +1295,7 @@
         }
         else {
           tmpFeat.style("fill", function(d) {
-            if (d.properties[tmpAtt] > -9999) {
+            if (d.properties[tmpAtt] > -9999) { //return newColor(d.properties[tmpAtt]); }
               var tVal = transformData(topo.scale[tmpAtt], [d.properties[tmpAtt]], maxVal);
               return newColor(tVal[0])
             }
@@ -1309,7 +1344,7 @@
           .style("border-top-color", String)
           .text(function(d, i) {
             var r = newColor.invertExtent(d);
-            tmpR = backTransformData(topo.scale[tmpAtt], r, maxVal);
+            tmpR = backTransformData(topo.scale[tmpAtt], r, topo.max[tmpAtt]);
             switch(topo.data_type[tmpAtt]) {
               case "decimal":
                 return tmpR[0].toFixed(2);
@@ -1362,15 +1397,28 @@
         //**Format ticks for special data types
         switch(topo.data_type[tmpKey]) {
           case "date":
-            xAxis.tickFormat(function(d) { var tmpDate = d3.time.format("%-m/%y"); return tmpDate(new Date(d)); });
-            xAxis.ticks(10);
+            xAxis.tickFormat(function(d) { var tmpDate = d3.time.format("%-m/%Y"); return tmpDate(new Date(d)); });
+            xAxis.ticks(5);
             break;
           case "text":
             xAxis.tickFormat(function(d) { if (isNaN(topo.conversion[tmpKey][d])) {return d + " (" + topo.conversion[tmpKey][d] + ")";} else {return topo.conversion[tmpKey][d];} });
             xAxis.ticks(Object.keys(topo.conversion[tmpKey]).length - 1);
             break;
           default:
-            xAxis.ticks(10);
+            var twoDec = d3.format(".2f");
+            switch(topo.scale[tmpKey]) {
+              case "log":
+                xAxis.tickFormat(function(d) { return twoDec(Math.exp(d)); });
+                xAxis.ticks(5);
+                break;
+              case "log_rec":
+                xAxis.tickFormat(function(d) { return twoDec(topo.max[tmpKey] - Math.exp(-d)); });
+                xAxis.ticks(5);
+                break;
+              default:
+                xAxis.tickFormat(function(d) { return twoDec(d); });
+                xAxis.ticks(5);
+            }
         }
 
 
@@ -1418,11 +1466,7 @@
           .append("div")
             .attr("class", "stats")
             .attr("id", "stats-" + topo.class + "-" + tmpKey);
-          /*.append("span")
-            .attr("class", "extent")
-            .attr("id", "extent-" + topo.class + "-" + tmpKey)
-            .property("title", "Range of selected values");
-          */
+
         var statsDiv = d3.select("#stats-" + topo.class + "-" + tmpKey);
 
         statsDiv.append("input")
@@ -1522,13 +1566,18 @@
         gBrush.selectAll(".resize").append("path").attr("d", resizePath);
 
         //******* Set upper and lower brush properties
+        var inpMin = backTransformData(topo.scale[tmpKey], [topo.minClip[tmpKey]], topo.max[tmpKey]);
+        var inpMax = backTransformData(topo.scale[tmpKey], [topo.maxClip[tmpKey] + topo.binWidth[tmpKey]], topo.max[tmpKey]);
+
         var tmpLower = d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey)
-          .property("min", tmpData[lowKey].key)
-          .property("step", ((tmpData[tmpData.length - 1].key - tmpData[lowKey].key)/100).toFixed(2));
+          .property("min", Math.floor(inpMin*100)/100)
+          .property("max", Math.ceil(inpMax*100)/100)
+          .property("step", Math.round((inpMax - inpMin))/100);
 
         var tmpUpper = d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey)
-          .property("max", tmpData[tmpData.length - 1].key + topo.binWidth[tmpKey])
-          .property("step", ((tmpData[tmpData.length - 1].key - tmpData[lowKey].key)/100).toFixed(2));
+          .property("min", Math.floor(inpMin*100)/100)
+          .property("max", Math.ceil(inpMax*100)/100)
+          .property("step", Math.round((inpMax - inpMin))/100);
 
         d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).on("change", function () {extentChange(tmpKey, topo, tmpLower, tmpUpper); });
         d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).on("change", function () {extentChange(tmpKey, topo, tmpLower, tmpUpper); });      
@@ -1591,7 +1640,10 @@
           valLow = tmpHold;
         }
 
-        d3.select("#brush-" + topo.class + "-" + tmpKey).call(brush[topo.class][tmpKey].extent([valLow, valHigh]));
+        var inpMin = transformData(topo.scale[tmpKey], [valLow], topo.max[tmpKey])[0];
+        var inpMax = transformData(topo.scale[tmpKey], [valHigh], topo.max[tmpKey])[0];
+
+        d3.select("#brush-" + topo.class + "-" + tmpKey).call(brush[topo.class][tmpKey].extent([inpMin, inpMax]));
         brushEnd(tmpKey, topo);
       }
 
@@ -1643,17 +1695,12 @@
         //******Update filter range (if isLink == false)
         if (isLink == false) {
           if (brush[topo.class][tmpKey].empty() && topo.filter.all.value() > 0) {
-            var tmpVals = topo.filter[tmpKey].top(Infinity);
-            tmpVals = tmpVals.map(function(d) { return d[tmpKey]; });
-            tmpVals = tmpVals.filter(function(val) {if(val > -9999){return true} else {return false};});
-            var tmpMin = d3.min(tmpVals);
-            var tmpMax = topo.filter[tmpKey].top(1)[0][tmpKey] + topo["binWidth"][tmpKey];
-            setInputs(topo, tmpKey, tmpMin, tmpMax);
+            setInputs(topo, tmpKey, topo.minVal[tmpKey], topo.maxVal[tmpKey], topo.minClip[tmpKey], topo.maxClip[tmpKey]);
           }
           else {
             var extMin = brush[topo.class][tmpKey].extent()[0]
             var extMax = brush[topo.class][tmpKey].extent()[1]
-            setInputs(topo, tmpKey, extMin, extMax);
+            setInputs(topo, tmpKey, extMin, extMax, extMin, extMax);
           }
         }
 
@@ -1665,20 +1712,23 @@
 
 
       //******Set lower and upper input values and adjust clip path
-      function setInputs(topo, tmpKey, tmpMin, tmpMax) {
+      function setInputs(topo, tmpKey, tmpMin, tmpMax, clipMin, clipMax) {
+        var inpMin = backTransformData(topo.scale[tmpKey], [clipMin], topo.max[tmpKey])[0];
+        var inpMax = Math.ceil(backTransformData(topo.scale[tmpKey], [clipMax], topo.max[tmpKey])[0]*100)/100;
+
         if (topo.data_type[tmpKey] == "date") {
           var tmpFormat = d3.time.format("%m/%d/%Y");
-          d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(tmpMin)));
-          d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(tmpMax)));
+          d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(inpMin)));
+          d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpFormat(new Date(inpMax)));
         }
         else {
-          d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", tmpMin.toFixed(2));
-          d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", tmpMax.toFixed(2));
+          d3.select("#extent-input-lower-" + topo.class + "-" + tmpKey).property("value", Math.round(inpMin*100)/100);
+          d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).property("value", Math.round(inpMax*100)/100);
         }
 
         d3.select("#clip-" + topo.class + "-" + tmpKey + " rect")
-          .attr("x", hist[topo.class][tmpKey].x(tmpMin))
-          .attr("width", hist[topo.class][tmpKey].x(tmpMax) - hist[topo.class][tmpKey].x(tmpMin));
+          .attr("x", hist[topo.class][tmpKey].x(clipMin))
+          .attr("width", hist[topo.class][tmpKey].x(clipMax) - hist[topo.class][tmpKey].x(clipMin));
       }
 
 
@@ -1794,12 +1844,10 @@
               }
 
               if (brush[tmpClass][key].empty()) {
-                var tmpMin = d3.min(topo.filter[key].top(Infinity), function(d) { if (d[key] > -9999) {return d[key];} });
-                var tmpMax = d3.max(topo.filter[key].top(Infinity), function(d) { if (d[key] > -9999) {return d[key];} }) + topo["binWidth"][key];
-                setInputs(topo, key, tmpMin, tmpMax);
+                setInputs(topo, key, topo.minVal[key], topo.maxVal[key], topo.minClip[key], topo.maxClip[key]);
               }
               else {
-                setInputs(topo, key, brush[tmpClass][key].extent()[0], brush[tmpClass][key].extent()[1]);
+                setInputs(topo, key, brush[tmpClass][key].extent()[0], brush[tmpClass][key].extent()[1], brush[tmpClass][key].extent()[0], brush[tmpClass][key].extent()[1]);
               }
             }
             else {

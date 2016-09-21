@@ -16,16 +16,21 @@ crossings	ave_Value	Delay (mean)	Minutes	reverse	decimal	log	Average traffic del
 crossings	afAve_Value	Delay (affected mean)	Minutes	reverse	decimal	log	Average traffic delay to emergency sevices to affected trips if road-stream crossing becomes compromised 	
 crossings	max_Dif	Delay (maximum)	Minutes	reverse	decimal	log	Maximum traffic delay to emergency sevices for all trips if road-stream crossing becomes compromised 	
 crossings	Observed_Date	Assessment Date		forward	date	linear	Date the crossing was field assessed (NA indicates crossing has not been field assessed)	
+crossings	featureid	featureid		forward	integer	linear		
+crossings	unique_id	unique_id		forward	integer	linear		
 catchments	agriculture	Agriculture	%	reverse	decimal	log	Percentage of the catchment used for agriculture	
 catchments	elevation	Elevation	Meters	forward	decimal	linear	Average elevation (meters) of the catchment	
 catchments	forest	Forest Cover	%	forward	decimal	log_rec	Percentage of the catchment covered with forest	
 catchments	impervious	Impervious Surface	%	reverse	decimal	log	Percentage of the catchment covered with impervious surface	
 catchments	slope_pcnt	Slope	%	forward	decimal	log	Average slope (percent) of the catchment	
 catchments	water	Water Cover	%	reverse	decimal	log	Percentage of the catchment covered with water	
+catchments	featureid	featureid		forward	integer	linear		
 streams	str_order	Stream Order		forward	text	categorical	Stream order (Strahler method) of stream reach	{"1":"1","2":"2","3":"3","4":"4","5":"5","6":"6"}
 streams	occ_cur	Habitat Suitability		reverse	decimal	log_rec	Probability of habitat suitability of stream reach for brook trout	
 streams	T_mean_sum	Temperature	Degrees Celsius	forward	decimal	linear	Average summer temperature (degrees celsius) of stream reach	
 streams	T_inertia	Resistance	Degrees Celsius	reverse	decimal	linear	Total summed differences (degrees celsius) between predicted water temperature and air temperature for the spring to fall time period	
+streams	featureid	featureid		forward	integer	linear		
+streams	unique_id	unique_id		forward	integer	linear		
 political	state	State						
 political	county	County						
 political	town	Town						
