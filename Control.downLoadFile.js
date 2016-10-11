@@ -105,7 +105,8 @@ L.Control.downLoadFile = L.Control.extend({
         var outLayer = document.querySelector('input[name=layer]:checked').value;
         
         var outData = topos[outLayer].filter.featureid.top(Infinity);
-        
+
+
         if (outData.length > 0) {
           //******CSV output
           if (d3.select("#dlSelect").node().value == "csv") {
@@ -124,7 +125,17 @@ L.Control.downLoadFile = L.Control.extend({
 
             outData.forEach(function(row) { 
               var lineData = [];
-              outKeys.forEach(function(key) { lineData.push(row[key]); });
+              outKeys.forEach(function(key) { 
+                var tmpVal = backTransformData(topos[outLayer]["scale"][key], [row[key]], topos[outLayer]["max"][key]);
+                if (topos[outLayer]["data_type"][key] == "date") {
+                  var formatDate = d3.time.format("%-m/%-d/%Y");
+                  lineData.push(formatDate(new Date(parseFloat(tmpVal))));
+                }
+                else {
+                  lineData.push(tmpVal);
+                }
+              });
+              
               if (outLayer == "crossings") {
                 var tmpPoint = tmpData[tmpID.indexOf(row[topos.crossings.uniqueID])].geometry.coordinates;
                 lineData.push(tmpPoint[0]);
@@ -145,7 +156,15 @@ L.Control.downLoadFile = L.Control.extend({
             strOutData.type = 'FeatureCollection';
             strOutData.features = [];
 
-            tmpArray = tmpData.filter(function(d) { if(tmpIDs.indexOf(d.properties[topos[outLayer].uniqueID]) != -1) { strOutData.features.push(d); } });
+            tmpData.forEach(function(d) { if(tmpIDs.indexOf(d.properties[topos[outLayer].uniqueID]) != -1) { strOutData.features.push(d); } });
+            
+            //******Convert utm dates to string
+            var formatDate = d3.time.format("%-m/%-d/%Y");
+            strOutData.features.forEach(function(d) {
+              d3.keys(d.properties).forEach(function(key) { if (topos[outLayer]["data_type"][key] == "date") {
+                d.properties[key] = formatDate(new Date(parseFloat(d.properties[key])));
+              }});
+            });
 
             //******Shapefile output
             if (d3.select("#dlSelect").node().value == "zip") {

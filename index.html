@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="styles/Control.mousePosition.css"/>
     <link rel="stylesheet" href="styles/Control.legend.css"/>
     <link rel="stylesheet" href="styles/Control.political.css"/>
+    <link rel="stylesheet" href="styles/Control.attributes.css"/>
     <link rel="stylesheet" href="styles/Control.graph.css"/>
     <link rel="stylesheet" href="styles/Control.customWeight.css"/>
     <link rel="stylesheet" href="styles/Control.downLoadFile.css"/>
@@ -37,6 +38,7 @@
     <script src="Control.mousePosition.js"></script>
     <script src="Control.legend.js"></script>
     <script src="Control.political.js"></script>
+    <script src="Control.attributes.js"></script>
     <script src="Control.graph.js"></script>
     <script src="Control.customWeight.js"></script>
     <script src="Control.downLoadFile.js"></script>
@@ -51,6 +53,7 @@
     <!--script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script-->
     <script src="queue.min.js"></script>
     <script src="crossfilter.min.js"></script>
+    <!--script src="esri-leaflet.js"></script-->
 
   </head>
 
@@ -73,6 +76,7 @@
       L.control.navbar().addTo(map);
       L.control.legend().addTo(map);
       L.control.political().addTo(map);
+      L.control.attributes().addTo(map);
 
       //******Bing geocoder control
       var tmpPoint = new L.marker;
@@ -147,6 +151,8 @@
         maxZoom: 20
       });
 
+      //var roads = L.esri.tiledMapLayer({url: "http://gis.massdot.state.ma.us/arcgis/rest/services/Roads/RoadInventory/MapServer"});
+
       //******Make d3 vector layers variable
       var topoSVG = d3.select(map.getPanes().overlayPane).append("svg");
       var catchG = topoSVG.append("g").attr("class", "leaflet-zoom-hide").attr("id", "catchG");
@@ -199,7 +205,8 @@
             .attr("class", topo.class)
             .on("mouseover", function(data) { if(d3.select(this).style("opacity") > 0) {showIt(this.id);} })
             .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-40) + "px").style("left", (d3.event.pageX+15) + "px"); })
-            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); });
+            .on("mouseout", function() { return tooltip.style("visibility", "hidden"); })
+            .on("click", function(data) { getAttributes(data.properties, topo); });
         changeStyle(d3.select("#" + topo.class + "Select").node().value, topo);
         filterMap("featureid", topo, true);
         d3.select("#" + topo.class + "Legend").style("display", "block");
@@ -212,7 +219,6 @@
         tmpFeats.remove();
         d3.select("#" + topo.class + "Legend").style("display", "none");
       }
-
 
       //******Add Geoserver Deerfield HUC8 layer to map
       map.addLayer(gsHuc8);
@@ -273,7 +279,7 @@
         .attr("class", "legTitle")
         .attr("id", "legendTitle")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="right" title="" data-html="true" data-original-title="<p><u><b><center>Legend</center></b></u></p><p>Enables interpretation and control over map styling for the Crossings, Catchments, and Streams layers.</p><br><p>Styling controls include a slider to change the layer\'s opacity, and a dropdown box to change the attribute shown.</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="right" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Legend</center></b></u></p><p>Enables interpretation and control over map styling for the Crossings, Catchments, and Streams layers.</p><br><p>Styling controls include a slider to change the layer\'s opacity, and a dropdown box to change the attribute shown.</p>"></span>');
  
       d3.select("#legendTitle")
         .append("span")
@@ -297,7 +303,7 @@
         .attr("class", "legTitle")
         .attr("id", "polFilterTitle")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="right" title="" data-html="true" data-original-title="<p><u><b><center>Regional Filter</center></b></u></p><p>Enables filtering of features in the Crossings, Catchments, and Streams layers to those contained within catchments that intersect the selected \'Area\'.</p><br><p>Conditional statements added to the filter from the same \'Class\' act as \'or\' operators, while conditional statements from different classes act as \'and\' operators</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="right" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Regional Filter</center></b></u></p><p>Enables filtering of features in the Crossings, Catchments, and Streams layers to those contained within catchments that intersect the selected \'Area\'.</p><br><p>Conditional statements added to the filter from the same \'Class\' act as \'or\' operators, while conditional statements from different classes act as \'and\' operators</p>"></span>');
 
       d3.select("#polFilterTitle")
         .append("span")
@@ -332,7 +338,59 @@
       d3.select("#polFilterDiv")
         .append("div")
         .attr("id", "polFilterConditions");
+
+
+
+
+      //******Make div for attribute display
+      d3.select("#leftSideToolsDiv")
+        .append("div")
+        .attr("class", "legend")
+        .attr("id", "attributesDiv")
+        .style("display", "none");
+
+      //******Add attribute display heading & glyphs
+      d3.select("#attributesDiv")
+        .append("h4")
+        .text("Feature Attributes")
+        .attr("class", "legTitle")
+        .attr("id", "attributesTitle")
+        .append("span")
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="right" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Feature Attributes</center></b></u></p><p>Click on a Crossing, Stream, or Catchment feature to display values for all of its attributes.</p>"></span>');
+
+      d3.select("#attributesTitle")
+        .append("span")
+        .attr("class", "glyphicon glyphicon-remove-sign pull-right minimize-button")
+        .property("title", "Click to hide feature attributes window")
+        .on("click", function() { d3.select("#attributesDiv").style("display", "none"); d3.select("#attributesControl").property("title", "Click to show feature attributes window"); });
+
+      d3.select("#attributesDiv")
+        .append("hr")
+        .attr("class", "hr");
+
+      //******Add attribute values div
+      d3.select("#attributesDiv")
+        .append("div")
+        .attr("id", "attValuesDiv")
+        .append("table")
+        .attr("id", "attValuesTable")
+        .append("tr")
+        .attr("id", "attHeadingsRow")
+        .attr("class", "attTRHead");
+
+      //******Add cells to table for attribute and value
+      d3.select("#attHeadingsRow")
+        .append("th")
+        .text("Attribute")
+        .attr("class", "attTH");
+
+      d3.select("#attHeadingsRow")
+        .append("th")
+        .text("Value")
+        .attr("class", "attTH");
         
+
+
 
 
       //******Make div for histograms (crossfilters)
@@ -348,7 +406,7 @@
         .attr("class", "legTitle")
         .attr("id", "filterTitle")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Charts</center></b></u></p><p>Enables visualization and selection of values for attribute data from the Crossings, Catchments, and Streams layers.</p><br><p>Selection of an attribute generates a graph showing the distribution of its values that the user can click and drag on to select a subset of the range.</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Charts</center></b></u></p><p>Enables visualization and selection of values for attribute data from the Crossings, Catchments, and Streams layers.</p><br><p>Selection of an attribute generates a graph showing the distribution of its values that the user can click and drag on to select a subset of the range.</p>"></span>');
 
       d3.select("#filterTitle")
         .append("span")
@@ -389,7 +447,7 @@
         .attr("class", "legTitle")
         .text("Spatial Joins")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Spatial Joins</center></b></u></p><p>Enables the spatial restriction of the data to the common subset between two layers for pair-wise combinations of the Crossings, Catchments, and Streams layers.</p><br><p>This feature provides the added functionality of being able to select a subset of data for one layer based on attribute criterion for its paired layer.</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Spatial Joins</center></b></u></p><p>Enables the spatial restriction of the data to the common subset between two layers for pair-wise combinations of the Crossings, Catchments, and Streams layers.</p><br><p>This feature provides the added functionality of being able to select a subset of data for one layer based on attribute criterion for its paired layer.</p>"></span>');
 
       d3.select("#sjTitle")
         .append("span")
@@ -415,7 +473,7 @@
         .attr("class", "legTitle")
         .text("Selection Counts")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Selection Count</center></b></u></p><p>Displays the count of currently selected features for each of the Crossings, Catchments, and Streams layers.</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Selection Count</center></b></u></p><p>Displays the count of currently selected features for each of the Crossings, Catchments, and Streams layers.</p>"></span>');
 
       d3.select("#totalsTitle")
         .append("span")
@@ -553,6 +611,7 @@
           topos[d]["direction"] = {};
           topos[d]["data_type"] = {};
           topos[d]["scale"] = {};
+          topos[d]["display"] = {};
           topos[d]["conversion"] = {};
           topos[d]["minVal"] = {};
           topos[d]["maxVal"] = {};
@@ -568,6 +627,7 @@
           topos[d.layer]["direction"][d.short_heading] = d.direction;
           topos[d.layer]["data_type"][d.short_heading] = d.data_type;
           topos[d.layer]["scale"][d.short_heading] = d.scale;
+          topos[d.layer]["display"][d.short_heading] = d.display;
           topos[d.layer]["conversion"][d.short_heading] = {};
           if (jQuery.isEmptyObject(d.conversion) == false) {
             topos[d.layer]["conversion"][d.short_heading] = JSON.parse(d.conversion);
@@ -653,6 +713,73 @@
       
 
 
+      //******Add attribute names and values to table
+      function getAttributes(tmpFeat, topo) {
+        d3.select("#attributesDiv").style("display", "block");
+        d3.select("#attributesControl").property("title", "Click to hide feature attributes window");
+
+        //var tmpArray = topo.keys.map(function(d) { return {"att": formatTitle(topo,d), "val": formatAtt(topo, d, tmpFeat[d]) }; });
+        var tmpArray = topo.keys.map(function(d) { return {"att": d, val: formatAtt(topo, d, tmpFeat[d]) }; } );
+        var columns = ["att", "val"]
+
+        var rows = d3.select("#attValuesTable").selectAll('.attTR')
+          .data(tmpArray);
+        rows.exit().remove();
+        rows.enter()
+          .append('tr')
+          .attr("class", "attTR");          
+
+        var cells = rows.selectAll("td")
+          .data(function(row) {
+            return columns.map(function (column) {
+              return {column: column, value: row[column]};
+            });
+          });
+        cells.enter()
+            .append('td')
+            .attr("class", "attTD");
+        cells
+          .text(function(d) { if (d.column == "att") {return formatTitle(topo, d.value);} else {return d.value;} })
+          .property("title", function(d) {if (d.column == "att") {return topo.tooltip[d.value];} else {return d.value;} });
+      }
+
+
+      //******Format title and units
+      function formatTitle(topo, att) {
+        if (topo.unit[att]) {
+          return topo.title[att]  + " (" + topo.unit[att] + ")";
+        }
+        else {
+          return topo.title[att];
+        }
+      }
+
+
+      //******Format data by its data_type
+      function formatAtt(topo, att, val) {
+        switch (topo.data_type[att]) {
+          case "decimal":
+            var tmpVal = val.toFixed(2);
+            break;
+          case "text":
+            if (Object.keys(topo.conversion[att]).length == 1) {
+              var tmpVal = val;
+            }
+            else {
+              var tmpVal = topo.conversion[att][val];
+            }
+            break;
+          case "integer":
+            var tmpVal = val;
+            break;
+          case "date":
+            var tmpTime = d3.time.format("%-m/%-d/%Y");
+            var tmpVal = tmpTime(new Date(val));
+            break;
+        }
+        if (Math.floor(val) == -9999) { tmpVal = "No Data"; };
+        return tmpVal;
+      }
 
 
 
@@ -940,7 +1067,7 @@
           .property("title", "Select an attribute to display an interactive graph containing the frequency of its values")
           .on("change", function() { addFilter(this.value, topos[this.dataset.layer]); });
 
-        var optData = topo.keys.filter(function(key) { return key != "unique_id" && key != "featureid"; });
+        var optData = topo.keys.filter(function(key) { return topo.display[key] == "yes"; });
 
         optData.splice(0,0, "...");
         topo.title["..."] = "...";
@@ -1012,15 +1139,15 @@
           .style("width", "182px")
           .on("change", function () { changeStyle(this.value, topo); });
 
-        var optData = topo.keys.filter(function(key) {
-          if (key != "unique_id" & key != "featureid") {
+        var optData = topo.keys.filter(function(key) { return topo.display[key] == "yes"; });
+/*          if (topo.display[key] == "yes") {
             return 1;
           }
           else {
             return 0;
           }
         });
-
+*/
         select.selectAll("option")
           .data(optData)
           .enter().append("option")
@@ -1132,7 +1259,7 @@
         topo.features.forEach(function(d) { 
           try {
             tmpKeys.forEach(function(key) {
-              d.properties[key] = tmpMap.get(d.id)[key];
+                d.properties[key] = tmpMap.get(d.id)[key];
             });
           }
           catch(err) { 

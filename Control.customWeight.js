@@ -9,23 +9,33 @@ L.Control.customWeight = L.Control.extend({
         this._map = map;
         var className = 'leaflet-control-customWeight';
         var container = this._container = L.DomUtil.create('div', className);
-
+        container.id = "prioritization";
         L.DomEvent.disableClickPropagation(container);
 
-        var form = this._form = L.DomUtil.create('form', className + '-form');
+        //******ROF Weighting
+        var rof = this._input = L.DomUtil.create('div', className + '-div');
+        rof.id = "rof";
+
+        var form = this._form = L.DomUtil.create('form', className + '-form', rof);
+        //var form = d3.select("#prioritization").append("form").attr("class", className + "-form");
 
         var rofDiv = this._input = L.DomUtil.create('div', className + '-div', form);
+        //var rofDiv = form.append("div").attr("class", className + "-div");
 
         var rofTitle = this._input = L.DomUtil.create('h5', className + '-h5', rofDiv);
-        rofTitle.innerHTML = "Crossing Condition Weights";
-        rofTitle.title = "Create a custom-weighted crossing condition attribute for use in prioritization decisions";
+        rofTitle.innerHTML = "Stream Crossing ROF Weights";
+        rofTitle.title = "Create a custom-weighted stream crossing risk of failure (ROF) attribute for use in prioritization decisions";
+        //var rofTitle = rofDiv.append("h5").property("title", "Create a custom-weighted stream crossing risk of failure attribute for use in prioritization decisions").text("Stream Crossing ROF Weights");
         
         this._input = L.DomUtil.create('hr', className + '-hr', rofDiv);
+        //rofDiv.append("hr").attr("class", className + "-hr");
 
         var hydroDiv = this._input = L.DomUtil.create('div', className + '-div', rofDiv);
+        //var hydroDiv = rofDiv.append("div").attr("class", className + "-div");
 
         var hydroLabel = this._input = L.DomUtil.create('label', className + '-label', hydroDiv);
         hydroLabel.innerHTML = "Hydrologic";
+        //var hydroLabel = hydroDiv.append("label").attr("class", className + "-label").text("Hydrologic");
 
         var hydroROF = this._input = L.DomUtil.create('input', className + '-input', hydroDiv);
         hydroROF.type = 'text';
@@ -34,11 +44,14 @@ L.Control.customWeight = L.Control.extend({
         hydroROF.id = "hydroROF";
         hydroROF.size = 2;
         hydroROF.title = "Relative weight of hydrologic condition value in creation of custom attribute";
+        //var hydroROF = hydroDiv.append("input").attr("class", className + "-input").attr({type: "text", name: "ROF"}).property("value", 1).property("size", 2).attr("id", "hydroROF").property("title", "Relative weight of hydrologic risk of failure value in creation of custom attribute");
 
         var structDiv = this._input = L.DomUtil.create('div', className + '-div', rofDiv);
+        //var structDiv = rofDiv.append("div").attr("class", className + "-div");
 
         var structLabel = this._input = L.DomUtil.create('label', className + '-label', structDiv);
         structLabel.innerHTML = "Structural";
+        //var structLabel = structDiv.append("label").attr("class", className + "-label").text("Structural");
 
         var structROF = this._input = L.DomUtil.create('input', className + '-input', structDiv);
         structROF.type = 'text';
@@ -47,11 +60,14 @@ L.Control.customWeight = L.Control.extend({
         structROF.id = "structROF";
         structROF.size = 2;
         structROF.title = "Relative weight of structural condition value in creation of custom attribute";
+        //var structROF = structDiv.append("input").attr("class", className + "-input").attr({type: "text", name: "ROF"}).property("value", 1).property("size", 2).attr("id", "structROF").property("title", "Relative weight of structural risk of failure value in creation of custom attribute");
 
         var geomorphDiv = this._input = L.DomUtil.create('div', className + '-div', rofDiv);
+        //var geomorphDiv = rofDiv.append("div").attr("class", className + "-div");
 
         var geomorphLabel = this._input = L.DomUtil.create('label', className + '-label', geomorphDiv);
         geomorphLabel.innerHTML = "Geomorphic";
+        //var geomorphLabel = geomorphDiv.append("label").attr("class", className + "-label");
 
         var geomorphROF = this._input = L.DomUtil.create('input', className + '-input', geomorphDiv);
         geomorphROF.type = 'text';
@@ -60,14 +76,18 @@ L.Control.customWeight = L.Control.extend({
         geomorphROF.id = "geomorphROF";
         geomorphROF.size = 2;
         geomorphROF.title = "Relative weight of geomorphic condition value in creation of custom attribute";
+        //var geomorphROF = geomorphDiv.append("input").attr("class", className + "-input").attr({type: "text", name: "ROF"}).property("value", 1).property("size", 2).attr("id", "geomorphROF").property("title", "Relative weight of geomorphic risk of failure value in creation of custom attribute");
 
         this._input = L.DomUtil.create('hr', className + '-hr', rofDiv);
+        //rofDiv.append("hr").attr("class", className + "-hr");
 
         var submit = this._createButton(className, this.options.text);
         submit.title = "Click to create a custom crossing condition attribute using the relative weights specified above";
         form.appendChild(submit);
+        //var submit = d3.select("#prioritization").append("button").attr("class", className + "-button").text("Create").property("title", "Click to create a custom crossing risk of failure (ROF) attribute using the relative weights specified above");
 
         L.DomEvent.on(submit, 'click', this._customWeight, this);
+        //submit.on("click", function() { this.customWeight; });
 
         if (this.options.collapsed) {
             L.DomEvent.on(container, 'mouseover', this._expand, this);
@@ -75,7 +95,7 @@ L.Control.customWeight = L.Control.extend({
 
             var link = this._layersLink = L.DomUtil.create('a', className + '-toggle', container);
             link.href = '#';
-            link.title = 'File Downloader';
+            link.title = 'prioritization';
 
             L.DomEvent.on(link, L.Browser.touch ? 'click' : 'focus', this._expand, this);
 
@@ -84,7 +104,7 @@ L.Control.customWeight = L.Control.extend({
             this._expand();
         }
 
-        container.appendChild(form);
+        container.appendChild(rof);
 
         return container;
     },
@@ -108,11 +128,14 @@ L.Control.customWeight = L.Control.extend({
         var tmpKey = "ROF_" + hROF + "-" + sROF + "-" + gROF;
         if (topos.crossings.keys.indexOf(tmpKey) == -1) {
           topos.crossings.keys.push(tmpKey);
-          topos.crossings.title[tmpKey] = "Condition " + hROF + ":" + sROF + ":" + gROF;
+          topos.crossings.title[tmpKey] = "ROF " + hROF + ":" + sROF + ":" + gROF;
           topos.crossings.unit[tmpKey] = "";
-          topos.crossings.tooltip[tmpKey] = "Combined condition score (0 = Poor, 1 = Good) for stream crossing with hydrologic, structural, and geomorphic weightings of " + hROF + ", " + sROF + ", and " + gROF; 
-          topos.crossings.direction[tmpKey] = "forward";
+          topos.crossings.tooltip[tmpKey] = "Combined risk of failure (ROF) score (0 = Good, 1 = Poor) for a stream crossing with hydrologic, structural, and geomorphic ROF weightings of " + hROF + ", " + sROF + ", and " + gROF; 
+          topos.crossings.direction[tmpKey] = "reverse";
           topos.crossings.covType[tmpKey] = "number";
+          topos.crossings.data_type[tmpKey] = "decimal";
+          topos.crossings.scale[tmpKey] = "linear";
+          topos.crossings.conversion[tmpKey] = {};
 
           d3.select("#crossingsSelect")
             .append("option")
@@ -142,6 +165,9 @@ L.Control.customWeight = L.Control.extend({
           crossingCov[i][tmpKey] = crossingCov[i].geo_rof*gROF + crossingCov[i].hydro_rof*hROF + crossingCov[i].struct_rof*sROF;
         };
 
+
+        //******Find max value
+        topos.crossings.max[tmpKey] = d3.max(crossingCov, function(d) {return d[tmpKey];});
 
         //******Add new weighted ROF to crossfilter
         cfDimension(topos.crossings, crossingCov);

@@ -76,9 +76,10 @@
   text-decoration: none;
   border: 1px solid darkgray;
   color: black;
+  margin-bottom: 10px;
 }
 
 .leaflet-control-downLoadFile-dlSelectDiv {
   text-align: center;
-  margin: 5px;
+  margin-bottom: 10px;
 }

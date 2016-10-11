@@ -192,10 +192,13 @@ body, html {
   position: absolute;
   top: 50px;
   left: 60px;
-  width: 362px;
-  max-width: 362px;
+  width: 375px;
+  max-width: 375px;
   margin: 0px;
   z-index: 2000;
+  max-height: 85%;
+  overflow-y: auto;
+  overflow-x: visible;
 }
 
 #polFilterDiv {
@@ -209,6 +212,12 @@ body, html {
   border-bottom: 1px solid black; 
 }
 
+#polFilterConditions {
+  max-height: 125px;
+  overflow-y: auto;
+  overflow-x: visible;
+}
+
 .polFilterCond {
   padding: 5px;
   margin: 0px;
@@ -220,12 +229,35 @@ body, html {
   background: rgba(255,255,255,1);
 }
 
+#attValuesDiv {
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-x: visible;  
+}
+
+.attTRHead {
+  background: rgba(0,0,255,0.2)
+}
+
+.attTR:hover {
+  background: rgba(255,255,255,1);
+}
+
+.attTD, .attTH {
+  border-top: 1px solid gray;
+  border-collapse: collapse;
+  padding: 5px;
+}
+
 #filtersDiv {
   position: absolute;
   top: 50px;
   right: 60px;
-  max-width: 410px;
+  max-width: 420px;
   margin: 0px;
+  max-height: 85%;
+  overflow-y: auto;
+  overflow-x: visible;
 }
 
 table {
@@ -330,6 +362,11 @@ input[type="checkbox"]  {
   font-weight: bold;
   text-align: center;
   margin: 2px;
+  //background: rgba(0,0,255,0.2)
+}
+
+.legTitle:hover {
+  //background: rgba(0,0,255,0.5)
 }
 
 .layerTitle {
