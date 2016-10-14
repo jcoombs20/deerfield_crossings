@@ -151,6 +151,30 @@
         maxZoom: 20
       });
 
+      var ej = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
+        layers: 'crossings:deerfield_ej',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.0',
+        maxZoom: 20
+      });
+
+      var jurisdiction = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
+        layers: 'crossings:roadinventory-jurisdiction',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.0',
+        maxZoom: 20
+      });
+
+      var nhs = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
+        layers: 'crossings:roadinventory-nhs',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.0',
+        maxZoom: 20
+      });
+
       //var roads = L.esri.tiledMapLayer({url: "http://gis.massdot.state.ma.us/arcgis/rest/services/Roads/RoadInventory/MapServer"});
 
       //******Make d3 vector layers variable
@@ -206,7 +230,7 @@
             .on("mouseover", function(data) { if(d3.select(this).style("opacity") > 0) {showIt(this.id);} })
             .on("mousemove", function() { return tooltip.style("top", (d3.event.pageY-40) + "px").style("left", (d3.event.pageX+15) + "px"); })
             .on("mouseout", function() { return tooltip.style("visibility", "hidden"); })
-            .on("click", function(data) { getAttributes(data.properties, topo); });
+            .on("click", function(data) { getAttributes(data.properties, topo, d3.select(this).style("opacity")); });
         changeStyle(d3.select("#" + topo.class + "Select").node().value, topo);
         filterMap("featureid", topo, true);
         d3.select("#" + topo.class + "Legend").style("display", "block");
@@ -225,7 +249,7 @@
 
       //******Make layer controller
       var baseLayers = {"Google Hybrid": googleHybrid, "Google Satellite": googleSatellite, "Google Street": googleStreet, "Google Terrain": googleTerrain, "Bing Hybrid": bingHybrid, "Bing Satellite": bingSatellite, "Bing Street": bingStreet, "USGS Topo": usgsTopo, "None": blank};
-      var overlays = {"DOT Districts": gsDOTDistricts, "Counties": gsCounties, "Towns": gsTowns, "HUC 12 Watersheds": gsHUC12, "Deerfield Watershed": gsHuc8, "Catchments": catchTogSVG, "Streams": streamTogSVG, "Crossings": crossTogSVG};
+      var overlays = {"DOT Districts": gsDOTDistricts, "Counties": gsCounties, "Towns": gsTowns, "HUC 12 Watersheds": gsHUC12, "Environmental Justice": ej, "Road Jurisdiction": jurisdiction, "NHS Roads": nhs, "Deerfield Watershed": gsHuc8, "Catchments": catchTogSVG, "Streams": streamTogSVG, "Crossings": crossTogSVG};
       L.control.layers(baseLayers, overlays).addTo(map);
 
       d3.select(".leaflet-control-layers-base").property("title", "Click on radio button to change the baselayer option");
@@ -714,11 +738,11 @@
 
 
       //******Add attribute names and values to table
-      function getAttributes(tmpFeat, topo) {
+      function getAttributes(tmpFeat, topo, opacity) {
+        if (opacity == 0) {return;}
         d3.select("#attributesDiv").style("display", "block");
         d3.select("#attributesControl").property("title", "Click to hide feature attributes window");
 
-        //var tmpArray = topo.keys.map(function(d) { return {"att": formatTitle(topo,d), "val": formatAtt(topo, d, tmpFeat[d]) }; });
         var tmpArray = topo.keys.map(function(d) { return {"att": d, val: formatAtt(topo, d, tmpFeat[d]) }; } );
         var columns = ["att", "val"]
 
@@ -1325,6 +1349,7 @@
       function showIt(tmpID) {
         tooltip.text(tmpID);
         tooltip.style("visibility", "visible");
+        tooltip.property("title", tmpID);
       }
 
 

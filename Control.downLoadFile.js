@@ -12,72 +12,73 @@ L.Control.downLoadFile = L.Control.extend({
 
         L.DomEvent.disableClickPropagation(container);
 
-        var form = this._form = L.DomUtil.create('form', className + '-form');
+        var form = L.DomUtil.create('form', className + '-form');
         form.id = "dlForm";
 
-        var dlTitle = this._input = L.DomUtil.create('h5', className + '-h5', form);
+        var dlTitle = L.DomUtil.create('h5', className + '-h5', form);
         dlTitle.innerHTML = "Download Map Features";
+        dlTitle.title = "Download attributes of displayed map features for the selected layer to the specified output format";
         
-        this._input = L.DomUtil.create('hr', className + '-hr', form);
+        L.DomUtil.create('hr', className + '-hr', form);
 
-        var crossDiv = this._input = L.DomUtil.create('div', className + '-div', form);
+        var crossDiv = L.DomUtil.create('div', className + '-div', form);
 
-        var crossings = this._input = L.DomUtil.create('input', className + '-input', crossDiv);
+        var crossings = L.DomUtil.create('input', className + '-input', crossDiv);
         crossings.type = 'radio';
         crossings.value = "crossings";
         crossings.name = "layer";
         crossings.checked = true;
 
-        var crossLabel = this._input = L.DomUtil.create('label', className + '-label', crossDiv);
+        var crossLabel = L.DomUtil.create('label', className + '-label', crossDiv);
         crossLabel.innerHTML = "Crossings";
 
-        var streamDiv = this._input = L.DomUtil.create('div', className + '-div', form);
+        var streamDiv = L.DomUtil.create('div', className + '-div', form);
 
-        var streams = this._input = L.DomUtil.create('input', className + '-input', streamDiv);
+        var streams = L.DomUtil.create('input', className + '-input', streamDiv);
         streams.type = 'radio';
         streams.value = "streams";
         streams.name = "layer";
 
-        var streamLabel = this._input = L.DomUtil.create('label', className + '-label', streamDiv);
+        var streamLabel = L.DomUtil.create('label', className + '-label', streamDiv);
         streamLabel.innerHTML = "Streams";
 
-        var catchDiv = this._input = L.DomUtil.create('div', className + '-div', form);
+        var catchDiv = L.DomUtil.create('div', className + '-div', form);
 
-        var catchments = this._input = L.DomUtil.create('input', className + '-input', catchDiv);
+        var catchments = L.DomUtil.create('input', className + '-input', catchDiv);
         catchments.type = 'radio';
         catchments.value = "catchments";
         catchments.name = "layer";
 
-        var catchLabel = this._input = L.DomUtil.create('label', className + '-label', catchDiv);
+        var catchLabel = L.DomUtil.create('label', className + '-label', catchDiv);
         catchLabel.innerHTML = "Catchments";
 
-        this._input = L.DomUtil.create('hr', className + '-hr', form);
+        L.DomUtil.create('hr', className + '-hr', form);
 
         //******Output select box
-        var dlSelectDiv = this._input = L.DomUtil.create('div', className + '-dlSelectDiv', form);
+        var dlSelectDiv = L.DomUtil.create('div', className + '-dlSelectDiv', form);
 
-        var dlSelect = this._input = L.DomUtil.create('select', className + '-dlSelect', dlSelectDiv);
+        var dlSelect = L.DomUtil.create('select', className + '-dlSelect', dlSelectDiv);
         dlSelect.id = "dlSelect";
         dlSelect.title = "Select the format for the output file";
 
-        var dlCSV = this._input = L.DomUtil.create('option', className + '-dlOption', dlSelect);
+        var dlCSV = L.DomUtil.create('option', className + '-dlOption', dlSelect);
         dlCSV.value = "csv";
         dlCSV.text = "CSV";
 
-        var dlShape = this._input = L.DomUtil.create('option', className + '-dlOption', dlSelect);
+        var dlShape = L.DomUtil.create('option', className + '-dlOption', dlSelect);
         dlShape.value = "zip";
         dlShape.text = "Shapefile";
 
-        var dlGeo = this._input = L.DomUtil.create('option', className + '-dlOption', dlSelect);
+        var dlGeo = L.DomUtil.create('option', className + '-dlOption', dlSelect);
         dlGeo.value = "json";
         dlGeo.text = "GeoJSON";
 
-	 var submit = this._input = L.DomUtil.create('a', className + '-a', form);
+	 var submit = L.DomUtil.create('a', className + '-a', form);
 	 submit.id = "dlButton";
         submit.href = "#";
         submit.onclick = this._downLoadFile;
         submit.innerHTML = "Download";
-        submit.title = "Download attributes of displayed map features for the selected layer above to the specified output format";
+        submit.title = "Download attributes of displayed map features for the selected layer to the specified output format";
 
         form.appendChild(submit);
 
@@ -127,7 +128,7 @@ L.Control.downLoadFile = L.Control.extend({
               var lineData = [];
               outKeys.forEach(function(key) { 
                 var tmpVal = backTransformData(topos[outLayer]["scale"][key], [row[key]], topos[outLayer]["max"][key]);
-                if (topos[outLayer]["data_type"][key] == "date") {
+                if (topos[outLayer]["data_type"][key] == "date" & tmpVal != -9999) {
                   var formatDate = d3.time.format("%-m/%-d/%Y");
                   lineData.push(formatDate(new Date(parseFloat(tmpVal))));
                 }
@@ -160,16 +161,23 @@ L.Control.downLoadFile = L.Control.extend({
             
             //******Convert utm dates to string
             var formatDate = d3.time.format("%-m/%-d/%Y");
+            strOutData = JSON.parse(JSON.stringify(strOutData));
+
             strOutData.features.forEach(function(d) {
               d3.keys(d.properties).forEach(function(key) { if (topos[outLayer]["data_type"][key] == "date") {
-                d.properties[key] = formatDate(new Date(parseFloat(d.properties[key])));
+                if(parseFloat(d.properties[key]) != -9999) {
+                  d.properties[key] = formatDate(new Date(parseFloat(d.properties[key])));
+                }
+                else {
+                  d.properties[key] = d.properties[key].toString();
+                }
               }});
             });
 
             //******Shapefile output
             if (d3.select("#dlSelect").node().value == "zip") {
               var shpwrite = require('shp-write');
-
+              
               var options = {
                 folder: outLayer,
                 types: {
@@ -179,9 +187,7 @@ L.Control.downLoadFile = L.Control.extend({
                   polyline: outLayer
                 }
               }
-
-              //shpwrite.download(strOutData, options);
-              //return;
+              
 
               var byteString = shpwrite.zip(strOutData, options);
 
