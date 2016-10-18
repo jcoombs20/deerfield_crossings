@@ -1164,14 +1164,7 @@
           .on("change", function () { changeStyle(this.value, topo); });
 
         var optData = topo.keys.filter(function(key) { return topo.display[key] == "yes"; });
-/*          if (topo.display[key] == "yes") {
-            return 1;
-          }
-          else {
-            return 0;
-          }
-        });
-*/
+
         select.selectAll("option")
           .data(optData)
           .enter().append("option")
@@ -1337,8 +1330,6 @@
           }
         });
        }
-
-
 
 
 
@@ -1672,7 +1663,7 @@
         }
 
         x.domain([tmpData[lowKey].key, tmpData[tmpData.length - 1].key + topo.binWidth[tmpKey]]);
-        y.domain([0, d3.max(tmpData, function(d) { return d.value; })]);
+        y.domain([0, d3.max(tmpData, function(d) { if ( d.key > -9999) { return d.value; } })]);
 
         var tmpX = svg.append("g")
           .attr("class", "x axis")
@@ -2051,7 +2042,7 @@
         var y = hist[topo.class][key].y;
         var height = hist[topo.class][key].height;
         var width = hist[topo.class][key].width;
-        y.domain([0, d3.max(tmpData, function(d) { return d.value; })]);
+        y.domain([0, d3.max(tmpData, function(d) { if (d.key > -9999) { return d.value; } })]);
 
         //******update background bars
         var update = svg.selectAll(".background.bar")
