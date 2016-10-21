@@ -258,6 +258,7 @@
       //******Add custom weighting tool
       var customWeight = new L.Control.customWeight();
       map.addControl(customWeight);
+      completePrioritization();
 
       //******Add graph tool
       L.control.graph().addTo(map);
@@ -511,7 +512,7 @@
       d3.select("#filtersDiv")
         .append("div")
         .attr("id", "totals")
-       .attr("class", "collapse");
+        .attr("class", "collapse");
 
 
       //*******Add div for histograms
