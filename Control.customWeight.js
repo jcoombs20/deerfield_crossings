@@ -119,7 +119,7 @@ function completePrioritization() {
     .text("Ecological Connectivity")
     .property("title", "Enter a relative weight of importance for the selected measure of ecological connectivity in the calculation of the prioritization metric")
     .append("span")
-    .html('<span id="testTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Ecological Connectivity</center></b></u></p><p>Enables the user to enter a relative weight of importance for the selected ecological connectivity measure in the calculation of the prioritazation metric</p>"></span>');
+    .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Ecological Connectivity</center></b></u></p><p>Enables the user to enter a relative weight of importance for the selected ecological connectivity measure in the calculation of the prioritazation metric</p>"></span>');
 
   d3.select("#ecoConnTitle")
     .append("span")
@@ -528,6 +528,8 @@ function completePrioritization() {
     .attr("id", "rofWeights")
     .attr("class", "collapse")
     .append("div")
+    .attr("id", "rofInputs")
+    .append("div")
     .attr("id", "hydroDiv")
     .attr("class", "priorDiv")
     .append("input")
@@ -542,7 +544,7 @@ function completePrioritization() {
     .text("Hydrologic")
     .property("title", "Relative weight of importance of hydrologic risk of failure (ROF) value in calculation of the weighted ROF metric");
 
-  d3.select("#rofWeights")
+  d3.select("#rofInputs")
     .append("div")
     .attr("id", "structDiv")
     .attr("class", "priorDiv")
@@ -558,7 +560,7 @@ function completePrioritization() {
     .text("Structural")
     .property("title", "Relative weight of importance of structural risk of failure (ROF) value in calculation of the weighted ROF metric");
 
-  d3.select("#rofWeights")
+  d3.select("#rofInputs")
     .append("div")
     .attr("id", "geomorphDiv")
     .attr("class", "priorDiv")
