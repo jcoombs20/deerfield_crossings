@@ -594,7 +594,7 @@
         .defer(d3.json, 'streams_topo.json')
         .defer(d3.json, 'crossings_topo.json')
         .defer(d3.json, 'catchments_topo.json')
-        .defer(d3.tsv, 'crossings_covariates_rof_delay.tsv')
+        .defer(d3.tsv, 'crossings_covariates_rof_delay_dot.tsv')
         .defer(d3.tsv, 'catchments_covariates.tsv')
         .defer(d3.tsv, 'streams_covariates.tsv')
         .defer(d3.tsv, 'catchments_political.tsv')
@@ -850,6 +850,7 @@
         topos[tmpName].covType = {};
         topos[tmpName].filter = {};
         topos[tmpName].binWidth = {};
+        topos[tmpName].binCount = {};
         topos[tmpName].color = tmpColor;
         brush[tmpName] = {};
         hist[tmpName] = {};
@@ -1068,7 +1069,7 @@
           .append("select")
           .attr("class", "filterAttrList")
           .attr("id", "attributeFilterSelect")
-          .style("width", "182px");
+          .style("width", "210px");
 
         //******Initialise with first layer
         addFilterSelect(topos[tmpLayers[0]]);
@@ -1299,7 +1300,7 @@
 
         var tmpCF = crossfilter(covariates);
         topo.filter.all = tmpCF.groupAll();
-        topo.binWidth = {};
+        //topo.binWidth = {};
         var lowKey = 0;
 
         //******Dimension and group each covariate
@@ -1317,9 +1318,16 @@
             topo.minVal[key] = tmpBot[lowKey][key];
             topo.maxVal[key] = tmpTop[0][key];
 
-            var divVal = (tmpTop[0][key] - tmpBot[lowKey][key]) / 40;
+            if (topo.scale[key] == "categorical") {
+              topo.binCount[key] = topo.filter[key].group().size();
+            }
+            else {
+              topo.binCount[key] = 40;
+            }
+
+            var divVal = (tmpTop[0][key] - tmpBot[lowKey][key]) / topo.binCount[key];
             topo.binWidth[key] = divVal;
-            topo.filter[key + "s"] = topo.filter[key].group(function(d) {return Math.floor(d / divVal) * divVal;});
+            topo.filter[key + "s"] = topo.filter[key].group(function(d) { if(topo.scale[key] == "categorical") {return d;} else {return Math.floor(d / divVal) * divVal;}});
 
             topo.minClip[key] = topo.filter[key + "s"].all()[0].key;
             if (topo.minClip[key] <= -9998) {
@@ -1423,15 +1431,23 @@
         if (topo.direction[tmpAtt] == "reverse") {
           colorArray.reverse();
         }
-          
-        var newColor = d3.scale.quantize()
-          .domain([d3.min(normVals), d3.max(normVals)])
-          .range(colorArray);
+        
+        if(topo.scale[tmpAtt] == "categorical") {
+          var catArray = d3.keys(tmpSet._);
+          var newColor = d3.scale.ordinal()
+            .domain(catArray)
+            .range(colorArray);
+        }
+        else {
+          var newColor = d3.scale.quantize()
+            .domain([d3.min(normVals), d3.max(normVals)])
+            .range(colorArray);
+        }
 
         //*******Style and label crossings by attribute value
         if (topo.class == "streams") {
           tmpFeat.style("stroke", function(d) {
-            if (d.properties[tmpAtt] > -9999) { //return newColor(d.properties[tmpAtt]); }
+            if (d.properties[tmpAtt] > -9999) { 
               var tVal = transformData(topo.scale[tmpAtt], [d.properties[tmpAtt]], maxVal);
               return newColor(tVal[0])
             }
@@ -1440,7 +1456,7 @@
         }
         else {
           tmpFeat.style("fill", function(d) {
-            if (d.properties[tmpAtt] > -9999) { //return newColor(d.properties[tmpAtt]); }
+            if (d.properties[tmpAtt] > -9999) { 
               var tVal = transformData(topo.scale[tmpAtt], [d.properties[tmpAtt]], maxVal);
               return newColor(tVal[0])
             }
@@ -1488,8 +1504,10 @@
           .attr("class", "key")
           .style("border-top-color", String)
           .text(function(d, i) {
-            var r = newColor.invertExtent(d);
-            tmpR = backTransformData(topo.scale[tmpAtt], r, topo.max[tmpAtt]);
+            if(topo.scale[tmpAtt] != "categorical") {
+              var r = newColor.invertExtent(d);
+              tmpR = backTransformData(topo.scale[tmpAtt], r, topo.max[tmpAtt]);
+            }
             switch(topo.data_type[tmpAtt]) {
               case "decimal":
                 return tmpR[0].toFixed(2);
@@ -1503,7 +1521,7 @@
                 return shortDate(tmpDate);
                 break;
               case "text":
-                return topo.conversion[tmpAtt][i+1];
+                return topo.conversion[tmpAtt][catArray[i]];
                 break;
             }
           });
@@ -1531,9 +1549,14 @@
           width = 380 - margin.left - margin.right,
           height = 100 - margin.top - margin.bottom;
 
-        var x = d3.scale.linear().rangeRound([0, width]);
-        var y = d3.scale.linear()
-          .range([height, 0]);
+        if (topo.scale[tmpKey] == "categorical") {
+          var x = d3.scale.ordinal().rangeRoundBands([0, width], 0.1, 0.1);
+        }
+        else {
+          var x = d3.scale.linear().rangeRound([0, width]);
+        }
+
+        var y = d3.scale.linear().range([height, 0]);
 
         var xAxis = d3.svg.axis()
           .scale(x)
@@ -1546,7 +1569,7 @@
             xAxis.ticks(5);
             break;
           case "text":
-            xAxis.tickFormat(function(d) { if (isNaN(topo.conversion[tmpKey][d])) {return d + " (" + topo.conversion[tmpKey][d] + ")";} else {return topo.conversion[tmpKey][d];} });
+            xAxis.tickFormat(function(d) { return topo.conversion[tmpKey][d]; });
             xAxis.ticks(Object.keys(topo.conversion[tmpKey]).length - 1);
             break;
           default:
@@ -1568,19 +1591,20 @@
 
 
         //******Add brush
-        brush[topo.class][tmpKey] = d3.svg.brush()
-          .x(x)
-          .on("brushstart", function() { brushStart(tmpKey, topo); })
-          .on("brush", function() { brushMove(tmpKey, topo); })
-          .on("brushend", function() { brushEnd(tmpKey, topo); });
-
+        //if (topo.scale[tmpKey] != "categorical") {
+          brush[topo.class][tmpKey] = d3.svg.brush()
+            .x(x)
+            .on("brushstart", function() { brushStart(tmpKey, topo); })
+            .on("brush", function() { brushMove(tmpKey, topo); })
+            .on("brushend", function() { brushEnd(tmpKey, topo); });
+        //}
 
         //******Add chart div, title div, and reset option
         d3.select("#charts")
           .append("div")
             .attr("class", "chart")
             .attr("id", topo.class + "-" + tmpKey)
-            .property("title", "Click and drag inside chart to select data")
+            .property("title", function() {if(topo.scale[tmpKey] == "categorical") { return "Click bar to select/unselect category"; } else { return "Click and drag inside chart to select data"; } })
           .append("div")
             .attr("class", "title")
             .attr("id", "title-" + topo.class + "-" + tmpKey)
@@ -1607,37 +1631,38 @@
 
 
         //******Add stats div and extent
-        d3.select("#" + topo.class + "-" + tmpKey)
-          .append("div")
-            .attr("class", "stats")
-            .attr("id", "stats-" + topo.class + "-" + tmpKey);
+        if (topo.scale[tmpKey] != "categorical") {
+          d3.select("#" + topo.class + "-" + tmpKey)
+            .append("div")
+              .attr("class", "stats")
+              .attr("id", "stats-" + topo.class + "-" + tmpKey);
 
-        var statsDiv = d3.select("#stats-" + topo.class + "-" + tmpKey);
+          var statsDiv = d3.select("#stats-" + topo.class + "-" + tmpKey);
 
-        statsDiv.append("input")
-          .attr({type: function() {if(topo.data_type[tmpKey] == "date") {return "text";} else { return "number"}} })
-          .attr("class", "extent-input")
-          .attr("id", "extent-input-lower-" + topo.class + "-" + tmpKey)
-          .property("title", "Lower value for selected range of " + topo.title[tmpKey] + " distribution");
+          statsDiv.append("input")
+            .attr({type: function() {if(topo.data_type[tmpKey] == "date") {return "text";} else { return "number"}} })
+            .attr("class", "extent-input")
+            .attr("id", "extent-input-lower-" + topo.class + "-" + tmpKey)
+            .property("title", "Lower value for selected range of " + topo.title[tmpKey] + " distribution");
 
-        statsDiv.append("p")
-          .attr("class", "extent-input-p")
-          .text("-");
+          statsDiv.append("p")
+            .attr("class", "extent-input-p")
+            .text("-");
 
-        statsDiv.append("input")
-          .attr({type: function() {if(topo.data_type[tmpKey] == "date") {return "text";} else { return "number"}} })
-          .attr("class", "extent-input")
-          .attr("id", "extent-input-upper-" + topo.class + "-" + tmpKey)
-          .property("title", "Upper value for selected range of " + topo.title[tmpKey] + " distribution");
+          statsDiv.append("input")
+            .attr({type: function() {if(topo.data_type[tmpKey] == "date") {return "text";} else { return "number"}} })
+            .attr("class", "extent-input")
+            .attr("id", "extent-input-upper-" + topo.class + "-" + tmpKey)
+            .property("title", "Upper value for selected range of " + topo.title[tmpKey] + " distribution");
 
 
-        //******Add mean to stats div
-        d3.select("#stats-" + topo.class + "-" + tmpKey)
-          .append("span")
-            .attr("class", "mean pull-right")
-            .attr("id", "mean-" + topo.class + "-" + tmpKey)
-            .property("title", "Average of selected values");
-
+          //******Add mean to stats div
+          d3.select("#stats-" + topo.class + "-" + tmpKey)
+            .append("span")
+              .attr("class", "mean pull-right")
+              .attr("id", "mean-" + topo.class + "-" + tmpKey)
+              .property("title", "Average of selected values");
+        }
 
         //******Add svg
         var svg = d3.select("#" + topo.class + "-" + tmpKey)
@@ -1650,11 +1675,13 @@
             .attr("id", "g-" + topo.class + "-" + tmpKey);
 
         //******Add clip path rectangle
-        svg.append("clipPath")
-          .attr("id", "clip-" + topo.class + "-" + tmpKey)
-          .append("rect")
-            .attr("width", width)
-            .attr("height", height);
+        if (topo.scale[tmpKey] != "categorical") {
+          svg.append("clipPath")
+            .attr("id", "clip-" + topo.class + "-" + tmpKey)
+            .append("rect")
+              .attr("width", width)
+              .attr("height", height);
+        }
 
         //******Get data and make graph
         var tmpData = topo.filter[tmpKey + "s"].all();
@@ -1664,7 +1691,13 @@
           lowKey = 1;
         }
 
-        x.domain([tmpData[lowKey].key, tmpData[tmpData.length - 1].key + topo.binWidth[tmpKey]]);
+        if (topo.scale[tmpKey] == "categorical") {
+          tmpData = tmpData.filter(function(d) { return d.key > -9999; });
+          x.domain(tmpData.map(function(d) {if(d.key > -9999) { return d.key;} }));
+        }
+        else {
+          x.domain([tmpData[lowKey].key, tmpData[tmpData.length - 1].key + topo.binWidth[tmpKey]]);
+        }
         y.domain([0, d3.max(tmpData, function(d) { if ( d.key > -9999) { return d.value; } })]);
 
         var tmpX = svg.append("g")
@@ -1672,33 +1705,69 @@
           .attr("transform", "translate(0," + height + ")")
           .call(xAxis);
 
-        if (topo.data_type[tmpKey] == "text") {
-          tmpX.select("text").style("text-anchor", "start");
-        }
+        //if (topo.data_type[tmpKey] == "text") {
+        //  tmpX.select("text").style("text-anchor", "start");
+        //}
 
-        var tmpData = topo.filter[tmpKey + "s"].all();
+        //var tmpData = topo.filter[tmpKey + "s"].all();
         hist[topo.class][tmpKey] = {"x": x, "y": y, "height": height, "width": width};
       
         //******Add background bars
-        svg.selectAll("background.bar")
-            .data(tmpData)
-          .enter().append("rect")
-            .attr("class", "background bar")
-            .attr("x", function(d) { return x(d.key); })
-            .attr("width", (x.range()[1] - x.range()[0])/40)  
-            .attr("y", function(d) { return y(d.value); })
-            .attr("height", function(d) { return height - y(d.value); });
+        if (topo.scale[tmpKey] != "categorical") {
+          svg.selectAll("background.bar")
+              .data(tmpData)
+            .enter().append("rect")
+              .attr("class", "background bar")
+              .attr("x", function(d) { return x(d.key); })
+              .attr("width", function() { if(topo.scale[tmpKey] == "categorical") { return x.rangeBand(); } else { return width / topo.binCount[tmpKey]; } })  
+              .attr("y", function(d) { return y(d.value); })
+              .attr("height", function(d) { return height - y(d.value); });
+        }
 
         //******Add foreground bars
         svg.selectAll(".foreground.bar")
             .data(tmpData)
           .enter().append("rect")
             .attr("class", "foreground bar")
+            .classed("categorical", function() { return topo.scale[tmpKey] == "categorical"; })
             .attr("x", function(d) { return x(d.key); })
-            .attr("width", (x.range()[1] - x.range()[0])/40)  
+            .attr("width", function() { if(topo.scale[tmpKey] == "categorical") { return x.rangeBand(); } else { return width / topo.binCount[tmpKey]; } })  
             .attr("y", function(d) { return y(d.value); })
-            .attr("height", function(d) { return height - y(d.value); });
+            .attr("height", function(d) { return height - y(d.value); })
+            .on("mouseover", function() { if(topo.scale[tmpKey] == "categorical") { d3.select(this).style("cursor", "crosshair"); } })
+            .on("click", function() { if(topo.scale[tmpKey] == "categorical") { 
+              var bars = d3.select("#g-" + topo.class + "-" + tmpKey).selectAll(".foreground.bar");
+              bars = bars.filter(function(d) { return d.value > 0; });
+              var blueBars = bars.filter(function() { return d3.select(this).style("fill") == "rgb(70, 130, 180)"; });
+              if(blueBars[0].length == bars[0].length) {
+                bars.style("fill", "#ccc");
+                d3.select(this).style("fill", "steelblue");
+              }
+              else if(d3.select(this).style("fill") == "rgb(70, 130, 180)" & blueBars[0].length == 1) {
+                bars.style("fill", "steelblue");
+              }
+              else {
+                if(d3.select(this).style("fill") == "rgb(70, 130, 180)") {
+                  d3.select(this).style("fill", "#ccc");
+                }
+                else {
+                  d3.select(this).style("fill", "steelblue");
+                }
+              }
 
+              var blueBars = bars.filter(function() { return d3.select(this).style("fill") == "rgb(70, 130, 180)"; });
+              if(blueBars[0].length == bars[0].length) {
+                d3.select("#reset-" + topo.class + "-" + tmpKey).style("display", "none");
+              }
+              else {
+                d3.select("#reset-" + topo.class + "-" + tmpKey).style("display", "inline-block");
+              }
+              brushEnd(tmpKey, topo);
+            } })
+            .append("svg:title")
+              .text(function(d) { return topo.conversion[tmpKey][d.key] + ": " + d.value; });
+
+      if (topo.scale[tmpKey] != "categorical") {
         svg.selectAll(".foreground.bar")
           .attr("clip-path", "url(#clip-" + topo.class + "-" + tmpKey + ")");
       
@@ -1728,6 +1797,7 @@
         d3.select("#extent-input-upper-" + topo.class + "-" + tmpKey).on("change", function () {extentChange(tmpKey, topo, tmpLower, tmpUpper); });      
 
         brushReset(tmpKey, topo);
+      }
 
         function resizePath(d) {
           var e = +(d == "e"),
@@ -1806,14 +1876,26 @@
 
 
       function brushEnd(tmpKey, topo) {
-        topo.filter[tmpKey].filterRange([brush[topo.class][tmpKey].extent()[0], brush[topo.class][tmpKey].extent()[1]]);       
+        if(topo.scale[tmpKey] != "categorical") {
+          topo.filter[tmpKey].filterRange([brush[topo.class][tmpKey].extent()[0], brush[topo.class][tmpKey].extent()[1]]);       
+          d3.select("#reset-" + topo.class + "-" + tmpKey).style("display", "inline-block");
+        }
+        else {
+          var tmpVals = [];
+          d3.select("#g-" + topo.class + "-" + tmpKey).selectAll(".foreground.bar").filter(function(d) { if(d3.select(this).style("fill") == "rgb(70, 130, 180)") { tmpVals.push(d.key); } });
+          topo.filter[tmpKey].filterFunction(function(d) { if(tmpVals.indexOf(d) > -1) { return true;} else { return false;} }); 
+        }
         checkLink(tmpKey, topo, false);
-        d3.select("#reset-" + topo.class + "-" + tmpKey).style("display", "inline-block");
+        
       }
 
-
       function brushReset(tmpKey, topo) {
-        d3.select("#brush-" + topo.class + "-" + tmpKey).call(brush[topo.class][tmpKey].clear());
+        if(topo.scale[tmpKey] != "categorical") {
+          d3.select("#brush-" + topo.class + "-" + tmpKey).call(brush[topo.class][tmpKey].clear());
+        }
+        else {
+          d3.select("#g-" + topo.class + "-" + tmpKey).selectAll(".foreground.bar").style("fill", "steelblue");
+        }
         topo.filter[tmpKey].filterAll();
         checkLink(tmpKey, topo, false);
         d3.select("#reset-" + topo.class + "-" + tmpKey).style("display", "none");
@@ -1978,7 +2060,7 @@
           var tmpClass = class_key.slice(0, dash);
           var key = class_key.slice(dash + 1, class_key.length);
 
-          if (class_key.indexOf(topo.class) > -1) {
+          if (class_key.indexOf(topo.class) > -1 & topo.scale[tmpKey] != "categorical") {
             if (topo.filter["all"].value() > 0 ) {
               if (topo.data_type[key] == "date") {
                 var tmpFormat = d3.time.format("%-m/%-d/%Y")
@@ -2047,17 +2129,22 @@
         y.domain([0, d3.max(tmpData, function(d) { if (d.key > -9999) { return d.value; } })]);
 
         //******update background bars
-        var update = svg.selectAll(".background.bar")
-          .data(tmpData);
+        if(topo.scale[key] != "categorical") {
+          var update = svg.selectAll(".background.bar")
+            .data(tmpData);
 
-        update.exit().remove();
-        update.enter().insert("rect", ":first-child")
-          .attr("class", "background bar");
-        update
-          .attr("x", function(d) { return x(d.key); })
-          .attr("width", (x.range()[1] - x.range()[0])/40)  
-          .attr("y", function(d) { return y(d.value); })
-          .attr("height", function(d) { return height - y(d.value); });
+          update.exit().remove();
+          update.enter().insert("rect", ":first-child")
+            .attr("class", "background bar");
+          update
+            .attr("x", function(d) { return x(d.key); })
+            .attr("width", function() { if(topo.scale[key] == "categorical") { return x.rangeBand(); } else { return width / topo.binCount[key]; } }) 
+            .attr("y", function(d) { return y(d.value); })
+            .attr("height", function(d) { return height - y(d.value); });
+        }
+        else {
+          tmpData = tmpData.filter(function(d) { return d.key > -9999; });
+        }
 
         //******update foreground bars
         var update = svg.selectAll(".foreground.bar")
@@ -2065,10 +2152,42 @@
 
         update.exit().remove();
         update.enter().insert("rect", ":first-child")
-          .attr("class", "foreground bar");
+          .attr("class", "foreground bar")
+          .on("mouseover", function() { if(topo.scale[key] == "categorical") { d3.select(this).style("cursor", "crosshair"); } })
+          .on("click", function() { if(topo.scale[key] == "categorical") { 
+            var bars = d3.select("#g-" + topo.class + "-" + key).selectAll(".foreground.bar");
+            bars = bars.filter(function(d) { return d.value > 0; });
+            var blueBars = bars.filter(function(d) { return d3.select(this).style("fill") == "rgb(70, 130, 180)"; });
+            if(blueBars[0].length == bars[0].length) {
+              bars.style("fill", "#ccc");
+              d3.select(this).style("fill", "steelblue");
+            }
+            else if(d3.select(this).style("fill") == "rgb(70, 130, 180)" & blueBars[0].length == 1) {
+              bars.style("fill", "steelblue");
+            }
+            else {
+              if(d3.select(this).style("fill") == "rgb(70, 130, 180)") {
+                d3.select(this).style("fill", "#ccc");
+              }
+              else {
+                d3.select(this).style("fill", "steelblue");
+              }
+            }
+
+            var blueBars = bars.filter(function() { return d3.select(this).style("fill") == "rgb(70, 130, 180)"; });
+            if(blueBars[0].length == bars[0].length) {
+              d3.select("#reset-" + topo.class + "-" + key).style("display", "none");
+            }
+            else {
+              d3.select("#reset-" + topo.class + "-" + key).style("display", "inline-block");
+            }
+            brushEnd(key, topo);
+          }
+        })
+
         update
           .attr("x", function(d) { return x(d.key); })
-          .attr("width", (x.range()[1] - x.range()[0])/40)  
+          .attr("width", function() { if(topo.scale[key] == "categorical") { return x.rangeBand(); } else { return width / topo.binCount[key]; } }) 
           .attr("y", function(d) { return y(d.value); })
           .attr("height", function(d) { return height - y(d.value); });
       }
