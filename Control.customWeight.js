@@ -16,12 +16,12 @@ L.Control.customWeight = L.Control.extend({
         weights.id = "priorWeights";
 
         //******Ecological Connectivity
-        var eco = L.DomUtil.create('div', className + '-div');
-        eco.id = "eco";
+        var core = L.DomUtil.create('div', className + '-div');
+        core.id = "core";
 
         //******Transportation Connectivity 
-        var transport = L.DomUtil.create('div', className + '-div');
-        transport.id = "transport";
+        var attr = L.DomUtil.create('div', className + '-div');
+        attr.id = "attr";
 
         //******Update 
         var update = L.DomUtil.create('div', className + '-div');
@@ -43,8 +43,8 @@ L.Control.customWeight = L.Control.extend({
         }
 
         container.appendChild(weights);
-        container.appendChild(eco);
-        container.appendChild(transport);
+        container.appendChild(core);
+        container.appendChild(attr);
         container.appendChild(update);
 
         return container;
@@ -94,357 +94,200 @@ function completePrioritization() {
   d3.select("#priorWeights")
     .append("div")
     .append("h4")
-    .attr("id", "priorTitle")
-    .attr("class", "legTitle")
-    .text("Stream Crossing Prioritization")
-    .property("title", "Create a custom-weighted stream crossing metric based on chosen ecological and transportation connectivity measures for use in prioritization decisions")
+    .attr("class", "priorTitle")
+    .text("Stream Crossing Component Selection")
+    .property("title", "Select stream crossing components for potential filtering in 'Charts' during prioritization")
     .append("span")
-    .html('<span id="testTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Stream Crossing Prioritization</center></b></u></p><p>Enables the user to create a custom-weighted stream crossing metric based on chosen ecological and transportation connectivity measures for use in prioritization decisions</p>"></span>');
+    .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Stream Crossing Component Selection</center></b></u></p><p>Enables the user to select stream crossing attributes for potential filtering in Charts during the prioritization process</p>"></span>');
+
+  //******Add Core Components
+  d3.select("#core")
+    .append("div")
+    .attr("id", "coreComp")
+    .append("div")
+    .attr("class", "priorHeader1")
+    .style("border-right", "1px solid black")
+    .property("title", "Select which ecological disruption and transportation system vulnerability measures are available to view and filter during crossing prioritization")
+    .append("h4")
+    .attr("class", "priorTitle")
+    .text("Choose Core Components");
+
+  //******Add Crossing Prioritization Score
+  d3.select("#core")
+    .append("div")
+    .attr("id", "crossPrior")
+    .append("div")
+    .attr("class", "priorHeader2")
+    .style("border-right", "1px solid black")
+    .property("title", "Check to make the crossing prioritization score available to view and filter")
+    .append("label")
+    .attr("class", "priorLabel")
+    .html('<input id="chk_cross_prior" type="checkbox" class="priorCheck" value="cross_prior" checked></input><span>Crossing Prioritization Score</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_cross_prior"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   //******Add ecological connectivity
-  d3.select("#eco")
+  d3.select("#crossPrior")
     .append("div")
-    .attr("class", "horBorder")
+    .attr("id", "midLevel")
+    .append("div")
+    .attr("id", "eco")
+    .append("div")
+    .attr("class", "priorHeader4")
     .attr("id", "connectEco")
-    .append("input")
-    .attr({type: "number", name: "priorWeight", value: 1, size: 2, min: 0, step: 1})
-    .attr("id", "ecoWeight")
-    .attr("class", "priorInput")
-    .property("title", "Relative weight of importance of the ecological connectivity value in calculation of prioritization metric");
-
-  d3.select("#connectEco")
+    .property("title", "Options related to ecological disruption score available to view and filter")
     .append("label")
-    .attr("class", "priorTitle")
-    .attr("id", "ecoConnTitle")
-    .text("Ecological Connectivity")
-    .property("title", "Enter a relative weight of importance for the selected measure of ecological connectivity in the calculation of the prioritization metric")
-    .append("span")
-    .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Ecological Connectivity</center></b></u></p><p>Enables the user to enter a relative weight of importance for the selected ecological connectivity measure in the calculation of the prioritazation metric</p>"></span>');
-
-  d3.select("#ecoConnTitle")
-    .append("span")
-    .attr("class", "glyphicon glyphicon-minus-sign pull-right minimize-button")
-    .attr("id", "ecoGlyph")
-    .style("margin-left", "10px")
-    .attr("data-toggle", "collapse")
-    .attr("data-target", "#ecoDiv")
-    .property("title", "Click to minimize panel")
-    .on("click", function() { changeGlyph(this); });
+    .attr("class", "priorLabel")
+    .html('<span>Ecological Disruption</span>')
 
   d3.select("#eco")
     .append("div")
     .attr("id", "ecoDiv")
-    .attr("class", "collapse in")
     .append("div")
     .attr("class", "priorDiv")
-    .attr("id", "ecoConnPassage")
-    .append("input")
-    .attr({type: "radio", name: "ecoConn", value: "Passage Score", id: "passRadio", checked: true})
-    .property("title", "Aquatic passability score of stream crossing")
-    .attr("class", "priorRadio")
-    .on("change", function() {if (d3.select('input[name="ecoConn"]:checked').property("value") == "Cold Water Connectivity Restoration Potential") { $('#coldWaterDiv').collapse('show'); } else { $('#coldWaterDiv').collapse('hide'); } });
-
-  d3.select("#ecoConnPassage")
+    .property("title", "Maximum value for IEI weighted delta and IEI weighted delta 16 C scores")
     .append("label")
-    .text("Passage Score")
-    .property("title", "Aquatic passability score of stream crossing")
     .attr("class", "priorLabel")
-    .attr("for", "passRadio");
+    .html('<input id="chk_int_eco_dis" type="checkbox" class="attrCheck" value="int_eco_dis" checked></input><span>Integrated Disruption</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_int_eco_dis"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   d3.select("#ecoDiv")
     .append("div")
     .attr("class", "priorDiv")
-    .attr("id", "ecoConnRestPot")
-    .append("input")
-    .attr({type: "radio", name: "ecoConn", value: "Connectivity Restoration Potential", id: "restRadio"})
-    .property("title", "Need definition from Scott")
-    .attr("class", "priorRadio")
-    .on("change", function() {if (d3.select('input[name="ecoConn"]:checked').property("value") == "Cold Water Connectivity Restoration Potential") { $('#coldWaterDiv').collapse('show'); } else { $('#coldWaterDiv').collapse('hide'); } });
-
-  d3.select("#ecoConnRestPot")
+    .property("title", "Aquatic impassability score of stream crossing")
     .append("label")
-    .text("Connectivity Restoration Potential")
-    .property("title", "Need definition from Scott")
     .attr("class", "priorLabel")
-    .attr("for", "restRadio");
+    .html('<input id="chk_impassability" type="checkbox" class="attrCheck" value="impassability"></input><span>Impassability</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_impassability"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   d3.select("#ecoDiv")
     .append("div")
     .attr("class", "priorDiv")
-    .attr("id", "ecoConnColdWater")
-    .append("input")
-    .attr({type: "radio", name: "ecoConn", value: "Cold Water Connectivity Restoration Potential", id: "coldRadio"})
     .property("title", "Need definition from Scott")
-    .attr("class", "priorRadio")
-    .attr("data-toggle", "collapse")
-    .attr("data-target", "#coldWaterDiv")
-    .on("change", function() {if (d3.select('input[name="ecoConn"]:checked').property("value") == "Cold Water Connectivity Restoration Potential") { $('#coldWaterDiv').collapse('show'); } else { $('#coldWaterDiv').collapse('hide'); } });
-
-  d3.select("#ecoConnColdWater")
     .append("label")
-    .text("Cold Water Connectivity Restoration Potential")
-    .property("title", "Need definition from Scott")
     .attr("class", "priorLabel")
-    .attr("for", "coldRadio");
+    .html('<input id="chk_delta_scaled" type="checkbox" class="attrCheck" value="delta_scaled"></input><span>Delta Score</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_delta_scaled"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
-  d3.select("#ecoConnColdWater")
+  d3.select("#ecoDiv")
+    .append("div")
+    .attr("class", "priorDiv")
+    .property("title", "Need definition from Scott")
+    .append("label")
+    .attr("class", "priorLabel")
+    .html('<input id="chk_effect_scaled" type="checkbox" class="attrCheck" value="effect_scaled"></input><span>IEI Weighted Delta</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_effect_scaled"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
+
+  d3.select("#ecoDiv")
+    .append("div")
+    .attr("class", "priorDiv")
+    .property("title", "Need definition from Scott")
+    .append("label")
+    .attr("class", "priorLabel")
+    .html('<input id="chk_water_temp" type="checkbox" class="attrCheck" value="water_temp" data-toggle="collapse" data-target="#coldWaterDiv"></input><span>Water Temperature</span>');
+
+  d3.select("#ecoDiv")
     .append("div")
     .attr("id", "coldWaterDiv")
     .attr("class", "collapse")
     .append("div")
-    .attr("id", "tempThreshDiv")
-    .append("div")
-    .attr("class", "horBorder")
-    .append("h5")
-    .attr("id", "tThreshTitle")
-    .attr("class", "legTitle")
-    .text("Threshold")
-    .property("title", "The maximum water temperature value (celsius) for which to infer connectivity among stream reaches");
-    
-  d3.select("#tempThreshDiv")
-    .append("div")
     .attr("class", "priorDiv")
-    .attr("id", "ecoConnColdWaterTemp16")
-    .append("input")
-    .attr({type: "radio", name: "ecoConnTemp", value: "16", id: "tempRadio16"})
     .property("title", "16 degrees celsius")
-    .attr("class", "priorRadio");
-
-  d3.select("#ecoConnColdWaterTemp16")
     .append("label")
-    .text("16")
-    .property("title", "16 degrees celsius")
     .attr("class", "priorLabel")
-    .attr("for", "tempRadio16");
-    
-  d3.select("#tempThreshDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .attr("id", "ecoConnColdWaterTemp18")
-    .append("input")
-    .attr({type: "radio", name: "ecoConnTemp", value: "18", id: "tempRadio18", checked: true})
-    .property("title", "18 degrees celsius")
-    .attr("class", "priorRadio");
+    .html('<input id="chk_effect_scaled_16" type="checkbox" class="attrCheck" value="effect_scaled_16"></input><span>16\xB0 C</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_effect_scaled_16"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
-  d3.select("#ecoConnColdWaterTemp18")
-    .append("label")
-    .text("18")
-    .property("title", "18 degrees celsius")
-    .attr("class", "priorLabel")
-    .attr("for", "tempRadio18");
-
-  d3.select("#tempThreshDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .attr("id", "ecoConnColdWaterTemp20")
-    .append("input")
-    .attr({type: "radio", name: "ecoConnTemp", value: "20", id: "tempRadio20"})
-    .property("title", "20 degrees celsius")
-    .attr("class", "priorRadio");
-
-  d3.select("#ecoConnColdWaterTemp20")
-    .append("label")
-    .text("20")
-    .property("title", "20 degrees celsius")
-    .attr("class", "priorLabel")
-    .attr("for", "tempRadio20");
-   
   d3.select("#coldWaterDiv")
     .append("div")
-    .attr("id", "tempYearDiv")
-    .append("div")
-    .attr("class", "horBorder")
-    .append("h5")
-    .attr("id", "tYearTitle")
-    .attr("class", "legTitle")
-    .text("Year")
-    .property("title", "Year for which to infer connectivity among stream reaches based on selected water temperature threshold value");
+    .attr("class", "priorDiv")
+    .property("title", "18 degrees celsius")
+    .append("label")
+    .attr("class", "priorLabel")
+    .html('<input id="chk_effect_scaled_18" type="checkbox" class="attrCheck" value="effect_scaled_18"></input><span>18\xB0 C</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_effect_scaled_18"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
-  d3.select("#tempYearDiv")
+  d3.select("#coldWaterDiv")
     .append("div")
     .attr("class", "priorDiv")
-    .attr("id", "ecoConnColdWaterYear2016")
-    .append("input")
-    .attr({type: "radio", name: "ecoConnYear", value: "2016", id: "tempRadio2016", checked: true})
-    .property("title", "Year 2016")
-    .attr("class", "priorRadio");
-
-  d3.select("#ecoConnColdWaterYear2016")
+    .property("title", "20 degrees celsius")
     .append("label")
-    .text("2016")
-    .property("title", "Year 2016")
     .attr("class", "priorLabel")
-    .attr("for", "tempRadio2016");
-
-  d3.select("#tempYearDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .attr("id", "ecoConnColdWaterYear2050")
-    .append("input")
-    .attr({type: "radio", name: "ecoConnYear", value: "2050", id: "tempRadio2050"})
-    .property("title", "Year 2050")
-    .attr("class", "priorRadio");
-
-  d3.select("#ecoConnColdWaterYear2050")
-    .append("label")
-    .text("2050")
-    .property("title", "Year 2050")
-    .attr("class", "priorLabel")
-    .attr("for", "tempRadio2050");
-
-  d3.select("#tempYearDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .attr("id", "ecoConnColdWaterYear2080")
-    .append("input")
-    .attr({type: "radio", name: "ecoConnYear", value: "2080", id: "tempRadio2080"})
-    .property("title", "Year 2080")
-    .attr("class", "priorRadio");
-
-  d3.select("#ecoConnColdWaterYear2080")
-    .append("label")
-    .text("2080")
-    .property("title", "Year 2080")
-    .attr("class", "priorLabel")
-    .attr("for", "tempRadio2080");
+    .html('<input id="chk_effect_scaled_20" type="checkbox" class="attrCheck" value="effect_scaled_20"></input><span>20\xB0 C</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_effect_scaled_20"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
+  
 
 
 
 
 
   //******Transportation Connectivity
-  d3.select("#transport")
+  d3.select("#midLevel")
     .append("div")
-    .attr("class", "horBorder")
+    .attr("id", "transport")
+    .append("div")
+    .attr("class", "priorHeader3")
     .attr("id", "connectTrans")
-    .append("input")
-    .attr({type: "number", name: "priorWeight", value: 1, size: 2, min: 0, step: 1})
-    .attr("id", "transWeight")
-    .attr("class", "priorInput")
-    .property("title", "Relative weight of transportation connectivity value in calculation of prioritization metric");
-
-  d3.select("#connectTrans")
+    .property("title", "Check to make the transportation system vulnerability score available to view and filter")
     .append("label")
-    .attr("id", "transConnTitle")
-    .attr("class", "priorTitle")
-    .text("Transportation Connectivity")
-    .property("title", "Enter a relative weight of importance for the selected measures of transportation connectivity in the calculation of the prioritization metric")
-    .append("span")
-    .html('<span id="testTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Transportation Connectivity</center></b></u></p><p>Enables the user to enter a relative weight of importance for the selected traffic disruption and crossing risk of failure measures in the calculation of the prioritazation metric</p>"></span>');
-
-  d3.select("#transConnTitle")
-    .append("span")
-    .attr("class", "glyphicon glyphicon-minus-sign pull-right minimize-button")
-    .attr("id", "transGlyph")
-    .attr("data-toggle", "collapse")
-    .attr("data-target", "#transDiv")
-    .property("title", "Click to minimize panel")
-    .on("click", function() { changeGlyph(this); });
-
-
+    .attr("class", "priorLabel")
+    .html('<input id="chk_trans_vuln" type="checkbox" class="priorCheck" checked></input><span>Transportation System Vulnerability</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_trans_vuln"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
 
   //******Disruption
   d3.select("#transport")
     .append("div")
     .attr("id", "transDiv")
-    .attr("class", "collapse in")
     .append("div")
     .attr("id", "disrupt")
     .append("div")
-    .attr("class", "connectDiv")
-    .attr("id", "transConnDisruptTitle")
-    .append("input")
-    .attr({type: "number", name: "priorWeight", value: 1, size: 2, min: 0, step: 1})
-    .attr("id", "transDisruptWeight")
-    .attr("class", "priorInput")
-    .property("title", "Relative weight of importance for the selected traffic disruption measure in calculation of the transportation connectivity metric");
-
-  d3.select("#transConnDisruptTitle")
+    .property("title", "Options related to emergency service disruption score available to view and filter")
+    .attr("class", "priorHeader4")
     .append("label")
-    .attr("id", "disruptTitle")
-    .attr("class", "priorHeader")
-    .text("Disruption")
-    .property("title", "Enter a relative weight of importance for the selected stream crossing traffic disruption measure in the calculation of the transportation connectivity metric")
-    .append("span")
-    .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Traffic Disruption</center></b></u></p><p>Enables the user to choose a traffic disruption measure for each stream crossing and weight its importance for calculation of transportation metric.</p>"></span>');
-
-  d3.select("#disruptTitle")
-    .append("span")
-    .attr("class", "glyphicon glyphicon-minus-sign pull-right minimize-button")
-    .attr("id", "disruptGlyph")
-    .style("margin-left", "10px")
-    .attr("data-toggle", "collapse")
-    .attr("data-target", "#disruptInput")
-    .property("title", "Click to minimize panel")
-    .on("click", function() { changeGlyph(this); });
+    .attr("class", "priorLabel")
+    .html('<span>Emergency Service Disruption</span>');
 
   d3.select("#disrupt")
     .append("div")
     .attr("id", "disruptInput")
-    .attr("class", "collapse in")
     .append("div")
-    .attr("id", "disruptTotal")
+    .attr("id", "disruptComposite")
     .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "radio", name: "transConnDisrupt", value: "Total", id: "transConnDisruptTotal"})
-    .property("title", "Total time of delay (minutes) to traffic if crossing was compromised") 
-    .attr("class", "priorRadio");
-
-  d3.select("#disruptTotal")
+    .property("title", "Combined total and maximum time of delay (minutes) to emergency services if crossing was compromised")
     .append("label")
-    .text("Total")
-    .property("title", "Total time of delay (minutes) to traffic if crossing was compromised") 
     .attr("class", "priorLabel")
-    .attr("for", "transConnDisruptTotal");
-   
-  d3.select("#disruptInput")
-    .append("div")
-    .attr("id", "disruptAve")
-    .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "radio", name: "transConnDisrupt", value: "Average", id: "transConnDisruptAve"})
-    .property("title", "Average time of delay (minutes) to traffic if crossing was compromised") 
-    .attr("class", "priorRadio");
-
-  d3.select("#disruptAve")
-    .append("label")
-    .text("Average")
-    .property("title", "Average time of delay (minutes) to traffic if crossing was compromised") 
-    .attr("class", "priorLabel")
-    .attr("for", "transConnDisruptAve");
-
+    .html('<input id="chk_ln_comp_del" type="checkbox" class="attrCheck" value="ln_com_del" checked></input><span>Integrated Delay</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_ln_comp_del"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
+  
   d3.select("#disruptInput")
     .append("div")
     .attr("id", "disruptMax")
     .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "radio", name: "transConnDisrupt", value: "Maximum", id: "transConnDisruptMax", checked: true})
-    .property("title", "Maximum time of delay (minutes) to traffic if crossing was compromised") 
-    .attr("class", "priorRadio");
-
-  d3.select("#disruptMax")
+    .property("title", "Maximum time of delay (minutes) to emergency services if crossing was compromised")
     .append("label")
-    .text("Maximum")
-    .property("title", "Maximum time of delay (minutes) to traffic if crossing was compromised") 
     .attr("class", "priorLabel")
-    .attr("for", "transConnDisruptMax");
+    .html('<input id="chk_max_del" type="checkbox" class="attrCheck" value="max_del"></input><span>Maximum Delay</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_max_del"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   d3.select("#disruptInput")
     .append("div")
-    .attr("id", "disruptComposite")
+    .attr("id", "disruptAve")
     .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "radio", name: "transConnDisrupt", value: "Composite", id: "transConnDisruptComposite"})
-    .property("title", "Combined total and maximum time of delay (minutes) to traffic if crossing was compromised") 
-    .attr("class", "priorRadio");
-
-  d3.select("#disruptComposite")
+    .property("title", "Average traffic delay (minutes) to emergency sevices for all trips if road-stream crossing becomes compromised")
     .append("label")
-    .text("Composite")
-    .property("title", "Combined total and maximum time of delay (minutes) to traffic if crossing was compromised") 
     .attr("class", "priorLabel")
-    .attr("for", "transConnDisruptComposite");
+    .html('<input id="chk_ave_del" type="checkbox" class="attrCheck" value="ave_del"></input><span>Average Delay</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_ave_del"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
+
+  d3.select("#disruptInput")
+    .append("div")
+    .attr("id", "disruptAveAff")
+    .attr("class", "priorDiv")
+    .property("title", "Average traffic delay (minutes) to emergency sevices for affected trips if road-stream crossing becomes compromised")
+    .append("label")
+    .attr("class", "priorLabel")
+    .html('<input id="chk_ave_aff_del" type="checkbox" class="attrCheck" value="ave_aff_del"></input><span>Average Affected Delay</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_ave_aff_del"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
 
 
@@ -454,127 +297,112 @@ function completePrioritization() {
     .append("div")
     .attr("id", "rof")
     .append("div")
-    .attr("class", "connectDiv")
-    .attr("id", "transConnRofTitle")
-    .append("input")
-    .attr({type: "number", name: "priorWeight", value: 1, size: 2, min: 0, step: 1})
-    .attr("id", "transRofWeight")
-    .attr("class", "priorInput")
-    .property("title", "Relative weight of importance for the selected risk of failure (ROF) measure in calculation of transportation connectivity metric");
-
-  d3.select("#transConnRofTitle")
+    .property("title", "Options related to crossing risk of failure score available to view and filter")
+    .attr("class", "priorHeader4")
     .append("label")
-    .attr("id", "rofTitle")
-    .attr("class", "priorHeader")
-    .text("Risk Of Failure")
-    .property("title", "Enter a relative weight of importance for the selected stream crossing risk of failure (ROF) measure in the calculation of the transportation connectivity metric")
-    .append("span")
-    .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Risk of Failure</center></b></u></p><p>Enables the user to select the maximum risk-of-failure (ROF) value for each stream crossing or create a custom weighted value based on its hydrologic, structural, and geomorphic ROF scores.</p>"></span>');
-
-  d3.select("#rofTitle")
-    .append("span")
-    .attr("class", "glyphicon glyphicon-minus-sign pull-right minimize-button")
-    .attr("id", "rofGlyph")
-    .style("margin-left", "10px")
-    .attr("data-toggle", "collapse")
-    .attr("data-target", "#rofInput")
-    .property("title", "Click to minimize panel")
-    .on("click", function() { changeGlyph(this); });
+    .attr("class", "priorLabel")
+    .html('<span>Crossing Risk of Failure</span>');
 
   d3.select("#rof")
     .append("div")
     .attr("id", "rofInput")
-    .attr("class", "collapse in")
     .append("div")
     .attr("id", "rofInputMax")
     .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "radio", name: "transConnRofInput", value: "Maximum", id: "transConnRofMax", checked: true})
-    .property("title", "Maximum hydrologic, structural, or geomorphic risk of failure (ROF) value for a stream crossing") 
-    .attr("class", "priorRadio")
-    .on("change", function() {if (d3.select('input[name="transConnRofInput"]:checked').property("value") == "Weighted") { $('#rofWeights').collapse('show'); } else { $('#rofWeights').collapse('hide'); } });
-
-  d3.select("#rofInputMax")
+    .property("title", "Maximum hydrologic, structural, or geomorphic risk of failure (ROF) value for a stream crossing")
     .append("label")
-    .text("Maximum")
-    .property("title", "Maximum hydrologic, structural, or geomorphic risk of failure (ROF) value for a stream crossing") 
     .attr("class", "priorLabel")
-    .attr("for", "transConnRofMax");
+    .html('<input id="chk_max_rof" type="checkbox" class="attrCheck" value="max_rof" checked></input><span>Integrated ROF</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_max_rof"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   d3.select("#rofInput")
     .append("div")
-    .attr("id", "rofInputWeight")
+    .attr("id", "rofInputStruct")
     .attr("class", "priorDiv")
-    .append("input")
-    .attr("data-toggle", "collapse")
-    .attr("data-target", "#rofWeights")
-    .attr({type: "radio", name: "transConnRofInput", value: "Weighted", id: "transConnRofWeight"})
-    .property("title", "Custom weighted hydrologic, structural, and geomorphic risk of failure (ROF) value for a stream crossing") 
-    .attr("class", "priorRadio")
-    .on("change", function() {if (d3.select('input[name="transConnRofInput"]:checked').property("value") == "Weighted") { $('#rofWeights').collapse('show'); } else { $('#rofWeights').collapse('hide'); } });
-
-  d3.select("#rofInputWeight")
-    .append("label")
-    .text("Weighted")
-    .property("title", "Custom weighted hydrologic, structural, and geomorphic risk of failure (ROF) value for a stream crossing") 
-    .attr("class", "priorLabel")
-    .attr("for", "transConnRofWeight");
-
-
-
-
-  d3.select("#rofInputWeight")
-    .append("div")
-    .attr("id", "rofWeights")
-    .attr("class", "collapse")
-    .append("div")
-    .attr("id", "rofInputs")
-    .append("div")
-    .attr("id", "hydroDiv")
-    .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "number", name: "ROF", value: 1, size: 2, min: 0, step: 1})
-    .attr("id", "hydroROF")
-    .attr("class", "priorInput")
-    .property("title", "Relative weight of importance of hydrologic risk of failure (ROF) value in calculation of the weighted ROF metric");
-
-  d3.select("#hydroDiv")
+    .property("title", "Structural risk of failure (ROF) value for the stream crossing")
     .append("label")
     .attr("class", "priorLabel")
-    .text("Hydrologic")
-    .property("title", "Relative weight of importance of hydrologic risk of failure (ROF) value in calculation of the weighted ROF metric");
+    .html('<input id="chk_struct_rof" type="checkbox" class="attrCheck" value="struct_rof"></input><span>Structural ROF</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_struct_rof"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
-  d3.select("#rofInputs")
+  d3.select("#rofInput")
     .append("div")
-    .attr("id", "structDiv")
+    .attr("id", "rofInputHydro")
     .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "number", name: "ROF", value: 1, size: 2, min: 0, step: 1})
-    .attr("id", "structROF")
-    .attr("class", "priorInput")
-    .property("title", "Relative weight of importance of structural risk of failure (ROF) value in calculation of the weighted ROF metric");
-
-  d3.select("#structDiv")
+    .property("title", "Hydrologic risk of failure (ROF) value for the stream crossing")
     .append("label")
     .attr("class", "priorLabel")
-    .text("Structural")
-    .property("title", "Relative weight of importance of structural risk of failure (ROF) value in calculation of the weighted ROF metric");
+    .html('<input id="chk_hydro_rof" type="checkbox" class="attrCheck" value="hydro_rof"></input><span>Hydrologic ROF</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_hydro_rof"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
-  d3.select("#rofInputs")
+  d3.select("#rofInput")
     .append("div")
-    .attr("id", "geomorphDiv")
+    .attr("id", "rofInputGeo")
     .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "number", name: "ROF", value: 1, size: 2, min: 0, step: 1})
-    .attr("id", "geomorphROF")
-    .attr("class", "priorInput")
-    .property("title", "Relative weight of importance of geomorphic risk of failure (ROF) value in calculation of the weighted ROF metric");
-
-  d3.select("#geomorphDiv")
+    .property("title", "Geomorphic risk of failure (ROF) value for the stream crossing")
     .append("label")
     .attr("class", "priorLabel")
-    .text("Geomorphic")
-    .property("title", "Relative weight of importance of geomorphic risk of failure (ROF) value in calculation of the weighted ROF metric");
+    .html('<input id="chk_geo_rof" type="checkbox" class="attrCheck" value="geo_rof"></input><span>Geomorphic ROF</span>')
+    .on("click", function() {var tmpChk = d3.select("#chk_geo_rof"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
+
+
+
+  //******Attribute selection
+  d3.select("#attr")
+    .append("div")
+    .attr("class", "priorHeader1")
+    .append("h4")
+    .attr("class", "priorTitle")
+    .text("Select Additional Crossing Attributes")
+    .property("title", "Choose additional crossing attributes to be added to 'Charts' for prioritization filtering");
+
+  d3.select("#attr")
+    .append("div")
+    .attr("class", "attrDiv")
+    .property("title", "Check to select all below attributes")
+    .style("border-bottom", "1px solid black")
+    .append("label")
+    .attr("class", "priorLabel")
+    .html('<input id="chk_all" type="checkbox" class="extraCheck"></input><span>Select All</span>');
+
+  d3.select("#chk_all")
+    .on("click", function() { 
+      var tmpChk = d3.selectAll(".extraCheck")
+      if (this.checked == true) {
+        tmpChk.property("checked", true);
+        tmpChk[0].forEach(function(d) { topos.crossings.display[d.value] = "yes"; });
+      } 
+      else {
+        tmpChk.property("checked", false);
+        tmpChk[0].forEach(function(d) { topos.crossings.display[d.value] = "no"; });
+      }
+    });
+
+  d3.select("#attr")
+    .append("div")
+    .attr("id", "attrSelDiv");
+    //.on("mousewheel", function() { d3.event.stopPropagation(); });
+   
+
+  var noDisplay = [];
+  topos.crossings.keys.forEach(function(key) {
+    if (topos.crossings.display[key] == "no") {
+      noDisplay.push(key);
+    }
+  });
+
+  var tmpDiv = d3.select("#attrSelDiv");
+  noDisplay.forEach(function(key) {
+    tmpDiv.append("div")
+      .attr("class", "attrDiv")
+      .property("title", "Check to add " + topos.crossings.title[key] + " to 'Charts' for filtering")
+      .append("label")
+      .attr("class", "priorLabel")
+      .html('<input id="chk_' + key + '" type="checkbox" class="extraCheck" value="' + key + '"></input><span>' + topos.crossings.title[key] + '</span>')
+      .on("click", function() { var tmpChk = d3.select("#chk_" + key); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
+  });
+
+
 
   //******Updating elements
   d3.select("#priorUpdate")
@@ -584,73 +412,61 @@ function completePrioritization() {
   d3.select("#priorUpdate")
     .append("button")
     .text("Update")
-    .property("title", "Click to update all priority metrics")
+    .property("title", "Click to update selected components")
     .attr("class", "priorButton")
-    .on("click", function() {createNewMetric();} );
-
+    .on("click", function() { updateLegends(); });
 }
 
 
-function createNewMetric() {
-  //get weights
-  var hROF = Number(d3.select("#hydroROF").property("value"));
-  var sROF = Number(d3.select("#structROF").property("value"));
-  var gROF = Number(d3.select("#geomorphROF").property("value"));
 
-  //******Add weighted ROF variable option to keys, legend select box, and histogram select box
-  var tmpKey = "ROF_" + hROF + "-" + sROF + "-" + gROF;
-  if (topos.crossings.keys.indexOf(tmpKey) == -1) {
-    topos.crossings.keys.push(tmpKey);
-    topos.crossings.title[tmpKey] = "ROF " + hROF + ":" + sROF + ":" + gROF;
-    topos.crossings.unit[tmpKey] = "";
-    topos.crossings.tooltip[tmpKey] = "Combined risk of failure (ROF) score (0 = Good, 1 = Poor) for a stream crossing with hydrologic, structural, and geomorphic ROF weightings of " + hROF + ", " + sROF + ", and " + gROF; 
-    topos.crossings.direction[tmpKey] = "reverse";
-    topos.crossings.covType[tmpKey] = "number";
-    topos.crossings.data_type[tmpKey] = "decimal";
-    topos.crossings.scale[tmpKey] = "linear";
-    topos.crossings.conversion[tmpKey] = {};
 
-    d3.select("#crossingsSelect")
-      .append("option")
-      .attr("value", tmpKey)
-      .text(topos.crossings.title[tmpKey]);
- 
-    if (d3.select("#layerFilterSelect").node().value == "crossings") {
-      d3.select("#attributeFilterSelect")
-        .append("option")
-        .attr("value", tmpKey)
-        .text(topos.crossings.title[tmpKey]);
+
+//******Update legend and chart select boxes
+function updateLegends() {
+  var display = [];
+  topos.crossings.keys.forEach(function(key) {
+    if (topos.crossings.display[key] == "yes") {
+      display.push(key);
     }
-  }
-  else {
-    addAlert("This weighting combination has previously been used and is already present as an attribute option");
-    return;
-  }
-
-  //******Calculate weighted ROF value
-  var sumWeight = gROF + hROF + sROF;
-
-  gROF = gROF/sumWeight;
-  hROF = hROF/sumWeight;
-  sROF = sROF/sumWeight;
-
-  for (var i=0; i<crossingCov.length; i++) {
-    crossingCov[i][tmpKey] = crossingCov[i].geo_rof*gROF + crossingCov[i].hydro_rof*hROF + crossingCov[i].struct_rof*sROF;
-  };
-
-
-  //******Find max value
-  topos.crossings.max[tmpKey] = d3.max(crossingCov, function(d) {return d[tmpKey];});
-
-  //******Add new weighted ROF to crossfilter
-  cfDimension(topos.crossings, crossingCov);
-
-  //******Add new weighted ROF to topoJSON
-  var tmpMap = d3.map(crossingCov, function(d) {return d[topos.crossings.uniqueID];});
-
-  topos.crossings.features.forEach(function(d) { 
-    d.properties[tmpKey] = tmpMap.get(d.id)[tmpKey];
   });
-  
-  addAlert("A custom weighted condition attribute has been added to the 'Crossings' options in both the Legend and Charts windows");  
+
+  var tmpOpts = d3.select("#crossingsSelect").selectAll("option")
+    .data(display);
+
+  tmpOpts.exit()
+    .remove();
+  tmpOpts.enter()
+    .append("option")
+  tmpOpts
+    .attr("value", function(d) { return d; })
+    .text(function(d) { return topos.crossings.title[d]; });
+
+  changeStyle(d3.select("#crossingsSelect").node().value, topos.crossings);
+
+
+ 
+  if (d3.select("#layerFilterSelect").node().value == "crossings") {
+    display.splice(0,0, "...");
+    tmpOpts = d3.select("#attributeFilterSelect").selectAll("option")
+      .data(display);
+      
+    tmpOpts.exit()
+      .remove();
+    tmpOpts.enter()
+      .append("option")
+    tmpOpts
+      .attr("value", function(d) { return d; })
+      .text(function(d) { return topos.crossings.title[d]; });
+  }
+
+  //Edit filter select if attribute graphed is removed
+  graphs.forEach(function(graph) {
+    if (display.indexOf(graph.split("-")[1]) == -1) {
+      removeFilter(graph, topos.crossings, 1);
+    }
+  });
+
+  d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 0;})
+
+  addAlert("Selected components have been added to the 'Crossings' options in both the Legend and Charts windows");
 }

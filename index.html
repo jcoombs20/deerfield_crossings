@@ -258,7 +258,7 @@
       //******Add custom weighting tool
       var customWeight = new L.Control.customWeight();
       map.addControl(customWeight);
-      completePrioritization();
+      //completePrioritization(); Needed to add later to access data
 
       //******Add graph tool
       L.control.graph().addTo(map);
@@ -638,6 +638,7 @@
           topos[d]["data_type"] = {};
           topos[d]["scale"] = {};
           topos[d]["display"] = {};
+          topos[d]["rank"] = {};
           topos[d]["conversion"] = {};
           topos[d]["minVal"] = {};
           topos[d]["maxVal"] = {};
@@ -655,6 +656,7 @@
           topos[d.layer]["data_type"][d.short_heading] = d.data_type;
           topos[d.layer]["scale"][d.short_heading] = d.scale;
           topos[d.layer]["display"][d.short_heading] = d.display;
+          topos[d.layer]["rank"][d.short_heading] = d.rank;
           topos[d.layer]["conversion"][d.short_heading] = {};
           if (jQuery.isEmptyObject(d.conversion) == false) {
             topos[d.layer]["conversion"][d.short_heading] = JSON.parse(d.conversion);
@@ -667,6 +669,21 @@
         topos.streams.keys = d3.keys(streamCov[0]);
         topos.catchments.keys = d3.keys(catchCov[0]);
         topos.political.keys = d3.keys(political[0]);
+
+        //******Put keys in rank order
+        tmpLayers.forEach(function(layer, i) {
+          if (i < tmpLayers.length - 1) {
+            var keyArray = [];
+            for (i = 0; i < topos[layer].keys.length; i++) { 
+              topos[layer].keys.forEach(function(d) {
+                if (parseInt(topos[layer].rank[d]) == i) {
+                  keyArray.push(d);
+                }
+              });
+            }
+            topos[layer].keys = keyArray;
+          }
+        }); 
 
         //******Transform covariate data if necessary
         var tmpLayers = [[crossCov, "crossings"], [streamCov, "streams"], [catchCov, "catchments"]];
@@ -690,7 +707,6 @@
             });
           });
         });
-
 
         //******Make crossfilter dimensions
         cfDimension(topos.crossings, crossCov);
@@ -725,11 +741,14 @@
         
         //******Add topoJSON layers
         map.addLayer(crossTogSVG);
-        d3.select("#catchmentsSelect").property("selectedIndex", function() {return 1;});
-        //map.addLayer(catchTogSVG); //Begin without catchment layer visible
-        removeTopo(topos.catchments);
         map.addLayer(streamTogSVG);
+        //map.addLayer(catchTogSVG); //Begin without catchment layer visible
+        //d3.select("#catchmentsSelect").property("selectedIndex", function() {return 1;});
+        removeTopo(topos.catchments);
        
+        //******Finalize the prioritization tool
+        completePrioritization();      
+
         //******Set map view
         map.on("viewreset", reset);
         reset();
@@ -749,12 +768,13 @@
         var tmpArray = topo.keys.map(function(d) { return {"att": d, val: formatAtt(topo, d, tmpFeat[d]) }; } );
         var columns = ["att", "val"]
 
-        var rows = d3.select("#attValuesTable").selectAll('.attTR')
+        var rows = d3.select("#attValuesTable").selectAll('.attTR, .attTRVis')
           .data(tmpArray);
         rows.exit().remove();
         rows.enter()
-          .append('tr')
-          .attr("class", "attTR");          
+          .append('tr');
+        rows
+          .attr("class", function(d) { if(topo.display[d.att] == "yes") { return "attTRVis"; } else { return "attTR"; } });          
 
         var cells = rows.selectAll("td")
           .data(function(row) {
@@ -898,7 +918,7 @@
           .append("select")
           .attr("class", "filterAttrList")
           .attr("id", "typePolFilterSelect")
-          .style("width", "130px");
+          .style("width", "200px");
 
         //******Add clear all button
         d3.select("#polFilterSelectDiv")

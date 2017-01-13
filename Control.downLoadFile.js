@@ -64,7 +64,7 @@ function completeDownload() {
     .property("title", "Download attributes of visible map features for the selected layer to the specified output format")
     .append("span")
     .style("margin-left", "20px")
-    .html('<span id="testTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Feature Download</center></b></u></p><p>Enables the user to download visible features from the crossings, streams, or catchments layer in a CSV, shapefile, or geoJSON format</p>"></span>');
+    .html('<span id="testTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-container="#downloadFile" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Feature Download</center></b></u></p><p>Enables the user to download visible features from the crossings, streams, or catchments layer in a CSV, shapefile, or geoJSON format</p>"></span>');
 
   d3.select("#downloadFile")
     .append("hr")

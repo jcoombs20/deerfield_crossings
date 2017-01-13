@@ -125,6 +125,14 @@ body, html {
   padding-top: 50px;
 }
 
+.leaflet-right {
+  z-index: 1001;
+}
+
+.leaflet-bottom {
+ z-index: 999;
+}
+
 .leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar {
   border: 0px;
 }
@@ -200,7 +208,7 @@ body, html {
   width: 375px;
   max-width: 375px;
   margin: 0px;
-  z-index: 2000;
+  z-index: 1000;
   max-height: 85%;
   overflow-y: auto;
   overflow-x: visible;
@@ -247,6 +255,15 @@ body, html {
 .attTR:hover {
   background: rgba(255,255,255,1);
 }
+
+.attTRVis {
+  background: rgba(51, 204, 51, 0.2)
+}
+
+.attTRVis:hover {
+  background: rgba(51, 204, 51, 1);
+}
+
 
 .attTD, .attTH {
   border-top: 1px solid gray;

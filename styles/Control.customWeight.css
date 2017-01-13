@@ -13,7 +13,7 @@
 
 .leaflet-control-customWeight a {
         background-color: white; 
-	background-image: url(../images/scale2_small.png);
+	background-image: url(../images/checkmark.png);
 	width: 36px;
 	height: 36px;
 	-moz-border-radius: 4px;
@@ -65,46 +65,105 @@
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
-  max-width: 881px;
+  max-width: 995px;
+}
+
+#priorWeights {
+  border-bottom: 1px solid black;
+}
+
+#core {
+  float: left;
+  //border-right: 1px solid black;
+}
+
+#attr {
+  float: left;
+  border-left: 1px solid black;
+  border-bottom: 1px solid black;
+  -moz-border-radius: 0px 0px 4px 4px;
+  -webkit-border-radius: 0px 0px 4px 4px;
+  border-radius: 0px 0px 4px 4px;
+}
+
+#attrSelDiv {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.attrCheck, .extraCheck {
+  transform: scale(1.2) !important;
+  margin-right: 7px !important;
+}
+
+.priorHeader1, .priorHeader2, .priorHeader3, .priorHeader4 {
+  text-align: center;
+  border-bottom: 1px solid black;
+}
+
+.priorHeader1 {
+  background: rgba(51, 204, 51, 0.2);
+}
+
+.priorHeader1:hover {
+  background: rgba(51, 204, 51, 0.5);
+}
+
+.priorHeader2 {
+  background: rgba(0, 0, 255, 0.2);
+}
+
+.priorHeader2:hover {
+  background: rgba(0, 0, 255, 0.5);
+}
+
+.priorHeader3 {
+  background: rgba(128, 0, 128, 0.2);
+}
+
+.priorHeader3:hover {
+  background: rgba(128, 0, 128, 0.5);
+}
+
+.priorHeader4 {
+  background: rgba(255, 165, 0, 0.2);
+}
+
+.priorHeader4:hover {
+  background: rgba(255, 165, 0, 0.5);
+}
+
+#coreComp, #crossPrior {
+  text-align: center;
+  min-width: 664px;
+  //border-right: 1px solid black;
 }
 
 #eco {
   float: left;
-  border-style: solid;
-  border-color: black;
-  border-width: 1px;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
   -moz-border-radius: 0px 0px 4px 4px;
   -webkit-border-radius: 0px 0px 4px 4px;
   border-radius: 0px 0px 4px 4px;
   text-align: center;
-  width: 372px;
+  width: 30%;
 }
 
 #transport {
   float: left;
-  border-style: solid;
-  border-color: black;
-  border-width: 1px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
   -moz-border-radius: 0px 0px 4px 4px;
   -webkit-border-radius: 0px 0px 4px 4px;
   border-radius: 0px 0px 4px 4px;
   text-align: center;
-  width: 509px;
+  width: 70%;
 }
 
-#tempThreshDiv {
-  float: left;
-  width: 42%;
-  margin-left: 8%;
-  border-left: 1px solid black;
-  border-right: 1px solid black;
-}
-
-#tempYearDiv {
-  float: left;
-  width: 42%;
-  margin-right: 8%;
-  border-right: 1px solid black;
+#coldWaterDiv {
+  margin-left: 40px;
 }
 
 #disrupt {
@@ -149,21 +208,21 @@
 }
 
 .priorTitle {
+  text-align: center;
   font-weight: bold;
-  font-size: 20px;
-  margin: 5px 10px 10px 10px;
-}
-
-.priorHeader {
-  font-weight: bold;
-  font-size: 18px;
-  margin: 0px 0px 0px 10px;
+  padding: 5px;
+  margin: 0px;
 }
 
 .priorLabel {
   font-weight: bold;
-  font-size: 15px;
-  margin: 8px 10px 8px 10px;
+  font-size: 14px;
+  margin: 3px 10px 3px 10px;
+}
+
+.priorCheck {
+  margin-right: 10px !important;
+  transform: scale(1.5) !important;
 }
 
 .priorHR {
@@ -186,6 +245,15 @@
 }
 
 .priorDiv:hover {
+  background: rgba(255,255,255,1);
+}
+
+.attrDiv {
+  text-align: left;
+  padding-left: 35px;
+}
+
+.attrDiv:hover {
   background: rgba(255,255,255,1);
 }
 
