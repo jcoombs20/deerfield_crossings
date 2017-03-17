@@ -11,10 +11,6 @@ L.Control.customWeight = L.Control.extend({
         container.id = "prioritization";
         L.DomEvent.disableClickPropagation(container);
 
-        //******Content Div
-        var content = L.DomUtil.create('div', className + '-div');
-        content.id = "attContent";
-
         //******Ecological Connectivity
         var weights = L.DomUtil.create('div', className + '-div');
         weights.id = "priorWeights";
@@ -46,11 +42,11 @@ L.Control.customWeight = L.Control.extend({
             this._expand();
         }
 
-        content.appendChild(weights);
-        content.appendChild(core);
-        content.appendChild(attr);
-        content.appendChild(update);
-        container.appendChild(content);
+        container.appendChild(weights);
+        container.appendChild(core);
+        container.appendChild(attr);
+        container.appendChild(update);
+
         return container;
     },
 
@@ -99,10 +95,10 @@ function completePrioritization() {
     .append("div")
     .append("h4")
     .attr("class", "priorTitle")
-    .text("Stream Crossing Attribute Selection")
+    .text("Stream Crossing Component Selection")
     .property("title", "Select stream crossing components for potential filtering in 'Charts' during prioritization")
     .append("span")
-    .html('<span id="attTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-container="#attContent" data-placement="left" title="Stream Crossing Attribute Selection: Enables the user to select stream crossing attributes for viewing in the &apos;Legend&apos; window and potential filtering in the &apos;Charts&apos; window during the prioritization process" data-html="true" data-original-title="<p><u><b><center>Stream Crossing Component Selection</center></b></u></p><p>Enables the user to select stream crossing attributes for viewing in the &apos;Legend&apos; window and potential filtering in the &apos;Charts&apos; window during the prioritization process</p>"></span>');
+    .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Stream Crossing Component Selection</center></b></u></p><p>Enables the user to select stream crossing attributes for potential filtering in Charts during the prioritization process</p>"></span>');
 
   //******Add Core Components
   d3.select("#core")
@@ -114,7 +110,7 @@ function completePrioritization() {
     .property("title", "Select which ecological disruption and transportation system vulnerability measures are available to view and filter during crossing prioritization")
     .append("h4")
     .attr("class", "priorTitle")
-    .text("Choose Core Attributes");
+    .text("Choose Core Components");
 
   //******Add Crossing Prioritization Score
   d3.select("#core")
@@ -187,7 +183,7 @@ function completePrioritization() {
     .property("title", "Potential for improved aquatic connectivity of coldwater streams via crossing replacement")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<span id="chk_water_temp" type="checkbox" class="attrCheck glyphicon glyphicon-plus-sign" value="water_temp" data-toggle="collapse" data-target="#coldWaterDiv" onclick="changeGlyph(this)" title="Click to open panel"></span><span>Coldwater Restoration</span>');
+    .html('<input id="chk_water_temp" type="checkbox" class="attrCheck" value="water_temp" data-toggle="collapse" data-target="#coldWaterDiv"></input><span>Coldwater Restoration</span>');
 
   d3.select("#ecoDiv")
     .append("div")
@@ -231,10 +227,10 @@ function completePrioritization() {
     .append("div")
     .attr("class", "priorHeader3")
     .attr("id", "connectTrans")
-    .property("title", topos.crossings.tooltip.trans_vuln)
+    .property("title", "Check to make the transportation system vulnerability score available to view and filter")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_trans_vuln" type="checkbox" class="priorCheck" value="trans_vuln" checked></input><span>' + topos.crossings.title.trans_vuln + '</span>')
+    .html('<input id="chk_trans_vuln" type="checkbox" class="priorCheck" checked></input><span>Transportation System Vulnerability</span>')
     .on("click", function() {var tmpChk = d3.select("#chk_trans_vuln"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
 
@@ -257,40 +253,40 @@ function completePrioritization() {
     .append("div")
     .attr("id", "disruptComposite")
     .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.ln_comp_del)
+    .property("title", "Combined total and maximum time of delay (minutes) to emergency services if crossing was compromised")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_ln_comp_del" type="checkbox" class="attrCheck" value="ln_comp_del" checked></input><span>' + topos.crossings.title.ln_comp_del + '</span>')
+    .html('<input id="chk_ln_comp_del" type="checkbox" class="attrCheck" value="ln_com_del" checked></input><span>Integrated Delay</span>')
     .on("click", function() {var tmpChk = d3.select("#chk_ln_comp_del"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
   
   d3.select("#disruptInput")
     .append("div")
     .attr("id", "disruptMax")
     .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.max_del)
+    .property("title", "Maximum time of delay (minutes) to emergency services if crossing was compromised")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_max_del" type="checkbox" class="attrCheck" value="max_del"></input><span>' + topos.crossings.title.max_del + '</span>')
+    .html('<input id="chk_max_del" type="checkbox" class="attrCheck" value="max_del"></input><span>Maximum Delay</span>')
     .on("click", function() {var tmpChk = d3.select("#chk_max_del"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   d3.select("#disruptInput")
     .append("div")
     .attr("id", "disruptAve")
     .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.ave_del)
+    .property("title", "Average traffic delay (minutes) to emergency sevices for all trips if road-stream crossing becomes compromised")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_ave_del" type="checkbox" class="attrCheck" value="ave_del"></input><span>' + topos.crossings.title.ave_del + '</span>')
+    .html('<input id="chk_ave_del" type="checkbox" class="attrCheck" value="ave_del"></input><span>Average Delay</span>')
     .on("click", function() {var tmpChk = d3.select("#chk_ave_del"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   d3.select("#disruptInput")
     .append("div")
     .attr("id", "disruptAveAff")
     .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.ave_aff_del)
+    .property("title", "Average traffic delay (minutes) to emergency sevices for affected trips if road-stream crossing becomes compromised")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_ave_aff_del" type="checkbox" class="attrCheck" value="ave_aff_del"></input><span>' + topos.crossings.title.ave_aff_del + '</span>')
+    .html('<input id="chk_ave_aff_del" type="checkbox" class="attrCheck" value="ave_aff_del"></input><span>Average Affected Delay</span>')
     .on("click", function() {var tmpChk = d3.select("#chk_ave_aff_del"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
 
@@ -313,40 +309,40 @@ function completePrioritization() {
     .append("div")
     .attr("id", "rofInputMax")
     .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.max_rof)
+    .property("title", "Maximum hydrologic, structural, or geomorphic risk of failure (ROF) value for a stream crossing")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_max_rof" type="checkbox" class="attrCheck" value="max_rof" checked></input><span>' + topos.crossings.title.max_rof + '</span>')
+    .html('<input id="chk_max_rof" type="checkbox" class="attrCheck" value="max_rof" checked></input><span>Integrated ROF</span>')
     .on("click", function() {var tmpChk = d3.select("#chk_max_rof"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   d3.select("#rofInput")
     .append("div")
     .attr("id", "rofInputStruct")
     .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.struct_rof)
+    .property("title", "Structural risk of failure (ROF) value for the stream crossing")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_struct_rof" type="checkbox" class="attrCheck" value="struct_rof"></input><span>' + topos.crossings.title.struct_rof + '</span>')
+    .html('<input id="chk_struct_rof" type="checkbox" class="attrCheck" value="struct_rof"></input><span>Structural ROF</span>')
     .on("click", function() {var tmpChk = d3.select("#chk_struct_rof"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   d3.select("#rofInput")
     .append("div")
     .attr("id", "rofInputHydro")
     .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.hydro_rof)
+    .property("title", "Hydrologic risk of failure (ROF) value for the stream crossing")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_hydro_rof" type="checkbox" class="attrCheck" value="hydro_rof"></input><span>' + topos.crossings.title.hydro_rof + '</span>')
+    .html('<input id="chk_hydro_rof" type="checkbox" class="attrCheck" value="hydro_rof"></input><span>Hydrologic ROF</span>')
     .on("click", function() {var tmpChk = d3.select("#chk_hydro_rof"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
   d3.select("#rofInput")
     .append("div")
     .attr("id", "rofInputGeo")
     .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.geo_rof)
+    .property("title", "Geomorphic risk of failure (ROF) value for the stream crossing")
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_geo_rof" type="checkbox" class="attrCheck" value="geo_rof"></input><span>' + topos.crossings.title.geo_rof + '</span>')
+    .html('<input id="chk_geo_rof" type="checkbox" class="attrCheck" value="geo_rof"></input><span>Geomorphic ROF</span>')
     .on("click", function() {var tmpChk = d3.select("#chk_geo_rof"); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
 
 
@@ -384,8 +380,8 @@ function completePrioritization() {
 
   d3.select("#attr")
     .append("div")
-    .attr("id", "attrSelDiv")
-    .on("mousewheel", function() { d3.event.stopPropagation(); });
+    .attr("id", "attrSelDiv");
+    //.on("mousewheel", function() { d3.event.stopPropagation(); });
    
 
   var noDisplay = [];
@@ -399,7 +395,7 @@ function completePrioritization() {
   noDisplay.forEach(function(key) {
     tmpDiv.append("div")
       .attr("class", "attrDiv")
-      .property("title", topos.crossings.tooltip[key])
+      .property("title", "Check to add " + topos.crossings.title[key] + " to 'Charts' for filtering")
       .append("label")
       .attr("class", "priorLabel")
       .html('<input id="chk_' + key + '" type="checkbox" class="extraCheck" value="' + key + '"></input><span>' + topos.crossings.title[key] + '</span>')
@@ -416,7 +412,7 @@ function completePrioritization() {
   d3.select("#priorUpdate")
     .append("button")
     .text("Update")
-    .property("title", "Click to update the 'Legend' and 'Charts' attributes for the Crossings layer to those selected above")
+    .property("title", "Click to update selected components")
     .attr("class", "priorButton")
     .on("click", function() { updateLegends(); });
 }
@@ -472,5 +468,5 @@ function updateLegends() {
 
   d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 0;})
 
-  addAlert("Selected components have been added to the Crossings layer options in both the 'Legend' and 'Charts' windows");
+  addAlert("Selected components have been added to the 'Crossings' options in both the Legend and Charts windows");
 }

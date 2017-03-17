@@ -1,16 +1,14 @@
 layer	short_heading	long_heading	unit	direction	data_type	scale	display	rank	tooltip	conversion
 crossings	impassability	Impassability Score		reverse	decimal	linear	not yet	5	The aquatic impassability score for the road-stream crossing (0 = Completely Passable, 1 = Impassable)	
 crossings	bar_type	Crossing Type		reverse	text	categorical	no	17	Type of stream crossing (bridge, culvert, multiple culvert, etc.)	{"1":"Culvert","2":"Bridge","3":"Dam"}
-crossings	jurisdiction	Road Jurisdiction		forward	text	categorical	no	27	Responsibility for road maintenance at crossing	{"0":"Unaccepted", "1":"Mass DOT", "2":"City/Town", "6":"State Park/Forest"}
-crossings	nhs	National Highway System		forward	text	categorical	no	28	National Highway System status of road at crossing	{"0":"Not on NHS","1":"NHS-Interstate","14":"NHS-Other"}
-crossings	drain_bar	Unimpeded Drainage Area	KM^2	forward	decimal	log	no	18	Drainage area (square kilometers) of all upstream reaches to first encountered road-stream crossing	
-crossings	drain_tot	Drainage Area	KM^2	forward	decimal	log	no	19	Drainage area (square kilometers) of all upstream reaches	
-crossings	strkm_bar	Connected Habitat	KM	forward	decimal	log	no	20	Stream length (kilometers) of all upstream reaches to first encountered road-stream crossing	
-crossings	strkm_tot	Stream Length	KM	forward	decimal	log	no	21	Stream length (kilometers) of all upstream reaches	
-crossings	upstr_bars	Structure Count		reverse	integer	log	no	22	Total number of upstream structures crossing the stream	
-crossings	Slope_perc	Stream Slope	%	forward	decimal	log	no	23	The slope of the stream reach containing the crossing	
-crossings	Q2_m3_s	Q2 Discharge	M^3/s	forward	decimal	log	no	24	The predicted two-year high discharge value determined using the Jacob's regime equation for gravel dominated stream beds	
-crossings	w_W_m2_ST	Unit Stream Power	W/M	forward	decimal	log	no	25	The total energy exerted by the stream divided by the width of the stream determined using Q2 discharge and bankful width	
+crossings	jurisdiction	Road Jurisdiction		forward	text	categorical	no	25	Responsibility for road maintenance at crossing	{"0":"Unaccepted", "1":"Mass DOT", "2":"City/Town", "6":"State Park/Forest"}
+crossings	nhs	National Highway System		forward	text	categorical	no	26	National Highway System status of road at crossing	{"0":"Not on NHS","1":"NHS-Interstate","14":"NHS-Other"}
+crossings	drain_tot	Drainage Area	KM^2	forward	decimal	log	no	18	Drainage area (square kilometers) of all upstream reaches	
+crossings	strkm_tot	Stream Length	KM	forward	decimal	log	no	19	Stream length (kilometers) of all upstream reaches	
+crossings	upstr_bars	Structure Count		reverse	integer	log	no	20	Total number of upstream structures crossing the stream	
+crossings	Slope_perc	Stream Slope	%	forward	decimal	log	no	21	The slope of the stream reach containing the crossing	
+crossings	Q2_m3_s	Q2 Discharge	M^3/s	forward	decimal	log	no	22	The predicted two-year high discharge value determined using the Jacob's regime equation for gravel dominated stream beds	
+crossings	w_W_m2_ST	Unit Stream Power	W/M	forward	decimal	log	no	23	The total energy exerted by the stream divided by the width of the stream determined using Q2 discharge and bankful width	
 crossings	hydro_rof	Hydraulic Risk		reverse	decimal	linear	not yet	11	Risk of hydraulic failure for the stream crossing (0 = Low, 1 = High)	
 crossings	struct_rof	Structural Risk		reverse	decimal	linear	not yet	12	Risk of structural failure for the stream crossing (0 = Low, 1 = High)	
 crossings	geo_rof	Geomorphic Risk		reverse	decimal	linear	not yet	13	Risk of geomorphic failure for the stream crossing (0 = Low, 1 =  High)	
@@ -25,12 +23,12 @@ crossings	effect_scaled	Connectivity Restoration Potential		forward	decimal	line
 crossings	effect_scaled_16	Coldwater (16 C) Restoration Potential		forward	decimal	linear	not yet	8	Potential for improved aquatic connectivity of coldwater streams (below 16 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality) 0 = Low, 1 = High	
 crossings	effect_scaled_18	Coldwater (18 C) Restoration Potential		forward	decimal	linear	not yet	9	Potential for improved aquatic connectivity of coldwater streams (below 18 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality)  0 = Low, 1 = High	
 crossings	effect_scaled_20	Coldwater (20 C) Restoration Potential		forward	decimal	linear	not yet	10	Potential for improved aquatic connectivity of coldwater streams (below 20 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality)  0 = Low, 1 = High	
-crossings	Observed_Date	Assessment Date		forward	date	linear	no	26	Date the crossing was field assessed (NA indicates crossing has not been field assessed)	
+crossings	Observed_Date	Assessment Date		forward	date	linear	no	24	Date the crossing was field assessed (NA indicates crossing has not been field assessed)	
 crossings	trans_vuln	Transportation Vulnerability		reverse	decimal	linear	yes	2	Transportation system vulnerability score that combines the Overall EMS delay score (criticality) and Overall Risk of Failure score (risk)	
 crossings	cross_prior	Crossing Prioritization		reverse	decimal	linear	yes	0	Crossing prioritization score that combines the maximum value of the Ecological Disruption and Transportation Vulnerability scores (0 = Low, 1 = High)	
-crossings	featureid	Feature ID		forward	integer	linear	never	31	The unique identifier of the catchment in which the stream crossing is located	
-crossings	unique_id	Unique ID		forward	integer	linear	never	30	The unique identifier of the stream crossing	
-crossings	crossing_id	Crossing ID		forward	text	linear	never	29	The NAACC XY identifier (culverts and bridges) or TNC identifier (dams) of the stream crossing	
+crossings	featureid	Feature ID		forward	integer	linear	never	29	The unique identifier of the catchment in which the stream crossing is located	
+crossings	unique_id	Unique ID		forward	integer	linear	never	28	The unique identifier of the stream crossing	
+crossings	crossing_id	Crossing ID		forward	text	linear	never	27	The NAACC XY identifier (culverts and bridges) or TNC identifier (dams) of the stream crossing	
 catchments	agriculture	Agriculture	%	reverse	decimal	log	yes	3	Percentage of the catchment used for agriculture	
 catchments	elevation	Elevation	M	forward	decimal	linear	yes	0	Average elevation (meters) of the catchment	
 catchments	forest	Forest Cover	%	forward	decimal	linear	yes	2	Percentage of the catchment covered with forest	
