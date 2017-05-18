@@ -10,21 +10,28 @@
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
+        width: 32px;
+}
+
+.leaflet-control-downLoadFile-expanded {
+        width: 265px;
+        position: absolute;
+        bottom: 0px;
 }
 
 .leaflet-control-downLoadFile a {
         background-color: white; 
 	background-image: url(../images/download2.png);
-	width: 36px;
-	height: 36px;
+	width: 32px;
+	height: 32px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
 }
 
 .leaflet-touch .leaflet-control-downLoadFile a {
-	width: 36px;
-	height: 36px;
+	width: 32px;
+	height: 32px;
 }
 
 .leaflet-control-downLoadFile .leaflet-control-downLoadFile-div,
@@ -34,11 +41,11 @@
 
 .leaflet-control-downLoadFile-expanded .leaflet-control-downLoadFile-div {
 	display: block;
-	position: relative;
+	//position: relative;
 }
 
 .leaflet-control-downLoadFile-expanded .leaflet-control-downLoadFile-div {
-	padding: 5px;
+	//padding: 5px;
 }
 
 .leaflet-control-downLoadFile-button {
@@ -50,7 +57,7 @@
 .leaflet-control-downLoadFile-h5 {
 	margin: 4px;
 	text-align: center;
-       font-weight: bold;
+        font-weight: bold;
 }
 
 .leaflet-control-downLoadFile-input[type=radio] {
@@ -64,6 +71,16 @@
 
 .leaflet-control-downLoadFile-hr {
 	margin: 4px 0px 4px 0px;
+}
+
+#download .priorDiv {
+  padding-left: 80px;
+}
+
+#dlHelpDiv {
+  position: absolute;
+  right: 12px;
+  top: -56px;
 }
 
 #dlButton {
@@ -100,7 +117,7 @@
 
 #download {
   background: rgba(255, 255, 255, 0.9);
-  position: relative;
+  //position: relative;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;

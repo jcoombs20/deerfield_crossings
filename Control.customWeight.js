@@ -1,6 +1,6 @@
 L.Control.customWeight = L.Control.extend({
     options: {
-        position: 'topright',
+        position: 'topleft',
         collapsed: true
     },
 
@@ -418,7 +418,7 @@ function completePrioritization() {
     .text("Update")
     .property("title", "Click to update the 'Legend' and 'Charts' attributes for the Crossings layer to those selected above")
     .attr("class", "priorButton")
-    .on("click", function() { updateLegends(); });
+    .on("click", function() { updateLegends(topos.crossings); });
 }
 
 
@@ -426,15 +426,15 @@ function completePrioritization() {
 
 
 //******Update legend and chart select boxes
-function updateLegends() {
+function updateLegends(topo) {
   var display = [];
-  topos.crossings.keys.forEach(function(key) {
-    if (topos.crossings.display[key] == "yes") {
+  topo.keys.forEach(function(key) {
+    if (topo.display[key] == "yes") {
       display.push(key);
     }
   });
 
-  var tmpOpts = d3.select("#crossingsSelect").selectAll("option")
+  var tmpOpts = d3.select("#" + topo.class + "Select").selectAll("option")
     .data(display);
 
   tmpOpts.exit()
@@ -443,13 +443,13 @@ function updateLegends() {
     .append("option")
   tmpOpts
     .attr("value", function(d) { return d; })
-    .text(function(d) { return topos.crossings.title[d]; });
+    .text(function(d) { return topo.title[d]; });
 
-  changeStyle(d3.select("#crossingsSelect").node().value, topos.crossings);
+  changeStyle(d3.select("#" + topo.class + "Select").node().value, topo);
 
 
  
-  if (d3.select("#layerFilterSelect").node().value == "crossings") {
+  if (d3.select("#layerFilterSelect").node().value == topo.class) {
     display.splice(0,0, "...");
     tmpOpts = d3.select("#attributeFilterSelect").selectAll("option")
       .data(display);
@@ -460,17 +460,17 @@ function updateLegends() {
       .append("option")
     tmpOpts
       .attr("value", function(d) { return d; })
-      .text(function(d) { return topos.crossings.title[d]; });
+      .text(function(d) { return topo.title[d]; });
   }
 
   //Edit filter select if attribute graphed is removed
   graphs.forEach(function(graph) {
-    if (display.indexOf(graph.split("-")[1]) == -1) {
-      removeFilter(graph, topos.crossings, 1);
+    if (display.indexOf(graph.split("-")[1]) == -1 && graph.split("-")[0] == topo.class) {
+      removeFilter(graph, topo, 1);
     }
   });
 
   d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 0;})
 
-  addAlert("Selected components have been added to the Crossings layer options in both the 'Legend' and 'Charts' windows");
+  addAlert("Selected components have been added to the " + topo.class + " layer options in both the 'Legend' and 'Charts' windows");
 }

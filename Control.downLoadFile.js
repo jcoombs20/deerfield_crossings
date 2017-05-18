@@ -1,6 +1,6 @@
 L.Control.downLoadFile = L.Control.extend({
     options: {
-        position: 'topright',
+        position: 'topleft',
         collapsed: true
     },
 
@@ -57,14 +57,22 @@ function completeDownload() {
   //******Add title information
   d3.select("#downloadFile")
     .append("div")
+    .attr("id", "dlHeader")
+    .html('<img class="pull-left header_icon" src="../images/download2.png"></img>');
+    
+  d3.select("#dlHeader")
     .append("h4")
     .attr("id", "priorTitle")
     .attr("class", "legTitle")
     .text("Download Map Features")
     .property("title", "Download attributes of visible map features for the selected layer to the specified output format")
     .append("span")
-    .style("margin-left", "20px")
-    .html('<span id="downloadTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-container="#downloadFile" data-placement="left" title="" data-html="true" data-original-title="<p><u><b><center>Feature Download</center></b></u></p><p>Enables the user to download visible features from the crossings, streams, or catchments layer in a CSV, shapefile, or geoJSON format</p>"></span>');
+    .html('<span id="downloadTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-container="#dlHelpDiv" data-placement="auto right"  data-html="true" title="<p><u><b><center>Feature Download</center></b></u></p><p>Enables the user to download features displayed on the map from the crossings, streams, or catchments layer in a CSV, shapefile, or geoJSON format</p>"></span>');
+
+  d3.select("#dlHeader")
+    .append("div")
+    .attr("id", "dlHelpDiv")
+    .style("float", "right");
 
   d3.select("#downloadFile")
     .append("hr")
@@ -75,7 +83,6 @@ function completeDownload() {
     .append("div")
     .attr("id", "dlCrossings")
     .attr("class", "priorDiv")
-    .style("padding-left", "55px")
     .append("input")
     .attr({type: "radio", name: "layer", value: "crossings", id: "dlCrossingsRadio", checked: true})
     .property("title", "Download visible features from crossings layer")
@@ -92,7 +99,6 @@ function completeDownload() {
     .append("div")
     .attr("id", "dlStreams")
     .attr("class", "priorDiv")
-    .style("padding-left", "55px")
     .append("input")
     .attr({type: "radio", name: "layer", value: "streams", id: "dlStreamsRadio"})
     .property("title", "Download visible features from streams layer")
@@ -109,7 +115,6 @@ function completeDownload() {
     .append("div")
     .attr("id", "dlCatchments")
     .attr("class", "priorDiv")
-    .style("padding-left", "55px")
     .append("input")
     .attr({type: "radio", name: "layer", value: "catchments", id: "dlCatchmentsRadio"})
     .property("title", "Download visible features from catchments layer")
@@ -164,7 +169,7 @@ function completeDownload() {
     .attr("id", "dlButton")
     .text("Download")
     .property("href", "#")
-    .property("title", "Download attributes of visible map features for the selected layer to the specified output format")
+    .property("title", "Save attributes of visible map features for the selected layer to the specified output format")
     .on("click", function() { downloadFile(); });
 
 }

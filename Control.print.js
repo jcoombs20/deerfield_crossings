@@ -1,6 +1,6 @@
 L.Control.print = L.Control.extend({
     options: {
-        position: 'topright',
+        position: 'topleft',
     },
 
     onAdd: function (map) {

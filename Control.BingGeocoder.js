@@ -1,7 +1,7 @@
 L.Control.BingGeocoder = L.Control.extend({
 	options: {
 		collapsed: true,
-		position: 'topright',
+		position: 'topleft',
 		text: 'Locate'
 		/*callback: function (results) {
 			var bbox = results.resourceSets[0].resources[0].bbox,
@@ -89,11 +89,14 @@ L.Control.BingGeocoder = L.Control.extend({
 	},
 
 	_expand: function () {
+                //$(".leaflet-control-zoom.leaflet-control.leaflet-bar").attr("style", "margin-bottom: 19px !important");
 		L.DomUtil.addClass(this._container, 'leaflet-control-geocoder-expanded');
+                d3.select("#dataControlHeaderDiv").style("margin-top", "38px");
 	},
 
 	_collapse: function () {
 		L.DomUtil.removeClass(this._container, 'leaflet-control-geocoder-expanded');
+                d3.select("#dataControlHeaderDiv").style("margin-top", "");
 	}
 });
 

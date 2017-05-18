@@ -15,12 +15,13 @@
     <link href="http://vjs.zencdn.net/5.16.0/video-js.css" rel="stylesheet">
     <link rel="stylesheet" href="styles/Control.BingGeocoder.css"/>
     <link rel="stylesheet" href="styles/Control.extentHistory.css"/>
+    <link rel="stylesheet" href="styles/Control.maxExtent.css"/>
     <link rel="stylesheet" href="styles/Control.mousePosition.css"/>
     <link rel="stylesheet" href="styles/Control.legend.css"/>
     <link rel="stylesheet" href="styles/Control.political.css"/>
     <link rel="stylesheet" href="styles/Control.attributes.css"/>
     <link rel="stylesheet" href="styles/Control.graph.css"/>
-    <link rel="stylesheet" href="styles/Control.customWeight.css"/>
+    <link rel="stylesheet" href="styles/Control.attrSelect.css"/>
     <link rel="stylesheet" href="styles/Control.downLoadFile.css"/>
     <link rel="stylesheet" href="styles/Control.print.css"/>
     <link rel="stylesheet" href="styles/app.css" />
@@ -29,7 +30,8 @@
     <!--script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script-->
     <script src="leaflet.js"></script>
     <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script-->
-    <script src="jquery.min.js"></script>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script src="jquery-ui.min.js"></script>
     <!--script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script-->
     <script src="bootstrap.min.js"></script>
     <script src="http://vjs.zencdn.net/5.16.0/video.js"></script>
@@ -40,12 +42,13 @@
     <!--script src="Google_tile.js"></script-->
     <script src="Control.BingGeocoder.js"></script>
     <script src="Control.extentHistory.js"></script>
+    <script src="Control.maxExtent.js"></script>
     <script src="Control.mousePosition.js"></script>
     <script src="Control.legend.js"></script>
     <script src="Control.political.js"></script>
     <script src="Control.attributes.js"></script>
     <script src="Control.graph.js"></script>
-    <script src="Control.customWeight.js"></script>
+    <script src="Control.attrSelect.js"></script>
     <script src="Control.downLoadFile.js"></script>
     <script src="Control.print.js"></script>
     <!--script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.4.0/intro.min.js"></script-->
@@ -77,56 +80,23 @@
       //******Add Map
       var map = new L.Map('map', {center: new L.LatLng(42.80, -72.83), zoomControl: false, zoom: 10, minZoom: 2, maxZoom: 20, inertiaDeceleration: 1000});
 
-      //******Add map controls
-      L.control.mousePosition().addTo(map);
-      L.control.scale({ maxWidth: 200 }).addTo(map);
-      L.control.zoom({ position: 'topleft', zoomInTitle: "Zoom in (can also be done with mouse wheel, double-click, '+' key, or by pressing the 'shift' key while clicking and dragging a rectangle)", zoomOutTitle: "Zoom out (can also be done with the mouse wheel or the '-' key)" }).addTo(map);
-      L.control.navbar().addTo(map);
-      L.control.legend().addTo(map);
-      L.control.political().addTo(map);
-      L.control.attributes().addTo(map);
-
-      //******Bing geocoder control
-      var tmpPoint = new L.marker;
-      var bingGeocoder = new L.Control.BingGeocoder('At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn', { callback: function (results) {
-                     var bbox = results.resourceSets[0].resources[0].bbox,
-                            first = new L.LatLng(bbox[0], bbox[1]),
-                            second = new L.LatLng(bbox[2], bbox[3]),
-                            tmpBounds = new L.LatLngBounds([first, second]);
-                     this._map.fitBounds(tmpBounds);
-                     this._map.removeLayer(tmpPoint);
-                     tmpPoint = new L.marker(results.resourceSets[0].resources[0].point.coordinates).bindPopup(results.resourceSets[0].resources[0].address.formattedAddress);
-                     this._map.addLayer(tmpPoint);
-                     d3.select(tmpPoint)
-                       .property("title", d3.select(".leaflet-control-geocoder-input").node().value)
-                       .on("click", function() { d3.select(".leaflet-marker-pane").select("img").style("display", "none"); event.stopPropagation(); });
-                   }
+      //******Add base layers
+      var googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
       });
-
-      map.addControl(bingGeocoder);
-
-      //******Add basemaps
-      //var googleHybrid = new L.Google('HYBRID');
-      //var googleSatellite = new L.Google('SATELLITE');
-      //var googleStreet = new L.Google('ROADMAP');
-      //var googleTerrain = new L.Google('TERRAIN');
-
-  var googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3']
-  });
-  var googleSatellite = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3']
-  }); 
-  var googleStreet = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3']
-  });
-  var googleTerrain = googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3']
-  });
+      var googleSatellite = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+      }); 
+      var googleStreet = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+      });
+      var googleTerrain = googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+      });
 
       var bingHybrid = new L.BingLayer("At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn", {type: 'AerialWithLabels'});
       var bingSatellite = new L.BingLayer("At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn", {type: 'Aerial'});
@@ -137,7 +107,7 @@
             });
       var blank = new L.tileLayer('');
     
-      map.addLayer(googleHybrid);
+      map.addLayer(googleTerrain);
 
       //******Add Geoserver Layers
       var gsHuc8 = L.tileLayer.wms("http://felek.cns.umass.edu:8080/geoserver/crossings/wms", {
@@ -206,6 +176,130 @@
 
       //var roads = L.esri.tiledMapLayer({url: "http://gis.massdot.state.ma.us/arcgis/rest/services/Roads/RoadInventory/MapServer"});
 
+      //******Add Geoserver Deerfield HUC8 layer to map
+      map.addLayer(gsHuc8);
+
+      //******Make layer controller
+      var baseLayers = {"Google Hybrid": googleHybrid, "Google Satellite": googleSatellite, "Google Street": googleStreet, "Google Terrain": googleTerrain, "Bing Hybrid": bingHybrid, "Bing Satellite": bingSatellite, "Bing Street": bingStreet, "USGS Topo": usgsTopo, "None": blank};
+      var overlays = {"DOT Districts": gsDOTDistricts, "Counties": gsCounties, "Towns": gsTowns, "HUC 12 Watersheds": gsHUC12, "Environmental Justice": ej, "Road Jurisdiction": jurisdiction, "NHS Roads": nhs, "Deerfield Watershed": gsHuc8};  //, "Catchments": catchTogSVG, "Streams": streamTogSVG, "Crossings": crossTogSVG};
+
+      //******Add map controls
+      //***Bottom Left
+      L.control.scale({ maxWidth: 200 }).addTo(map);
+      L.control.mousePosition().addTo(map);
+
+      //***Top Left
+      //***Map
+      d3.select(".leaflet-top.leaflet-left")
+        .append("div")
+        .attr("class", "horBorder")
+        .append("h5")
+        .attr("class", "controlHeader")
+        .text("Map");
+      d3.select(".leaflet-top.leaflet-left")
+        .append("div")
+        .attr("id", "mapControlDiv");
+      L.control.layers(baseLayers, overlays, {position:'topleft'}).addTo(map);
+      L.control.maxExtent().addTo(map);
+      L.control.zoom({ position: 'topleft', zoomInTitle: "Zoom in (can also be done with mouse wheel, double-click, '+' key, or by pressing the 'shift' key while clicking and dragging a rectangle)", zoomOutTitle: "Zoom out (can also be done with the mouse wheel or the '-' key)" }).addTo(map);
+      //L.control.navbar().addTo(map);
+
+      //***Bing geocoder control
+      var tmpPoint = new L.marker;
+      var bingGeocoder = new L.Control.BingGeocoder('At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn', { callback: function (results) {
+        var bbox = results.resourceSets[0].resources[0].bbox,
+          first = new L.LatLng(bbox[0], bbox[1]),
+          second = new L.LatLng(bbox[2], bbox[3]),
+          tmpBounds = new L.LatLngBounds([first, second]);
+        this._map.fitBounds(tmpBounds);
+        this._map.removeLayer(tmpPoint);
+        tmpPoint = new L.marker(results.resourceSets[0].resources[0].point.coordinates).bindPopup(results.resourceSets[0].resources[0].address.formattedAddress);
+        this._map.addLayer(tmpPoint);
+        d3.select(tmpPoint)
+          .property("title", d3.select(".leaflet-control-geocoder-input").node().value)
+          .on("click", function() { d3.select(".leaflet-marker-pane").select("img").style("display", "none"); event.stopPropagation(); });
+        }
+      });
+
+      map.addControl(bingGeocoder);
+
+      //***Data
+      d3.select(".leaflet-top.leaflet-left")
+        .append("div")
+        .attr("id", "dataControlHeaderDiv")
+        .attr("class", "horBorder")
+        .append("h5")
+        .attr("class", "controlHeader")
+        .text("Data");
+      d3.select(".leaflet-top.leaflet-left")
+        .append("div")
+        .attr("id", "dataControlDiv");
+      L.control.legend().addTo(map);
+      L.control.attrSelect().addTo(map);
+      L.control.attributes().addTo(map);
+      L.control.political().addTo(map);
+      L.control.graph().addTo(map);
+
+      //***Output
+      d3.select(".leaflet-top.leaflet-left")
+        .append("div")
+        .attr("class", "horBorder")
+        .append("h5")
+        .attr("class", "controlHeader")
+        .text("Output");
+      d3.select(".leaflet-top.leaflet-left")
+        .append("div")
+        .attr("id", "outputControlDiv");
+      L.control.print().addTo(map);
+      L.control.downLoadFile().addTo(map);
+
+      //******Move all controls to a new div that can be collapsed
+      var tmpChildren = $(".leaflet-top.leaflet-left").children();
+      d3.select(".leaflet-top.leaflet-left")
+        .append("div")
+        .attr("id", "controlDiv")
+      
+      $('#controlDiv').append($(tmpChildren));
+
+      //******Move control groups to their own divs
+      $('#mapControlDiv').append($('.leaflet-control-layers,.leaflet-control-maxExtent,.leaflet-control-zoom,.leaflet-control-geocoder'));
+      $('#dataControlDiv').append($('.leaflet-control-legend,.leaflet-control-attrSelect,.leaflet-control-political,.leaflet-control-graph,.leaflet-control-attributes'));
+      $('#outputControlDiv').append($('.leaflet-control-print,.leaflet-control-downLoadFile'));
+
+      //******Add collapsible div
+      d3.select(".leaflet-top.leaflet-left")
+        .append("div")
+        .attr("id", "controlToggle")
+        .property("title", "Click to hide control panel")
+        .on("click", function() { controlToggle(); })
+        .html('<span id="controlCaret" class="glyphicon glyphicon-menu-left control-caret"></span>');
+      
+
+      //******Toggle display of control div
+      function controlToggle() {
+       if (d3.select("#controlCaret").classed("glyphicon-menu-left")) {
+          d3.select("#controlCaret").classed("glyphicon-menu-left", false); 
+          d3.select("#controlCaret").classed("glyphicon-menu-right", true);
+          d3.select("#controlToggle").property("title", "Click to show control panel");
+          d3.select("#controlDiv").transition().duration(750).ease("cubic-in-out").style({"width":"0px"});
+        } 
+        else {
+          d3.select("#controlCaret").classed("glyphicon-menu-right", false); 
+          d3.select("#controlCaret").classed("glyphicon-menu-left", true);
+          d3.select("#controlToggle").property("title", "Click to hide control panel");
+          d3.select("#controlDiv").transition().duration(750).ease("cubic-in-out").style({"width": toolWindows.controlDiv.width + "px"});
+        }
+      }
+
+
+      //******Finish styling control menu
+      completeDownload();
+      d3.select(".leaflet-control-layers-base").property("title", "Click on radio button to change the baselayer option");
+      d3.select(".leaflet-control-layers-overlays").property("title", "Check the box to add layer to map (may be slight delay)");
+      
+
+
+
       //******Make d3 vector layers variable
       var topoSVG = d3.select(map.getPanes().overlayPane).append("svg");
       var catchG = topoSVG.append("g").attr("class", "leaflet-zoom-hide").attr("id", "catchG");
@@ -262,7 +356,7 @@
             .on("click", function(data) { getAttributes(data.properties, topo, d3.select(this).style("opacity")); });
         changeStyle(d3.select("#" + topo.class + "Select").node().value, topo);
         filterMap("featureid", topo, true);
-        d3.select("#" + topo.class + "Legend").style("display", "block");
+        //d3.select("#" + topo.class + "Legend").style("display", "block");
       }
 
 
@@ -270,36 +364,9 @@
       function removeTopo(topo) {
         var tmpFeats = topo.g.selectAll("." + topo.class);
         tmpFeats.remove();
-        d3.select("#" + topo.class + "Legend").style("display", "none");
+        //d3.select("#" + topo.class + "Legend").style("display", "none");
       }
 
-      //******Add Geoserver Deerfield HUC8 layer to map
-      map.addLayer(gsHuc8);
-
-      //******Make layer controller
-      var baseLayers = {"Google Hybrid": googleHybrid, "Google Satellite": googleSatellite, "Google Street": googleStreet, "Google Terrain": googleTerrain, "Bing Hybrid": bingHybrid, "Bing Satellite": bingSatellite, "Bing Street": bingStreet, "USGS Topo": usgsTopo, "None": blank};
-      var overlays = {"DOT Districts": gsDOTDistricts, "Counties": gsCounties, "Towns": gsTowns, "HUC 12 Watersheds": gsHUC12, "Environmental Justice": ej, "Road Jurisdiction": jurisdiction, "NHS Roads": nhs, "Deerfield Watershed": gsHuc8, "Catchments": catchTogSVG, "Streams": streamTogSVG, "Crossings": crossTogSVG};
-      L.control.layers(baseLayers, overlays).addTo(map);
-
-      d3.select(".leaflet-control-layers-base").property("title", "Click on radio button to change the baselayer option");
-      d3.select(".leaflet-control-layers-overlays").property("title", "Check the box to add layer to map (may be slight delay)");
-
-      //******Add crossing attribute selection div
-      var customWeight = new L.Control.customWeight();
-      map.addControl(customWeight);
-      //completePrioritization(); Needed to add later to access data
-
-      //******Add graph tool
-      L.control.graph().addTo(map);
-
-      //******Add Download tool
-      var downLoadFile = new L.Control.downLoadFile();
-      map.addControl(downLoadFile);
-      completeDownload();
-
-      //******Add Print tool
-      var printMap = new L.Control.print();
-      map.addControl(printMap);
 
 
       //******Make tooltip for displaying attribute data
@@ -317,16 +384,30 @@
         .html('<span class="brand">SHEDS: Stream Crossings Explorer</span> <div class="pull-right"><a id="launchIntro" href="#" title="Click to launch introduction tutorial" onclick="startIntro()">Tutorial</a> | <a id="showDetails" title="Click to display informational details about this tool" href="#" data-toggle="modal" data-target="#helpDiv">About SCE</a> | <a title="Click to go to the Ecosheds homepage" href="http://ecosheds.org" target="_blank">SHEDS Home</a>');
 
 
-      //******Make div for left-side tools
+
+      //******Function to close window when image icon is clicked
+      function closeIt(tmpWin) {
+        var tmpName = tmpWin;
+        if (tmpWin == "polFilter") {tmpName = "filter";}
+        else if (tmpWin == "attributes") {tmpName = "feature attributes";}
+        else if (tmpWin == "attrSelect") {tmpName = "attribute selection";}
+
+        d3.select("#" + tmpWin + "Div").style("display", "none"); 
+        d3.select("#" + tmpWin + "Control").property("title", "Click to show " + tmpName + " window");
+      }
+      
+
+
+
+
+      //******Make div for legend
       d3.select("body")
         .append("div")
-        .attr("id", "leftSideToolsDiv");
-      
-      //******Make div for legend
-      d3.select("#leftSideToolsDiv")
-        .append("div")
         .attr("class", "legend")
-        .attr("id", "legendDiv");
+        .attr("id", "legendDiv")
+        .html('<img class="pull-left header_icon" src="../images/legend_small.png" ondblclick="toolWindowToggle(&quot;legend&quot;)" title="Double click to hide legend window"></img>');
+
+      $('#legendDiv').draggable({containment: "body"});
 
       d3.select("#legendDiv")
         .append("h4")
@@ -334,22 +415,32 @@
         .attr("class", "legTitle")
         .attr("id", "legendTitle")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="right" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Legend</center></b></u></p><p>Enables interpretation and control over map styling for the Crossings, Catchments, and Streams layers.</p><br><p>Styling controls include a slider to change the layer\'s opacity, and a dropdown box to change the attribute shown.</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-container="body" data-placement="auto right" data-html="true" title="<p><u><b><center>Legend</center></b></u></p><p>Enables interpretation and control over map styling for the Crossings, Catchments, and Streams layers.</p><br><p>Styling controls include a checkbox to turn the layer on and off, a slider to change the layer\'s opacity, and a dropdown box to change the attribute shown on the map.</p>"></span>');
  
       d3.select("#legendTitle")
         .append("span")
         .attr("class", "glyphicon glyphicon-remove-sign pull-right minimize-button")
         .property("title", "Click to hide legend window")
-        .on("click", function() { d3.select("#legendDiv").style("display", "none"); d3.select("#legendControl").property("title", "Click to show legend window"); });
+        .on("click", function() { toolWindowToggle("legend"); });
+
+      d3.select("#legendDiv")
+        .append("div")
+        .style("padding-left", "30px")
+        .attr("class", "legendHeader")
+        .html('<h5 class="layerTitle">Layer&nbsp&nbsp&nbsp&nbsp&nbsp</h5><h5 class="layerTitle pipe">|</h5><h5 class="layerTitle">Transparency</h5><h5 class="layerTitle pipe">|</h5><h5 class="layerTitle">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspMapped Attribute</h5>');
+
 
 
 
 
       //******Make div for political filter
-      d3.select("#leftSideToolsDiv")
+      d3.select("body")
         .append("div")
         .attr("class", "legend")
-        .attr("id", "polFilterDiv");
+        .attr("id", "polFilterDiv")
+        .html('<img class="pull-left header_icon" src="../images/filter2_small.png" ondblclick="toolWindowToggle(&quot;polFilter&quot;)" title="Double click to hide filter window"></img>');
+
+      $('#polFilterDiv').draggable({containment: "body"});
 
       //******Add political filter heading & glyphs
       d3.select("#polFilterDiv")
@@ -358,17 +449,13 @@
         .attr("class", "legTitle")
         .attr("id", "polFilterTitle")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="right" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Regional Filter</center></b></u></p><p>Enables filtering of features in the Crossings, Catchments, and Streams layers to those contained within catchments that intersect the selected \'Area\'.</p><br><p>Conditional statements added to the filter from the same \'Class\' act as \'or\' operators, while conditional statements from different classes act as \'and\' operators</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="auto right" data-container="body"  data-html="true" title="<p><u><b><center>Regional Filter</center></b></u></p><p>Enables filtering of features in the Crossings, Catchments, and Streams layers to those contained within catchments that intersect the selected \'Area\'.</p><br><p>Conditional statements added to the filter from the same \'Class\' act as \'or\' operators (can meet any of the criteria), while conditional statements from different classes act as \'and\' operators (must meet all criteria)</p>"></span>');
 
       d3.select("#polFilterTitle")
         .append("span")
         .attr("class", "glyphicon glyphicon-remove-sign pull-right minimize-button")
         .property("title", "Click to hide filter window")
-        .on("click", function() { d3.select("#polFilterDiv").style("display", "none"); d3.select("#polFilterControl").property("title", "Click to show filter window"); });
-
-      d3.select("#polFilterDiv")
-        .append("hr")
-        .attr("class", "hr");
+        .on("click", function() { toolWindowToggle("polFilter"); });
 
       //******Add political filter select div
       d3.select("#polFilterDiv")
@@ -398,11 +485,14 @@
 
 
       //******Make div for attribute display
-      d3.select("#leftSideToolsDiv")
+      d3.select("body")
         .append("div")
         .attr("class", "legend")
         .attr("id", "attributesDiv")
-        .style("display", "none");
+        .style("display", "none")
+        .html('<img class="pull-left header_icon" src="../images/attributes_icon.png" ondblclick="toolWindowToggle(&quot;attributes&quot;)" title="Double click to hide feature attributes window"></img>');
+
+      $('#attributesDiv').draggable({containment: "body"});
 
       //******Add attribute display heading & glyphs
       d3.select("#attributesDiv")
@@ -411,17 +501,13 @@
         .attr("class", "legTitle")
         .attr("id", "attributesTitle")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="right" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Feature Attributes</center></b></u></p><p>Click on a Crossing, Stream, or Catchment feature to display values for all of its attributes.<br><br>Rows highlighted in pink indicate activated attributes</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="auto right" data-container="body"  data-html="true" title="<p><u><b><center>Feature Attributes</center></b></u></p><p>Click on a Crossing, Stream, or Catchment feature to display values for all of its attributes.<br><br>Rows highlighted in teal indicate activated attributes</p>"></span>');
 
       d3.select("#attributesTitle")
         .append("span")
         .attr("class", "glyphicon glyphicon-remove-sign pull-right minimize-button")
         .property("title", "Click to hide feature attributes window")
-        .on("click", function() { d3.select("#attributesDiv").style("display", "none"); d3.select("#attributesControl").property("title", "Click to show feature attributes window"); });
-
-      d3.select("#attributesDiv")
-        .append("hr")
-        .attr("class", "hr");
+        .on("click", function() { toolWindowToggle("attributes"); });
 
       //******Add attribute values div
       d3.select("#attributesDiv")
@@ -448,33 +534,43 @@
 
 
 
+      //******Make div for attr selection
+      d3.select("body")
+        .append("div")
+        .attr("id", "attrSelectDiv");
+      
+      $('#attrSelectDiv').draggable({containment: "body"});
+
+
+
+
+
       //******Make div for histograms (crossfilters)
       d3.select("body")
         .append("div")
         .attr("class", "legend")
-        .attr("id", "filtersDiv")
-        .style("display", "none");
+        .attr("id", "chartsDiv")
+        .html('<img class="pull-left header_icon" src="../images/graph_2_small.png" ondblclick="toolWindowToggle(&quot;charts&quot;)" title="Double click to hide charts window"></img>');
 
-      d3.select("#filtersDiv")
+
+      $('#chartsDiv').draggable({containment: "body", cancel: "input,textarea, button,select,option,#charts"});
+
+      d3.select("#chartsDiv")
         .append("h4")
         .text("Charts")
         .attr("class", "legTitle")
         .attr("id", "filterTitle")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Charts</center></b></u></p><p>Enables visualization and selection of attribute value distributions from the Crossings, Catchments, and Streams layers.</p><br><p>Selection of an attribute generates a graph showing the distribution of its values that the user can interact with to filter for a subset of the data.</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="auto right" data-container="body"  data-html="true" title="<p><u><b><center>Charts</center></b></u></p><p>Enables visualization and selection of attribute value distributions from the Crossings, Catchments, and Streams layers.</p><br><p>Selection of an attribute generates a graph showing the distribution of its values that the user can interact with to filter and display on the map a subset of the data.</p>"></span>');
 
       d3.select("#filterTitle")
         .append("span")
         .attr("class", "glyphicon glyphicon-remove-sign pull-right minimize-button")
         .property("title", "Click to hide charts window")
-        .on("click", function() { d3.select("#filtersDiv").style("display", "none"); d3.select("#chartControl").property("title", "Click to show charts window"); });
-
-      d3.select("#filtersDiv")
-        .append("hr")
-        .attr("class", "hr");
+        .on("click", function() { toolWindowToggle("charts"); });
 
       //******Add div and table to hold select boxes for adding histograms
-      d3.select("#filtersDiv")
+      d3.select("#chartsDiv")
         .append("div")
         .attr("id", "filterLayers")
         .append("table")
@@ -494,7 +590,7 @@
         
 
       //*******Add div for linking crossfilters (spatial join)
-      d3.select("#filtersDiv")
+      d3.select("#chartsDiv")
         .append("div")
         .attr("class", "horBorder")
         .append("h5")
@@ -502,7 +598,7 @@
         .attr("class", "legTitle")
         .text("Spatial Joins")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Spatial Joins</center></b></u></p><p>When checked, each join shows only features that overlap geographically between its two layers.</p><br><p>Spatial joins enable the filtering of features in one layer based on the selected features of another layer.</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="auto right" data-container="body"  data-html="true" title="<p><u><b><center>Spatial Joins</center></b></u></p><p>When checked, each join shows only features that overlap geographically between its two layers.</p><br><p>Spatial joins enable the filtering of features in one layer based on attribute values of another layer.</p>"></span>');
 
       d3.select("#sjTitle")
         .append("span")
@@ -513,14 +609,14 @@
         .property("title", "Click to display panel")
         .on("click", function() { changeGlyph(this); });
         
-      d3.select("#filtersDiv")
+      d3.select("#chartsDiv")
         .append("div")
         .attr("id", "linkLayers")
         .attr("class", "collapse");
 
 
       //*******Add div for total selections
-      d3.select("#filtersDiv")
+      d3.select("#chartsDiv")
         .append("div")
         .attr("class", "horBorder")
         .append("h5")
@@ -528,7 +624,7 @@
         .attr("class", "legTitle")
         .text("Selection Counts")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Selection Count</center></b></u></p><p>Displays the count of currently selected features for each of the Crossings, Catchments, and Streams layers.</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="auto right" data-container="body"  data-html="true" title="<p><u><b><center>Selection Count</center></b></u></p><p>Displays the count of currently filtered features for each of the Crossings, Catchments, and Streams layers.</p>"></span>');
 
       d3.select("#totalsTitle")
         .append("span")
@@ -539,14 +635,14 @@
         .property("title", "Click to display panel")
         .on("click", function() { changeGlyph(this); });
 
-      d3.select("#filtersDiv")
+      d3.select("#chartsDiv")
         .append("div")
         .attr("id", "totals")
         .attr("class", "collapse");
 
 
       //*******Add div for histograms
-      d3.select("#filtersDiv")
+      d3.select("#chartsDiv")
         .append("div")
         .attr("class", "horBorder")
         .append("h5")
@@ -554,7 +650,7 @@
         .attr("class", "legTitle")
         .text("Distributions")
         .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="left" data-container="body" title="" data-html="true" data-original-title="<p><u><b><center>Attribute Distributions</center></b></u></p><p>Contains graphs that show distributions of selected attributes.</p><br><p>Each graph can be restricted to specific value ranges or categories, which in turn filters the associated features displayed on the map.</p>"></span>');
+        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="auto right" data-container="body"  data-html="true" title="<p><u><b><center>Attribute Distributions</center></b></u></p><p>Contains graphs that show distributions of selected attributes.</p><br><p>Each graph can be restricted to specific value ranges or categories, which in turn filters the associated features displayed on the map.</p>"></span>');
 
       d3.select("#distributionsTitle")
         .append("span")
@@ -565,11 +661,23 @@
         .property("title", "Click to hide panel")
         .on("click", function() { changeGlyph(this); });
 
-      d3.select("#filtersDiv")
+      d3.select("#chartsDiv")
         .append("div")
         .attr("id", "charts")
         .attr("class", "collapse in");
 
+
+
+      //******Set z-indexes of moveable divs so that clicked one is always on top
+      d3.selectAll("#legendDiv,#polFilterDiv,#attributesDiv,#attrSelectDiv,#chartsDiv")
+        .on("mousedown", function() { setZ(this); });
+
+      function setZ(tmpWin) {
+        if (d3.select("#map").classed("introjs-showElement") == false) {
+          d3.selectAll("#legendDiv,#polFilterDiv,#attributesDiv,#attrSelectDiv,#chartsDiv").style("z-index", 1000); 
+          d3.select(tmpWin).style("z-index", 1001);
+        }
+      }
 
 
 
@@ -811,6 +919,7 @@
       var graphs = [];   //global list of current graphs variable
       var layers = [];   //global list of topoJSON map layers
       var crossingCov = [];  //global array of crossing covariate data 
+      var toolWindows = {};  //global tool window variable to hold bounding client rect data
 
       //******Add in custom color pallate for streams
       colorbrewer.streams = {};
@@ -972,12 +1081,15 @@
         //******Add topoJSON layers
         map.addLayer(crossTogSVG);
         map.addLayer(streamTogSVG);
-        //map.addLayer(catchTogSVG); //Begin without catchment layer visible
-        //d3.select("#catchmentsSelect").property("selectedIndex", function() {return 1;});
-        removeTopo(topos.catchments);
-       
-        //******Finalize the prioritization tool
-        completePrioritization();      
+        map.addLayer(catchTogSVG); 
+        //removeTopo(topos.catchments);
+        
+        //******Finalize the attribute selection window
+        completeAttrSelect();
+
+        //******Set catchments layer to "..."
+        d3.select("#catchmentsSelect").property("selectedIndex", function() {return 0;});
+        changeStyle("...", topos.catchments);  
 
         //******Set map view
         map.on("viewreset", reset);
@@ -986,19 +1098,50 @@
         //******Remove "Loading..." text
         d3.select("#loadingDiv").style("display", "none");
 
+        //******Add bounding client rect data for tool windows
+        toolWindows.controlDiv = document.getElementById("controlDiv").getBoundingClientRect();
+
+        var tools = ["legend", "attrSelect", "polFilter", "charts", "attributes"];
+        var toggleWords = {"legend":"legend", "attrSelect":"attribute selection", "polFilter":"regional filter", "charts":"charts", "attributes":"feature attributes"}
+        tools.forEach(function(tool, i) { 
+          toolWindows[tool + "Control"] = document.getElementById(tool + "Control").getBoundingClientRect();
+          toolWindows[tool + "Control"].title = toggleWords[tool];
+          toolWindows[tool + "Div"] = {};
+          d3.select("#" + tool + "Control").on("click", function() {toolWindowToggle(tool);});
+        });
+
         //******Run intro for first time users
         if(localStorage.getItem('doneTour') != 'yeah!') {
           startIntro();
         }
       }
-      
+
+
+      //******Function to toggle tool windows
+      function toolWindowToggle(tmpDiv) {
+        if (d3.select("#" + tmpDiv + "Div").style("opacity") == "1") {
+          toolWindows[tmpDiv + "Div"] = document.getElementById(tmpDiv + "Div").getBoundingClientRect();
+          d3.select("#" + tmpDiv + "Div").transition().duration(500).ease("cubic").style({"height":"32px","width":"32px","top": toolWindows[tmpDiv + "Control"].top + "px","left": toolWindows[tmpDiv + "Control"].left + "px","min-width":"32px", "opacity":"0"});
+          d3.select("#" + tmpDiv + "Control").property("title", "Click to show " + toolWindows[tmpDiv + "Control"].title + " window");
+        }
+        else {
+          if ($.isEmptyObject(toolWindows[tmpDiv + "Div"])) {
+            d3.select("#" + tmpDiv + "Div").transition().duration(500).ease("cubic").style({"height":"","width":"","top":"","left":"","min-width":"", "opacity":"1", "display":"block"});            
+          }
+          else {
+            d3.select("#" + tmpDiv + "Div").transition().duration(500).ease("cubic").style({"height":"","width":"","top": toolWindows[tmpDiv + "Div"].top + "px","left": toolWindows[tmpDiv + "Div"].left + "px","min-width":"", "opacity":"1"});
+          }
+          d3.select("#" + tmpDiv + "Control").property("title", "Click to hide " + toolWindows[tmpDiv + "Control"].title + " window");
+          setZ(d3.select("#" + tmpDiv + "Div")[0][0]);
+        }
+      }
+
+
 
 
       //******Add attribute names and values to table
       function getAttributes(tmpFeat, topo, opacity) {
         if (opacity == 0) {return;}
-        d3.select("#attributesDiv").style("display", "block");
-        d3.select("#attributesControl").property("title", "Click to hide feature attributes window");
 
         var tmpArray = topo.keys.map(function(d) { return {"att": d, val: formatAtt(topo, d, tmpFeat[d]) }; } );
         var columns = ["att", "val"]
@@ -1023,6 +1166,8 @@
         cells
           .text(function(d) { if (d.column == "att") {return formatTitle(topo, d.value);} else {return d.value;} })
           .property("title", function(d) {if (d.column == "att") {return topo.tooltip[d.value];} else {return d.value;} });
+
+        if(d3.select("#attributesDiv").style("opacity") == "0") { toolWindowToggle("attributes"); }
       }
 
 
@@ -1153,7 +1298,7 @@
           .append("select")
           .attr("class", "filterAttrList")
           .attr("id", "typePolFilterSelect")
-          .style("width", "200px");
+          .style("width", "255px");
 
         //******Add clear all button
         d3.select("#polFilterSelectDiv")
@@ -1381,11 +1526,17 @@
         d3.select("#legendDiv")
           .append("div")
           .attr("id", topo.class + "Legend")
+          .attr("class", "layerLegendDiv")
           .style("margin-bottom", "10px");
 
+        //***Add check box for toggling SVG layers
         d3.select("#" + topo.class + "Legend")
-          .append("hr")
-          .attr("class", "hr");
+          .append("div")
+          .html('<input id="' +  topo.class + 'LayerChk" type="checkbox" class="legendCheck" title="Click to display/hide the ' + topo.class + ' layer" checked></input>');
+
+        //***Toggle layer
+        d3.select("#" + topo.class + "LayerChk")
+          .on("click", function() { if(this.checked) {addTopo(topo);} else {removeTopo(topo);} });
 
         d3.select("#" + topo.class + "Legend")
           .append("h5")
@@ -1397,23 +1548,9 @@
           .append("input")
           .attr({type: "range", name: topo.class + "Opacity", min: 0, max: 100, value: 100})
           .attr("id", topo.class + "Slider")
-          .property("title", topo.class + " opacity: 100%")
-          .style("margin-left", 87 - d3.select("#legHead" + topo.class).property("offsetWidth") + "px")
-          .on("input", function() {
-            var tmpOpacity = this.value/100; 
-            d3.select("#" + topo.class + "Slider").attr("value", this.value);
-            var tmpData = topo.filter.featureid.top(Infinity);
-            var tmpID = tmpData.map(function(d) {return d.featureid;});
-            topo.g.selectAll("." + topo.class).style("opacity", function(d) {
-              if(tmpID.indexOf(d.properties.featureid) > -1) {
-                return tmpOpacity;
-              }
-              else {
-                return 0;
-              }
-            });
-            this.title = "Opacity: " + this.value + "%"; 
-          });
+          .property("title", topo.class.charAt(0).toUpperCase() + topo.class.slice(1) + " opacity: 100%")
+          .style("margin-left", 95 - d3.select("#legHead" + topo.class).property("offsetWidth") + "px")
+          .on("input", function() { layerOpacity(this, topo); });
 
         var select = d3.select("#" + topo.class + "Legend")
           .append("select")
@@ -1429,9 +1566,33 @@
           .enter().append("option")
           .attr("value", function (d, i) { return optData[i]; })
           .text(function (d, i) { return topo.title[optData[i]]; });
+        
+        select.insert("option", ":first-child")
+          .attr("value", "...")
+          .property("title", "Select an attribute to display its values on the map")
+          .text("...");
+
+        topo.tooltip["..."] = "Select an attribute to display an interactive graph containing the frequency of its values";
       }
 
 
+
+
+      function layerOpacity(tmpEl, topo) {
+        var tmpOpacity = tmpEl.value/100; 
+        d3.select("#" + topo.class + "Slider").attr("value", tmpEl.value);
+        var tmpData = topo.filter.featureid.top(Infinity);
+        var tmpID = tmpData.map(function(d) {return d.featureid;});
+        topo.g.selectAll("." + topo.class).style("opacity", function(d) {
+          if(tmpID.indexOf(d.properties.featureid) > -1) {
+            return tmpOpacity;
+          }
+          else {
+            return 0;
+          }
+        });
+        tmpEl.title = "Opacity: " + tmpEl.value + "%"; 
+      } 
 
 
 
@@ -1674,120 +1835,129 @@
         var curG = d3.select(topo.g[0][0]);
         var tmpFeat = curG.selectAll("." + topo.class);
 
-        //*******Get data for passed in attribute
-        var tmpVals = d3.values(topo.features).map(function(d) { return d.properties[tmpAtt]; });
-
-        //*Filter out "NA" data
-        tmpVals = tmpVals.filter(function(val) {if(val > -9999){return true} else {return false};});
-
-        //*******Normalise scale
-        var maxVal = d3.max(tmpVals);
-        var normVals = transformData(topo.scale[tmpAtt], tmpVals, maxVal);
-  
-        var tmpSet = d3.set(normVals);
-        var tmpMin = d3.min([6, tmpSet.size()])
-
-        //*******Make a color scale
-        var colorArray = colorbrewer[topo.color][tmpMin].slice(0);
-        if (topo.direction[tmpAtt] == "reverse") {
-          colorArray.reverse();
-        }
+        //******Remove colors from layer and legend when ... is selected
+        if (tmpAtt == "...") {
+          tmpFeat.style({"stroke":"gray","fill":"gray","fill-opacity":"0.01"});
+          tmpFeat.attr("id", "...");
         
-        if(topo.scale[tmpAtt] == "categorical") {
-          var catArray = d3.keys(tmpSet._);
-          var newColor = d3.scale.ordinal()
-            .domain(catArray)
-            .range(colorArray);
+          d3.select("#" + topo.class + "-list-inline").selectAll("li").style({"border-top-color":"gray", "color":"white"});
         }
         else {
-          var newColor = d3.scale.quantize()
-            .domain([d3.min(normVals), d3.max(normVals)])
-            .range(colorArray);
-        }
+          //*******Get data for passed in attribute
+          var tmpVals = d3.values(topo.features).map(function(d) { return d.properties[tmpAtt]; });
 
-        //*******Style and label crossings by attribute value
-        if (topo.class == "streams") {
-          tmpFeat.style("stroke", function(d) {
-            if (d.properties[tmpAtt] > -9999) { 
-              var tVal = transformData(topo.scale[tmpAtt], [d.properties[tmpAtt]], maxVal);
-              return newColor(tVal[0])
-            }
-            else {return "gray"}; 
-          });
-        }
-        else {
-          tmpFeat.style("fill", function(d) {
-            if (d.properties[tmpAtt] > -9999) { 
-              var tVal = transformData(topo.scale[tmpAtt], [d.properties[tmpAtt]], maxVal);
-              return newColor(tVal[0])
-            }
-            else {return "gray"}; 
-          });
-        }
+          //*Filter out "NA" data
+          tmpVals = tmpVals.filter(function(val) {if(val > -9999){return true} else {return false};});
 
-        tmpFeat.attr("id", function(d) { 
-          if(d.properties[tmpAtt] > -9999) {
-            switch(topo.data_type[tmpAtt]) {
-              case "decimal":
-                return (topo.title[tmpAtt] + ": " + d.properties[tmpAtt].toFixed(2) + " " + topo.unit[tmpAtt]);
-                break;
-              case "integer":
-                return (topo.title[tmpAtt] + ": " + d.properties[tmpAtt] + " " + topo.unit[tmpAtt]);
-                break;
-              case "date":
-                var formatDate = d3.time.format("%-m/%-d/%Y");
-                return (topo.title[tmpAtt] + ": " + formatDate(new Date(d.properties[tmpAtt])));
-                break;
-              case "text":
-                return (topo.title[tmpAtt] + ": " + topo.conversion[tmpAtt][d.properties[tmpAtt]]);
-                break;
-            }
+          //*******Normalise scale
+          var maxVal = d3.max(tmpVals);
+          var normVals = transformData(topo.scale[tmpAtt], tmpVals, maxVal);
+  
+          var tmpSet = d3.set(normVals);
+          var tmpMin = d3.min([6, tmpSet.size()])
+
+          //*******Make a color scale
+          var colorArray = colorbrewer[topo.color][tmpMin].slice(0);
+          if (topo.direction[tmpAtt] == "reverse") {
+            colorArray.reverse();
+          }
+        
+          if(topo.scale[tmpAtt] == "categorical") {
+            var catArray = d3.keys(tmpSet._);
+            var newColor = d3.scale.ordinal()
+              .domain(catArray)
+              .range(colorArray);
           }
           else {
-            return (topo.title[tmpAtt] + ": No Data");
+            var newColor = d3.scale.quantize()
+              .domain([d3.min(normVals), d3.max(normVals)])
+              .range(colorArray);
           }
-        })
 
-        //*******Make a legend
-        var list = d3.select("#" + topo.class + "-list-inline");
-        list.remove();
+          //*******Style and label crossings by attribute value
+          if (topo.class == "streams") {
+            tmpFeat.style("stroke", function(d) {
+              if (d.properties[tmpAtt] > -9999) { 
+                var tVal = transformData(topo.scale[tmpAtt], [d.properties[tmpAtt]], maxVal);
+                return newColor(tVal[0])
+              }
+              else {return "gray"}; 
+            });
+          }
+          else {
+            tmpFeat.style({"stroke":"","fill-opacity":""});
+            tmpFeat.style("fill", function(d) {
+              if (d.properties[tmpAtt] > -9999) { 
+                var tVal = transformData(topo.scale[tmpAtt], [d.properties[tmpAtt]], maxVal);
+                return newColor(tVal[0])
+              }
+              else {return "gray"}; 
+            });
+          }
 
-        var legend = d3.select("#" + topo.class + "Legend")
-         .append("ul")
-         .attr("id", topo.class + "-list-inline")
-         .attr("class", "legend-colors")
-         .property("title", topo.tooltip[tmpAtt]);
-
-        var keys = legend.selectAll("li.key")
-          .data(newColor.range());
-
-        keys.enter().append("li")
-          .attr("class", "key")
-          .style("border-top-color", String)
-          .text(function(d, i) {
-            if(topo.scale[tmpAtt] != "categorical") {
-              var r = newColor.invertExtent(d);
-              tmpR = backTransformData(topo.scale[tmpAtt], r, topo.max[tmpAtt]);
+          tmpFeat.attr("id", function(d) { 
+            if(d.properties[tmpAtt] > -9999) {
+              switch(topo.data_type[tmpAtt]) {
+                case "decimal":
+                  return (topo.title[tmpAtt] + ": " + d.properties[tmpAtt].toFixed(2) + " " + topo.unit[tmpAtt]);
+                  break;
+                case "integer":
+                  return (topo.title[tmpAtt] + ": " + d.properties[tmpAtt] + " " + topo.unit[tmpAtt]);
+                  break;
+                case "date":
+                  var formatDate = d3.time.format("%-m/%-d/%Y");
+                  return (topo.title[tmpAtt] + ": " + formatDate(new Date(d.properties[tmpAtt])));
+                  break;
+                case "text":
+                  return (topo.title[tmpAtt] + ": " + topo.conversion[tmpAtt][d.properties[tmpAtt]]);
+                  break;
+              }
             }
-            switch(topo.data_type[tmpAtt]) {
-              case "decimal":
-                return tmpR[0].toFixed(2);
-                break;
-              case "integer":
-                return tmpR[0].toFixed(1);
-                break;
-              case "date":
-                var tmpDate = new Date(tmpR[0]);
-                var shortDate = d3.time.format("%-m/%Y");
-                return shortDate(tmpDate);
-                break;
-              case "text":
-                return topo.conversion[tmpAtt][catArray[i]];
-                break;
+            else {
+              return (topo.title[tmpAtt] + ": No Data");
             }
-          });
-       }
+          })
 
+          //*******Make a legend
+          var list = d3.select("#" + topo.class + "-list-inline");
+          list.remove();
+ 
+          var legend = d3.select("#" + topo.class + "Legend")
+           .append("ul")
+           .attr("id", topo.class + "-list-inline")
+           .attr("class", "legend-colors")
+           .property("title", topo.tooltip[tmpAtt]);
+
+          var keys = legend.selectAll("li.key")
+            .data(newColor.range());
+ 
+          keys.enter().append("li")
+            .attr("class", "key")
+            .style("border-top-color", String)
+            .text(function(d, i) {
+              if(topo.scale[tmpAtt] != "categorical") {
+                var r = newColor.invertExtent(d);
+                tmpR = backTransformData(topo.scale[tmpAtt], r, topo.max[tmpAtt]);
+              }
+              switch(topo.data_type[tmpAtt]) {
+                case "decimal":
+                  return tmpR[0].toFixed(2);
+                  break;
+                case "integer":
+                  return tmpR[0].toFixed(1);
+                  break;
+                case "date":
+                  var tmpDate = new Date(tmpR[0]);
+                  var shortDate = d3.time.format("%-m/%Y");
+                  return shortDate(tmpDate);
+                  break;
+                case "text":
+                  return topo.conversion[tmpAtt][catArray[i]];
+                  break;
+              }
+            });
+        }
+      }
 
 
 
@@ -1863,7 +2033,8 @@
 
         //******Add chart div, title div, and reset option
         d3.select("#charts")
-          .append("div")
+          //.append("div")
+          .insert("div", ":first-child")
             .attr("class", "chart")
             .attr("id", topo.class + "-" + tmpKey)
             .property("title", function() {if(topo.scale[tmpKey] == "categorical") { return "Click bar to select/unselect category"; } else { return "Click and drag inside chart to select data"; } })
@@ -1916,6 +2087,10 @@
             .attr("class", "extent-input")
             .attr("id", "extent-input-upper-" + topo.class + "-" + tmpKey)
             .property("title", "Upper value for selected range of " + topo.title[tmpKey] + " distribution");
+
+          statsDiv.append("p")
+            .attr("class", "extent-input-p")
+            .text(topo.unit[tmpKey]);
 
 
           //******Add mean to stats div
@@ -2064,7 +2239,7 @@
 
         //******If select dropdown is this attribute change back to ...
         if (d3.select("#attributeFilterSelect").node().value == key) {
-          d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 0;})
+          d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 0;});
         }
       }
 
@@ -2511,101 +2686,352 @@
 
       function startIntro(){
         var intro = introJs();
-          intro.setOptions({
-            steps: [
-              { 
-                intro: '<h4>Welcome to the Stream Crossings Explorer tool!<h4><br><p style="font-size:11px"><b>Disclaimer:</b> This project and tool are still under development and therefore some data is made up.</p>'
-              },
-              { 
-                intro: '<h4><b><u>Keywords</u></b></h4><br><p><u>Layer:</u> A collection of features of a specific class (e.g. crossings, streams, or catchments).</p><br><p><u>Feature:</u> A representation of a real-world object on a map.</p><br><p><u>Attribute:</u> Information about a feature (e.g. risk of failure, stream temperature, or elevation).</p>'
-              },
-              {
-                element: document.querySelector('#legendDiv'),
-                intro: '<h4><b><u>Legend</b></u></h4><br><p>Controls which attributes are displayed for features on the map and assists with interpreting their values.</p>',
-              },
-              {
-                element: document.querySelector('#crossingsSelect'),
-                intro: '<h4><b><u>Attribute Display</b></u></h4><br><p>To display different attribute values for features, change the current selection in the dropdown list.</p>',
-                position: 'right'
-              },
-              {
-                element: document.querySelector('.leaflet-control-customWeight-toggle'),
-                intro: '<h4><b><u>Attribute Selector</b></u></h4><br><p>To change which attributes are available to view for the Crossings layer, mouse-over this icon and modify the selected choices.</p>',
-                position: 'left'
-              },
-              {
-                element: document.querySelector('#crossingsSlider'),
-                intro: '<h4><b><u>Layer Transparency</b></u></h4><br><p>To change the transparency of a feature layer, simply adjust the slider bar.</p>',
-                position: 'bottom'
-              },
-              {
-                element: document.querySelector('.leaflet-control-layers-toggle'),
-                intro: '<h4><b><u>Layer Selector</b></u></h4><br><p>To add or remove layers or change backgrounds on the map, mouse-over this icon and modify the selected choices.</p>',
-                position: 'left'
-              },
-              {
-                intro: '<h4><b><u>Feature Attributes</b></u></h4><br><p>To see all attribute values for a specific feature, simply click on it to open the Feature Attributes window.</p>'
-              },
-              {
-                element: document.querySelector('#attributesControl'),
-                intro: '<h4><b><u>Feature Attributes</b></u></h4><br><p>This window can also be open and closed by clicking this icon.',
-                position: 'right'
-              },
-              {
-                element: document.querySelector('#polFilterControl'),
-                intro: '<h4><b><u>Regional Filter</b></u></h4><br><p>To narrow features on the map to a specific area, click here and specify the region(s).</p>',
-                position: 'right'
-              },
-              {
-                element: document.querySelector('#chartControl'),
-                intro: '<h4><b><u>Attribute Filter</b></u></h4><br><p>To filter features based on their attribute values, click on this icon, select an attribute to display a graph of its values, and choose the values you want to show on the map.</p>',
-                position: 'left'
-              },
-              {
-                element: document.querySelector('.leaflet-control-downLoadFile-toggle'),
-                intro: '<h4><b><u>Download Features</b></u></h4><br><p>Mouse-over this icon to display options for saving current features on the map in your preferred output format.</p>',
-                position: 'left'
-              },
-              {
-                element: document.querySelector('.leaflet-control-print-interior'),
-                intro: '<h4><b><u>Print Screen</b></u></h4><br><p>Click here to print the current screen or save it to a PDF.</p>',
-                position: 'left'
-              },
-              {
-                element: document.querySelector('#showDetails'),
-                intro: '<h4><b><u>Tool Information</b></u></h4><br><p>Click on "About SCE" to display detailed information about this tool and view instructional videos.</p>',
-                position: 'bottom'
-              },
-              {
-                element: document.querySelector('#launchIntro'),
-                intro: '<h4><b><u>Tutorial</b></u></h4><br><p>Click on "Tutorial" to relaunch this introduction.</p>',
-                position: 'left'
-              },
-              {
-                intro: '<h4><b><u>Stream Crossings Explorer</b></u></h4><br><p>Thank you for using our tool, enjoy!</p>'
-              }
-            ],
-            tooltipPosition: 'auto',
-            positionPrecedence: ['left', 'right', 'bottom', 'top'],
-            showStepNumbers: false
+        intro.setOptions({
+          steps: [
+            { 
+              //0
+              intro: '<h4>Welcome to the Stream Crossings Explorer tool!<h4><br><p style="font-size:11px"><b>Disclaimer:</b> This project and tool are still under development and therefore some data is made up.</p>'
+            },
+            { 
+              //1
+              intro: '<h4><b><u>Keywords</u></b></h4><br><p><u>Layer:</u> A collection of features of a specific class (e.g. crossings, streams, or catchments).</p><br><p><u>Feature:</u> A representation of a real-world object on a map.</p><br><p><u>Attribute:</u> Information about a feature (e.g. risk of failure, stream temperature, or elevation).</p>'
+            },
+            {
+              //2
+              element: document.querySelector('#controlDiv'),
+              intro: '<h4><b><u>Interactive Controls</b></u></h4><br><p>Controls that allow the user to interact with the map and data are located in this collapsible tool bar and grouped by functionality',
+              position: 'bottom'
+            },
+            {
+              //3
+              element: document.querySelector('#mapControlDiv'),
+              intro: '<h4><b><u>Map Controls</b></u></h4><br><p>Enable the user to change the background and add overlay layers, zoom to the original extent, zoom in and out, and search by geographic name or coordinates.',
+              position: 'bottom'
+            },
+            {
+              //4
+              element: document.querySelector('#dataControlDiv'),
+              intro: '<h4><b><u>Data Controls</b></u></h4><br><p>Show or hide movable windows that enable the user to interact with data through mapping, filtering, and viewing attribute data for the Crossings, Streams, and catchments feature layers.',
+              position: 'right'
+            },
+            {
+              //5
+              element: document.querySelector('#legendControl'),
+              intro: "<h4><b><u>Legend Window</b></u></h4><br><p>This icon shows/hides the Legend window.</p>",
+            },
+            {
+              //6
+              element: document.querySelector('#legendDiv'),
+              intro: "<h4><b><u>Legend Window</b></u></h4><br><p>Controls which attribute is displayed on the map for a layer's features and assists with interpreting their values.</p>",
+            },
+            {
+              //7
+              element: document.querySelector('#crossingsLayerChk'),
+              intro: '<h4><b><u>Layer Selector</b></u></h4><br><p>To add/remove a feature layer from the map check/uncheck its box.</p>',
+              position: 'bottom'
+            },
+            {
+              //8
+              element: document.querySelector('#crossingsSlider'),
+              intro: '<h4><b><u>Layer Transparency</b></u></h4><br><p>To change the transparency of a feature layer, simply adjust the slider bar.</p>',
+              position: 'bottom'
+            },
+            {
+              //9
+              element: document.querySelector('#crossingsSelect'),
+              intro: '<h4><b><u>Attribute Display</b></u></h4><br><p>To display different attribute values for features, change the current selection in the dropdown list.</p>',
+              position: 'right'
+            },
+            {
+              //10
+              element: document.querySelector('#attrSelectControl'),
+              intro: "<h4><b><u>Attribute Selector Window</b></u></h4><br><p>This icon shows/hides the Attribute Selector window.</p>",
+            },
+            {
+              //11
+              element: document.querySelector('#attrSelectDiv'),
+              intro: '<h4><b><u>Attribute Selector Window</b></u></h4><br><p>To change which attributes are available to interact with for each feature layer modify the selected choices.</p>',
+              position: 'left'
+            },
+            {
+              //12
+              element: document.querySelector('#attributesControl'),
+              intro: "<h4><b><u>Feature Attributes Window</b></u></h4><br><p>This icon shows/hides the Feature Attributes window.</p>",
+            },
+             {
+              //13
+              element: document.querySelector('#map'),
+              intro: '<h4><b><u>Feature Attributes Window</b></u></h4><br><p>Click on a feature to see all of its associated attribute values.</p>',
+              position: 'right'
+            },
+            {
+              //14
+              element: document.querySelector('#polFilterControl'),
+              intro: "<h4><b><u>Regional Filter Window</b></u></h4><br><p>This icon shows/hides the Regional Filter window.</p>",
+            },
+            {
+              //15
+              element: document.querySelector('#polFilterDiv'),
+              intro: '<h4><b><u>Regional Filter</b></u></h4><br><p>Restricts features on the map to the specified areas for political and hydrologic boundary classes.</p>',
+              position: 'right'
+            },
+            {
+              //16
+              element: document.querySelector('#chartsControl'),
+              intro: "<h4><b><u>Charts Window</b></u></h4><br><p>This icon shows/hides the Charts window.</p>",
+            },
+            {
+              //17
+              element: document.querySelector('#chartsDiv'),
+              intro: "<h4><b><u>Charts Window</b></u></h4><br><p>Enables the user to graphically view the distribution of an attribute's values and choose which ones are shown on the map.</p>",
+              position: 'left'
+            },
+            {
+              //18
+              element: document.querySelector('#filterLayers'),
+              intro: '<h4><b><u>Graph Distribution</b></u></h4><br><p>Choose an attribute from the selected feature layer to create a graph of its distribution.</p>',
+              position: 'left'
+            },
+            {
+              //19
+              element: document.querySelector('#charts'),
+              intro: '<h4><b><u>Filter Features</b></u></h4><br><p>Specify attribute values directly or by interacting with the graph to filter map features to only those that meet the criteria.</p>',
+              position: 'left'
+            },
+            {
+              //20
+              element: document.querySelector('#totals'),
+              intro: '<h4><b><u>Feature Counts</b></u></h4><br><p>Expand the Selection Counts window to view how many features meet the attribtute specifications.</p>',
+              position: 'left'
+            },
+            {
+              //21
+              element: document.querySelector('#linkLayers'),
+              intro: "<h4><b><u>Spatial Joins</b></u></h4><br><p>Provide the ability to filter features in one layer based on attribute values of geographically overlapping features of another layer. View the instructional video under the 'About SCE' link for more details.</p>",
+              position: 'left'
+            },
+            {
+              //22
+              element: document.querySelector('#outputControlDiv'),
+              intro: '<h4><b><u>Output Controls</b></u></h4><br><p>Controls for printing the current map or saving it to a PDF, and downloading current map features in your preferred output format.</p>',
+              position: 'left'
+            },
+            {
+              //23
+              element: document.querySelector('#showDetails'),
+              intro: "<h4><b><u>Tool Information</b></u></h4><br><p>Click on 'About SCE' to display detailed information about this tool and view instructional videos.</p>",
+              position: 'bottom'
+            },
+            {
+              //24
+              element: document.querySelector('#launchIntro'),
+              intro: '<h4><b><u>Tutorial</b></u></h4><br><p>Click on "Tutorial" to relaunch this introduction.</p>',
+              position: 'left'
+            },
+            {
+              //25
+              intro: '<h4><b><u>Stream Crossings Explorer</b></u></h4><br><p>Thank you for using our tool, enjoy!</p>'
+            }
+          ],
+          tooltipPosition: 'auto',
+          positionPrecedence: ['left', 'right', 'bottom', 'top'],
+          showStepNumbers: false
+        });
+
+        intro.onbeforechange(function() { 
+          switch (this._currentStep) {
+            case 0:                              
+              hideWindows();
+              d3.select("#controlDiv").style("overflow", "visible");
+              map.setView(new L.LatLng(42.74, -72.83), 10);
+              break;
+          }  
+        });
+
+        intro.onchange(function() { 
+          hideWindows();
+          switch (this._currentStep) {
+            case 5:
+              d3.select("#legendDiv").style("visibility", "visible");
+              break;
+            case 6:
+              d3.select("#legendDiv").style("visibility", "visible");
+              break;
+            case 7:
+              d3.select("#legendDiv").style("visibility", "visible");
+              d3.select("#crossingsLayerChk").property("checked", true);
+              d3.select("#crossingsSlider").property("value", "100");
+              layerOpacity(d3.select("#crossingsSlider")[0][0],topos.crossings);
+              break;
+            case 8:
+              addTopo(topos.crossings);
+              d3.select("#crossingsLayerChk").property("checked", true);
+              d3.select("#legendDiv").style("visibility", "visible");
+              d3.select("#attrSelectDiv").style("visibility", "hidden");                  
+              break;
+            case 9:
+              d3.select("#legendDiv").style("visibility", "visible");
+              d3.select("#crossingsSlider").property("value", "100");
+              layerOpacity(d3.select("#crossingsSlider")[0][0],topos.crossings);
+              d3.select("#attrSelectDiv").style("visibility", "hidden");
+              break;
+            case 10:
+              d3.select("#attrSelectDiv").style("visibility", "visible");
+              d3.select("#legendDiv").style("visibility", "hidden"); 
+              break;
+            case 11:
+              d3.select("#attrSelectDiv").style("visibility", "visible");
+              d3.select("#attributesDiv").style("visibility", "hidden"); 
+              break;
+            case 12:
+              d3.select("#attrSelectDiv").style("visibility", "hidden");
+              d3.select("#attributesDiv").style("visibility", "visible"); 
+              d3.select("#attributesDiv").style("z-index", "1000"); 
+              break;
+            case 13:
+              d3.select("#attributesDiv").style("z-index", "9999999");
+              d3.select("#attributesDiv").style("visibility", "visible"); 
+              d3.select(".d3Tooltip").style("z-index", "9999999");
+              d3.select("#polFilterDiv").style("visibility", "hidden");
+              break; 
+            case 14:
+              d3.select("#polFilterDiv").style("visibility", "visible");
+              d3.select("#attributesDiv").style("visibility", "hidden");
+              d3.select("#attributesDiv").style("z-index", "1000"); 
+              break;
+            case 15:
+              d3.select("#polFilterDiv").style("visibility", "visible");
+              d3.select("#chartsDiv").style("visibility", "hidden");
+              break;
+            case 16:
+              d3.select("#chartsDiv").style("visibility", "visible");
+              d3.select("#polFilterDiv").style("visibility", "hidden");
+              break;
+            case 17:
+              d3.select("#chartsDiv").style("visibility", "visible");
+              break;
+            case 18:
+              d3.select("#chartsDiv").style("visibility", "visible");
+              d3.select("#layerFilterSelect").property("selectedIndex", function() {return 0;})
+              addFilterSelect(topos[d3.select("#layerFilterSelect").node().value]);
+              d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 1;})
+              addFilter(d3.select("#attributeFilterSelect").node().value, topos[d3.select("#layerFilterSelect").node().value]);
+              break;
+            case 19:
+              d3.select("#chartsDiv").style("visibility", "visible");
+              d3.select("#layerFilterSelect").property("selectedIndex", function() {return 0;})
+              addFilterSelect(topos[d3.select("#layerFilterSelect").node().value]);
+              d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 1;})
+              addFilter(d3.select("#attributeFilterSelect").node().value, topos[d3.select("#layerFilterSelect").node().value]);
+              break;
+            case 20:
+              d3.select("#chartsDiv").style("visibility", "visible");
+              d3.select("#totals").classed("in", true);
+              d3.select("#totalsGlyph").classed("glyphicon-minus-sign", true)
+              d3.select("#layerFilterSelect").property("selectedIndex", function() {return 0;})
+              addFilterSelect(topos[d3.select("#layerFilterSelect").node().value]);
+              d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 1;})
+              addFilter(d3.select("#attributeFilterSelect").node().value, topos[d3.select("#layerFilterSelect").node().value]);
+              break;
+            case 21:
+              d3.select("#chartsDiv").style("visibility", "visible");
+              d3.select("#linkLayers").classed("in", true);
+              d3.select("#sjGlyph").classed("glyphicon-minus-sign", true)
+              d3.select("#crossings-streams-check").property("checked", true);
+              checkLink("featureid", "crossings", true);
+              d3.select("#layerFilterSelect").property("selectedIndex", function() {return 0;})
+              addFilterSelect(topos[d3.select("#layerFilterSelect").node().value]);
+              d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 1;})
+              addFilter(d3.select("#attributeFilterSelect").node().value, topos[d3.select("#layerFilterSelect").node().value]);
+              d3.select("#layerFilterSelect").property("selectedIndex", function() {return 1;})
+              addFilterSelect(topos[d3.select("#layerFilterSelect").node().value]);
+              d3.select("#attributeFilterSelect").property("selectedIndex", function() {return 1;})
+              addFilter(d3.select("#attributeFilterSelect").node().value, topos[d3.select("#layerFilterSelect").node().value]);
+              break;
+            case 22:
+              d3.select("#chartsDiv").style("visibility", "hidden");
+              d3.select("#showDetails").style("color", "");
+              break;
+            case 23:
+              d3.select("#showDetails").style("color", "gray");
+              d3.select("#launchIntro").style("color", "");
+              d3.select("#helpDiv").classed("in", true).style("display", "flex");
+              break;
+            case 24:
+              d3.select("#launchIntro").style("color", "gray");
+              d3.select("#showDetails").style("color", "");
+              break;
+            case 25:
+              d3.select("#launchIntro").style("color", "");
+              break;
+          }
+        });
+
+        intro.onafterchange(function() { 
+        });
+
+        intro.oncomplete(function() { 
+          localStorage.setItem('doneTour', 'yeah!'); 
+          exitTutorial();
+        });
+
+        intro.onexit(function() {
+          exitTutorial();
+        });            
+
+        intro.start();
+
+        function hideWindows() {
+          var tmpWins = ["legend", "attrSelect", "attributes", "polFilter", "charts"];
+          tmpWins.forEach(function(win) {
+            if(d3.select("#" + win + "Div").style("opacity") == "0") {
+              toolWindowToggle(win);
+            }
+            d3.select("#" + win + "Div").style("visibility", "hidden");
           });
-          intro.onbeforechange(function() { introBeforeChange(this._currentStep); });
-          intro.onchange(function() { introChange(this._currentStep); });
-          intro.oncomplete(function() { localStorage.setItem('doneTour', 'yeah!'); });
-          intro.start();
-      }
+          d3.select("#helpDiv").classed("in", false).style("display", "none");
+          if (d3.select("#controlCaret").classed("glyphicon-menu-right")) { controlToggle(); }
+        }    
 
-      function introBeforeChange(step) {
-        switch (step) {
-          case 2:
-            //setTimeout(function(){d3.select("#crossingsSelect").property("selectedIndex", function() {return 1;})}, 1000);
-        }
-      }
+        function exitTutorial() {
+           var tmpWins = ["attrSelect", "attributes", "polFilter", "charts"];
+           tmpWins.forEach(function(win) {
+             if(d3.select("#" + win + "Div").style("opacity") == "1") {
+               toolWindowToggle(win);
+             }
+             d3.select("#" + win + "Div").style("visibility", "visible");
+          });
 
-      function introChange(step) {
-        //console.log(step);
-      }
-      
+          if(d3.select("#legendDiv").style("opacity") == "0") {
+            toolWindowToggle("legend");
+          }
+          d3.select("#legendDiv").style("visibility", "visible")
+
+          d3.select("#controlDiv").style("overflow", "hidden");
+
+          //***Regional Filter Window
+          var tmpArray = topos.political.condition.slice();
+          tmpArray.forEach(function(cond) {
+            var i = cond.indexOf("-") + 1;
+            var j = cond.lastIndexOf("-");
+            removeCondition(topos.political, cond, cond.slice(i,j), cond.slice(j+1)); 
+          });
+
+          //***Charts Window
+          d3.select("#crossings-streams-check").property("checked", false);
+          checkLink("featureid", "crossings", true);
+          var tmpArray = graphs.slice();
+          tmpArray.forEach(function(graph) {
+            var i = graph.indexOf("-");
+            removeFilter(graph, topos[graph.slice(0,i)]);
+          });
+
+          //***About & Tutorial
+          d3.select("#helpDiv").classed("in", false).style("display", "none");
+          d3.select("#showDetails").style("color", "");
+          d3.select("#launchIntro").style("color", "");
+        }     
+      }      
     </script>
   </body>
 </html>

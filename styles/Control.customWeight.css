@@ -14,16 +14,16 @@
 .leaflet-control-customWeight a {
         background-color: white; 
 	background-image: url(../images/checkmark.png);
-	width: 36px;
-	height: 36px;
+	width: 32px;
+	height: 32px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
 }
 
 .leaflet-touch .leaflet-control-customWeight a {
-	width: 36px;
-	height: 36px;
+	width: 32px;
+	height: 32px;
 }
 
 .leaflet-control-customWeight .leaflet-control-customWeight-div,

@@ -1,7 +1,7 @@
 .leaflet-control-attributes-interior {
     background-image: url(../images/attributes_icon.png);
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     background-position: 50% 50%;
     background-repeat: no-repeat;
     display: block;

@@ -2,7 +2,7 @@ layer	short_heading	long_heading	unit	direction	data_type	scale	display	rank	too
 crossings	impassability	Impassability Score		reverse	decimal	linear	not yet	5	The aquatic impassability score for the road-stream crossing (0 = Completely Passable, 1 = Impassable)	
 crossings	bar_type	Crossing Type		reverse	text	categorical	no	17	Type of stream crossing (bridge, culvert, multiple culvert, etc.)	{"1":"Culvert","2":"Bridge","3":"Dam"}
 crossings	jurisdiction	Road Jurisdiction		forward	text	categorical	no	25	Responsibility for road maintenance at crossing	{"0":"Unaccepted", "1":"Mass DOT", "2":"City/Town", "6":"State Park/Forest"}
-crossings	nhs	National Highway System		forward	text	categorical	no	26	National Highway System status of road at crossing	{"0":"Not on NHS","1":"NHS-Interstate","14":"NHS-Other"}
+crossings	nhs	National Highway System		forward	text	categorical	no	26	National Highway System status of road at crossing	{"0":"Not on NHS","1":"NHS-Interstate","14":"NHS-Other","15":"NHS-Arterial"}
 crossings	drain_tot	Drainage Area	KM^2	forward	decimal	log	no	18	Drainage area (square kilometers) of all upstream reaches	
 crossings	strkm_tot	Stream Length	KM	forward	decimal	log	no	19	Stream length (kilometers) of all upstream reaches	
 crossings	upstr_bars	Structure Count		reverse	integer	log	no	20	Total number of upstream structures crossing the stream	
@@ -39,7 +39,7 @@ catchments	featureid	Feature ID		forward	integer	linear	never	6	The unique ident
 streams	str_order	Stream Order		forward	text	categorical	yes	0	Stream order (Strahler method) of stream reach	{"1":"1","2":"2","3":"3","4":"4","5":"5","6":"6"}
 streams	occ_cur	Trout Habitat Suitability		reverse	decimal	linear	yes	1	Probability that the stream reach is suitable for brook trout	
 streams	T_mean_sum	Stream Temperature	C	forward	decimal	linear	yes	2	Average predicted summer temperature (degrees C) of stream reach	
-streams	T_inertia	Stream Temperature Resistance	C	reverse	decimal	linear	yes	3	Predicted resistance of stream temperature to changes in air temperature (0 = Low, 1 = High)	
+streams	T_inertia	Stream Temperature Resistance		reverse	decimal	linear	yes	3	Predicted resistance of stream temperature to changes in air temperature (0 = Low, 1 = High)	
 streams	featureid	Feature ID		forward	integer	linear	never	7	The unique identifier of the catchment (in which the stream centroid is located)	
 streams	unique_id	Unique ID		forward	integer	linear	never	6	The unique identifier of the stream	
 streams	from_node	From Node		forward	integer	linear	never	4	The unique identifier of the first point of the stream reach	

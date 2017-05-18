@@ -1,8 +1,17 @@
+html {
+  overflow: auto;
+}
+
+body {
+  overflow: hidden;
+}
+
 body, html {
   width: 100%;
   height: 100%;
   min-width: 1200px;
-  min-height: 600px;
+  min-height: 650px;
+  //overflow: hidden;
 }
 
 .header {
@@ -18,7 +27,7 @@ body, html {
   width: 100%;
   height: 100%;
   min-width: 1200px;
-  min-height: 600px;
+  min-height: 650px;
 }
 
 .crossings {
@@ -80,14 +89,6 @@ body, html {
   justify-content: center;
   min-height: 555px;
   min-width: 882px;
-}
-
-.legendTitle {
-  text-align: left;
-  font-size: 24px;
-  padding: 3px;
-  font-variant: small-caps;
-  font-weight: bold;
 }
 
 .introjs-tooltiptext p, h4{
@@ -164,14 +165,14 @@ px;
   font-size: 16px;
 }
 
-.helpDivs table, th, td {
+.helpDivs table, .helpDivs th, .helpDivs td {
   font-size: 14px;
   border: solid gray 1px;
   border-collapse: collapse;
   padding-left: 3px;
 }
 
-.helpDivs td:nth-child(1), th:nth-child(1) {
+.helpDivs td:nth-child(1), .helpDivs th:nth-child(1) {
   width: 40%;
 }
 
@@ -268,10 +269,28 @@ px;
 }
 
 .leaflet-top {
-  padding-top: 50px;
+  margin-top: 70px;
+  background: rgba(255,255,255,0.8);
+  border: solid black 1px;
+  //border-radius: 4px;
+  pointer-events: visible;
+  cursor: initial;
+  overflow: visible;
+  max-width: 56px;
+  min-height: 485px;
+  height: 485px;
 }
 
-.leaflet-right {
+.leaflet-top.leaflet-left {
+  z-index: 1002;
+}
+
+.leaflet-top .horBorder {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.leaflet-right, .leaflet-left, .leaflet-bottom, .leaflet-top {
   z-index: 1001;
 }
 
@@ -284,28 +303,53 @@ px;
 }
 
 .leaflet-touch .leaflet-control-layers-toggle, .leaflet-touch .leaflet-bar a {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
+}
+
+.leaflet-control {
+  margin: 3px 5px 3px 10px !important;
+  float: none;
+}
+
+.leaflet-control-layers-toggle {
+  width: 32px;
+  height: 32px;
+}
+
+.leaflet-control-layers {
+  width: 32px;
+}
+
+.leaflet-control-layers-expanded {
+  width: 165px;
+  position: absolute;
+  z-index: 1002;
+  margin-top: 38px;
 }
 
 .leaflet-control-zoom {
   font-size: 2.5em;
 }
 
+.leaflet-bar {
+  box-shadow: none;
+}
+
 .leaflet-touch, .leaflet-bar a {
   opacity: 1;
   box-shadow: 0 1px 7px #999;
   border-radius: 4px;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   font-size: 1em;
   font-weight: bold;
   padding-top: 5px;
 }
 
 .leaflet-bar a:hover {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   opacity: 1;
 }
 
@@ -314,7 +358,7 @@ px;
 }
 
 .leaflet-control-scale-line, .leaflet-control-scale-line:not(:first-child) {
-  background: rgba(255,255,0,0.6);
+  background: rgba(255,255,0,0.4);
   border-style: solid;
   border-width: 1px;
   border-radius: 4px;
@@ -322,7 +366,7 @@ px;
   margin: 5px;
   margin-left: 0px;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 1.5em;
+  font-size: 1.3em;
   font-weight: bold;
   color: black;
   text-align: center;
@@ -332,43 +376,158 @@ px;
   background: rgba(255,255,0,1);
 }
 
+.controlHeader {
+  font-weight: bold;
+  margin: 1px;
+}
+
+#controlDiv {
+  overflow: hidden;
+}
+
+#dataControlDiv {
+  overflow: visible;
+}
+
+#outputControlDiv {
+  min-height: 68px;
+}
+
+#controlToggle {
+  background: rgba(0,0,0,0.6);
+  border: solid 1px black;
+  border-radius: 0px 4px 4px 0px;
+  height: 100.5%;
+  width: 13px;
+  position: absolute;
+  right: -13px;
+  top: -1px;
+  cursor: pointer;
+}
+
+#controlToggle:hover {
+  background: rgba(0,0,0,0.9);
+}
+
+.control-caret {
+  top: 49%;
+  color: white;
+  opacity: 1;
+}
+
+.introjs-tooltiptext {
+  width: 300px;
+}
+
 .hr {
   margin-top: 5px;
   margin-bottom: 5px;
 }
 
+.header_icon {
+  height: 20px;
+  width: 20px;
+  margin: 2px;
+  border: solid 1px black;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
 .legend {
   width: 100%;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.9);
   border: solid;
   border-color: black;
   border-width: 1px;
-  border-radius: 0px 0px 4px 4px;
+  border-radius: 4px;
   margin: 0px;
 }
 
 #leftSideToolsDiv {
   position: absolute;
   top: 50px;
-  left: 60px;
-  width: 435px;
-  max-width: 435px;
+  left: 80px;
+  width: 100%;
+  max-width: 500px;
+  min-width: 500px;
   margin: 0px;
   z-index: 1000;
   max-height: 85%;
   overflow-y: auto;
   overflow-x: visible;
+  border-radius: 4px;
+}
+
+.legendTitle {
+  text-align: left;
+  font-size: 24px;
+  padding: 3px;
+  font-variant: small-caps;
+  font-weight: bold;
+}
+
+.legendHeader {
+  background: rgba(0,0,255,0.2);
+  border-top: solid black 1px;
+}
+
+#legendDiv {
+  position: absolute;
+  top: 50px;
+  left: 80px;
+  width: 100%;
+  max-width: 500px;
+  min-width: 500px;
+  margin: 0px;
+  z-index: 1000;
+  max-height: 85%;
+  overflow-y: auto;
+  overflow-x: visible;
+  border-radius: 4px;
+}
+
+#legendDiv input[type="checkbox"] {
+  float: left;
+  margin-top: 4px;
+  transform: scale(1.3) !important;
+}
+
+.legendImg {
+  float: right;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-right: 43px;
+}
+
+.layerLegendDiv {
+  border-top: solid black 1px;
+  padding: 3px;
 }
 
 #polFilterDiv {
   display: none;
+  position: absolute;
+  top: 325px;
+  left: 490px;
+  width: 100%;
+  max-width: 400px;
+  min-width: 400px;
   margin: 0px;
+  z-index: 1000;
+  max-height: 85%;
+  overflow-y: auto;
+  overflow-x: visible;
+  border-radius: 4px;
+  opacity: 0;
 }
 
 #polFilterSelectDiv {
   text-align: center;
   padding-bottom: 5px;
   border-bottom: 1px solid black; 
+  border-top: 1px solid black;
+  margin-top: 3px;
 }
 
 #polFilterConditions {
@@ -388,10 +547,30 @@ px;
   background: rgba(255,255,255,1);
 }
 
-#attValuesDiv {
-  max-height: 250px;
+#attributesDiv {
+  display: none;
+  position: absolute;
+  top: 325px;
+  left: 80px;
+  width: 100%;
+  max-width: 400px;
+  min-width: 400px;
+  margin: 0px;
+  z-index: 1000;
+  max-height: 85%;
   overflow-y: auto;
-  overflow-x: visible;  
+  overflow-x: visible;
+  border-radius: 4px;
+  opacity: 0;
+}
+
+#attValuesDiv {
+  margin-top: 3px;
+  max-height: 290px;
+  overflow-y: auto;
+  overflow-x: visible;
+  border-top: solid black 1px;
+  border-bottom: solid black 1px;
 }
 
 .attTRHead {
@@ -423,15 +602,25 @@ px;
   fill-opacity: 0.5;
 }
 
-#filtersDiv {
+#chartsDiv {
+  display: none;
   position: absolute;
   top: 50px;
   right: 60px;
   max-width: 420px;
+  min-width: 420px;
   margin: 0px;
   max-height: calc(100% - 50px);
   overflow-y: auto;
   overflow-x: visible;
+  border-radius: 4px;
+  z-index: 1000;
+  opacity: 0;
+}
+
+#filterLayers {
+  border-top: solid black 1px;
+  margin-top: 3px;
 }
 
 table {
@@ -473,9 +662,10 @@ input[type="checkbox"]  {
 }
 
 .horBorder {
-  border-top: 1px solid black;
-  border-bottom: 1px solid black;
+  border-top: 0.5px solid black;
+  border-bottom: 0.5px solid black;
   background: rgba(0,0,255,0.2);
+  text-align: center;
 }
 
 .horBorder:hover {
@@ -550,6 +740,11 @@ input[type="checkbox"]  {
   font-size: 1em;
 }
 
+.pipe {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
 input[type="range"] {
   -webkit-appearance: none;
   width: 75px;
@@ -588,7 +783,7 @@ input[type=range]::-webkit-slider-thumb {
   text-align: center;
   opacity: 0.7;
   position: absolute;
-  right: 0px;
+  right: 5px;
 
 }
 
@@ -611,8 +806,8 @@ li.key {
   font-size: 0.75em;
   font-weight: bold;
   text-align: left;
-  padding-left: 0px;
-  padding-right: 0px;
+  padding-left: 1px;
+  padding-right: 1px;
   display: inline-block;
   float: left;
   flex-grow: 1;
@@ -649,13 +844,7 @@ li.key:hover {
 }
 
 @media print {
-  #leftSideToolsDiv {
-    top: 5px;
-    left: 5px;
-    background: rgba(255,255,255,0.8) !important;
-  }
-
-  #filtersDiv {
+  #legendDiv, #polFilterDiv, #attributesDiv, #attrSelectDiv, #chartsDiv {
     top: 5px;
     right: 5px;
     background: rgba(255,255,255,0.8) !important;
@@ -677,7 +866,7 @@ li.key:hover {
     background: rgba(255,255,255,1) !important;
   }
 
-  .header, .leaflet-control-zoom, .leaflet-control-navbar {
+  .header, .leaflet-control-zoom, .leaflet-control-navbar, .leaflet-top.leaflet-left, .leaflet-control-attribution {
     display: none; 
   }   
 }

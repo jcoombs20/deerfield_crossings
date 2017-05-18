@@ -7,18 +7,7 @@ L.Control.attributes = L.Control.extend({
         var controlDiv = L.DomUtil.create('div', 'leaflet-control-attributes');
         L.DomEvent
             .addListener(controlDiv, 'click', L.DomEvent.stopPropagation)
-            .addListener(controlDiv, 'click', L.DomEvent.preventDefault)
-            .addListener(controlDiv, 'click', function () {
-              if (d3.select("#attributesDiv").style("display") == "block") {
-                d3.select("#attributesDiv").style("display", "none");
-                d3.select("#attributesControl").property("title", "Click to show feature attributes window");
-              }
-              else {
-                d3.select("#attributesDiv").style("display", "block");
-                d3.select("#attributesControl").property("title", "Click to hide feature attributes window");
-              }
-            });
-
+            .addListener(controlDiv, 'click', L.DomEvent.preventDefault);
 
         var controlUI = L.DomUtil.create('div', 'leaflet-control-attributes-interior', controlDiv);
         controlUI.id = "attributesControl";
