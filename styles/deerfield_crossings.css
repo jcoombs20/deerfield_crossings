@@ -511,8 +511,8 @@ px;
   top: 325px;
   left: 490px;
   width: 100%;
-  max-width: 400px;
-  min-width: 400px;
+  max-width: 450px;
+  min-width: 450px;
   margin: 0px;
   z-index: 1000;
   max-height: 85%;
@@ -655,6 +655,10 @@ table {
 
 .filterAttrList:hover {
   opacity: 1;
+}
+
+#polFilterDiv .filterAttrList {
+  width: 179px;
 }
 
 input[type="checkbox"]  {

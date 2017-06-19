@@ -79,6 +79,7 @@
 
       //******Add Map
       var map = new L.Map('map', {center: new L.LatLng(42.80, -72.83), zoomControl: false, zoom: 10, minZoom: 2, maxZoom: 20, inertiaDeceleration: 1000});
+      d3.select(".leaflet-control-attribution a").property("target", "_blank")
 
       //******Add base layers
       var googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
@@ -427,7 +428,7 @@
         .append("div")
         .style("padding-left", "30px")
         .attr("class", "legendHeader")
-        .html('<h5 class="layerTitle">Layer&nbsp&nbsp&nbsp&nbsp&nbsp</h5><h5 class="layerTitle pipe">|</h5><h5 class="layerTitle">Transparency</h5><h5 class="layerTitle pipe">|</h5><h5 class="layerTitle">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspMapped Attribute</h5>');
+        .html('<h5 class="layerTitle" title="The name of the feature layer">Layer&nbsp&nbsp&nbsp&nbsp&nbsp</h5><h5 class="layerTitle pipe">|</h5><h5 class="layerTitle" title="The transparency level of the feature layer">Transparency</h5><h5 class="layerTitle pipe">|</h5><h5 class="layerTitle" title="The current feature attribute displayed on the map">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspMapped Attribute</h5>');
 
 
 
@@ -805,12 +806,11 @@
           + '<table>'
             + '<tr><th>Variable</th><th>Source</th></tr>'
             + '<tr><td>Assessment Date</td><td><a href="https://streamcontinuity.org/" target="_blank">North Atlantic Aquatic Connectivity Collaborative (NAACC)</a></td></tr>'
-            + '<tr><td>Average Affected EMS Delay</td><td><a href="mailto:sheldon@cs.umass.edu">Dan Sheldon</a>, University of Massachusetts Amherst</td></tr>'
-            + '<tr><td>Average EMS Delay</td><td><a href="mailto:sheldon@cs.umass.edu">Dan Sheldon</a>, University of Massachusetts Amherst</td></tr>'
+            + '<tr><td>Average Affected EMS Delay</td><td><a href="http://people.cs.umass.edu/~sheldon/" target="_blank">Dan Sheldon</a> & <a href="http://rbr.cs.umass.edu/shlomo/" target="_blank">Shlomo Zilberstein</a>, UMass Amherst</td></tr>'
+            + '<tr><td>Average EMS Delay</td><td><a href="http://people.cs.umass.edu/~sheldon/" target="_blank">Dan Sheldon</a> & <a href="http://rbr.cs.umass.edu/shlomo/" target="_blank">Shlomo Zilberstein</a>, UMass Amherst</td></tr>'
             + '<tr><td>Coldwater (16&deg;C) Restoration Potential</td><td><a href="http://www.umasscaps.org/" target="_blank">Conservation Assessment and Prioritization System (CAPS)</a></td></tr>'
             + '<tr><td>Coldwater (18&deg;C) Restoration Potential</td><td><a href="http://www.umasscaps.org/" target="_blank">Conservation Assessment and Prioritization System (CAPS)</a></td></tr>'
             + '<tr><td>Coldwater (20&deg;C) Restoration Potential</td><td><a href="http://www.umasscaps.org/" target="_blank">Conservation Assessment and Prioritization System (CAPS)</a></td></tr>'
-            //+ '<tr><td>Connected Habitat</td><td><a href="mailto:jcoombs@cns.umass.edu">Jason Coombs</a>, University of Massachusetts Amherst</td></tr>'
             + '<tr><td>Connectivity Loss</td><td><a href="http://www.umasscaps.org/" target="_blank">Conservation Assessment and Prioritization System (CAPS)</a></td></tr>'
             + '<tr><td>Connectivity Restoration Potential</td><td><a href="http://www.umasscaps.org/" target="_blank">Conservation Assessment and Prioritization System (CAPS)</a></td></tr>'
             + '<tr><td>Crossing Prioritization</td><td><a href="mailto:sjackson@umass.edu">Scott Jackson</a>, University of Massachusetts Amherst</td></tr>'
@@ -820,11 +820,10 @@
             + '<tr><td>Hydraulic Risk</td><td><a href="mailto:sjackson@umass.edu">Scott Jackson</a>, University of Massachusetts Amherst</td></tr>'
             + '<tr><td>Ecological Disruption</td><td><a href="mailto:sjackson@umass.edu">Scott Jackson</a>, University of Massachusetts Amherst</td></tr>'
             + '<tr><td>Impassability Score</td><td><a href="https://streamcontinuity.org/" target="_blank">North Atlantic Aquatic Connectivity Collaborative (NAACC)</a></td></tr>'
-            + '<tr><td>Maximum EMS Delay</td><td><a href="mailto:sheldon@cs.umass.edu">Dan Sheldon</a>, University of Massachusetts Amherst</td></tr>'
+            + '<tr><td>Maximum EMS Delay</td><td><a href="http://people.cs.umass.edu/~sheldon/" target="_blank">Dan Sheldon</a> & <a href="http://rbr.cs.umass.edu/shlomo/" target="_blank">Shlomo Zilberstein</a>, UMass Amherst</td></tr>'
             + '<tr><td>National Highway System</td><td><a href="http://geo-massdot.opendata.arcgis.com/datasets/road-inventory" target="_blank">Massachusetts Department of Transportation (MassDOT)</a></td></tr>'
             + '<tr><td>Overall EMS Delay</td><td><a href="mailto:sjackson@umass.edu">Scott Jackson</a>, University of Massachusetts Amherst</td></tr>'
             + '<tr><td>Overall Risk</td><td><a href="mailto:sjackson@umass.edu">Scott Jackson</a>, University of Massachusetts Amherst</td></tr>'
-            + '<tr><td>Overall EMS Delay</td><td><a href="mailto:sjackson@umass.edu">Scott Jackson</a>, University of Massachusetts Amherst</td></tr>'
             + '<tr><td>Q2 Discharge</td><td><a href="mailto:sbmabee@geo.umass.edu">Steve Mabee</a>, University of Massachusetts Amherst</td></tr>'
             + '<tr><td>Road Jurisdiction</td><td><a href="http://geo-massdot.opendata.arcgis.com/datasets/road-inventory" target="_blank">Massachusetts Department of Transportation (MassDOT)</a></td></tr>'
             + '<tr><td>Stream Length</td><td><a href="mailto:jcoombs@cns.umass.edu">Jason Coombs</a>, University of Massachusetts Amherst</td></tr>'
@@ -933,7 +932,7 @@
         .defer(d3.json, 'streams_topo.json')
         .defer(d3.json, 'crossings_topo.json')
         .defer(d3.json, 'catchments_topo.json')
-        .defer(d3.tsv, 'crossings_covariates_03-14-17.tsv')
+        .defer(d3.tsv, 'crossings_covariates_06-06-17.tsv')
         .defer(d3.tsv, 'catchments_covariates.tsv')
         .defer(d3.tsv, 'streams_covariates_new.tsv')
         .defer(d3.tsv, 'catchments_political.tsv')
@@ -1840,7 +1839,9 @@
           tmpFeat.style({"stroke":"gray","fill":"gray","fill-opacity":"0.01"});
           tmpFeat.attr("id", "...");
         
-          d3.select("#" + topo.class + "-list-inline").selectAll("li").style({"border-top-color":"gray", "color":"white"});
+          d3.select("#" + topo.class + "-list-inline").selectAll("li")
+            .style({"border-top-color":"gray", "color":"white"})
+            .property("title", "");
         }
         else {
           //*******Get data for passed in attribute
@@ -1954,8 +1955,9 @@
                 case "text":
                   return topo.conversion[tmpAtt][catArray[i]];
                   break;
-              }
-            });
+              }  
+            })
+            .property("title", function() {return d3.select(this).text();});
         }
       }
 
