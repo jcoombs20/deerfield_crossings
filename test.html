@@ -1,28 +1,36 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>@Media Test</title>
-  <link rel="stylesheet" href="test.css" type="text/css">
+  <head>
+    <title>GIF Test</title>
+    <link rel="stylesheet" href="styles/bootstrap.min.css"/>
+    <link rel="stylesheet" href="styles/bootstrap-toggle.min.css"/>
 
-  <style>
-    @media print {
-      body {
-        background: lime;
+    <script src="jquery-3.2.1.min.js"></script>
+    <script src="jquery-ui.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script src="bootstrap-toggle.min.js"></script>  
+  
+    <style>
+      div {
+        margin: 15px;
+        width: 581px;
+        overflow: hidden;
+        border: 1px solid;
+        box-shadow: 9px 9px 8px 2px rgba(0,0,0,0.2);
       }
-      .header {
-        background: orange;
-        color: purple;
-        font-weight: bold;
-      }
-   </style>
-</head>
-<body>
-<div class="header">
-  <p>Hello World</p>
-</div>
-<button onclick="window.print()">Print</button>
-<script type='text/javascript'>
 
-</script>
-</body>
+      img {
+        position: relative;
+        left: -9px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <img src="images/sce_demo_zoom.gif"></img>
+    </div>
+    <script type='text/javascript'>
+
+    </script>
+  </body>
 </html>

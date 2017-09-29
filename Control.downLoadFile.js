@@ -53,90 +53,37 @@ L.control.downLoadFile = function (options) {
 
 
 //******Add download html elements
-function completeDownload() {
-  //******Add title information
-  d3.select("#downloadFile")
+function completeDownload(tmpLayers) {
+  d3.select("#downloadDiv")
     .append("div")
-    .attr("id", "dlHeader")
-    .html('<img class="pull-left header_icon" src="../images/download2.png"></img>');
+    .attr("id", "dlLayersDiv");
     
-  d3.select("#dlHeader")
-    .append("h4")
-    .attr("id", "priorTitle")
-    .attr("class", "legTitle")
-    .text("Download Map Features")
-    .property("title", "Download attributes of visible map features for the selected layer to the specified output format")
-    .append("span")
-    .html('<span id="downloadTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-container="#dlHelpDiv" data-placement="auto right"  data-html="true" title="<p><u><b><center>Feature Download</center></b></u></p><p>Enables the user to download features displayed on the map from the crossings, streams, or catchments layer in a CSV, shapefile, or geoJSON format</p>"></span>');
+  tmpLayers.forEach(function(layer) {
+    var Layer = layer.charAt(0).toUpperCase() + layer.slice(1);
+    d3.select("#dlLayersDiv")
+      .append("div")
+      .attr("id", "dl" + Layer)
+      .append("input")
+      .attr({type: "radio", name: "layer", value: layer, id: "dl" + Layer + "Radio", class: "dlOptions"})
+      .property("title", "Download visible features from " + layer + " layer");
 
-  d3.select("#dlHeader")
-    .append("div")
-    .attr("id", "dlHelpDiv")
-    .style("float", "right");
+    d3.select("#dl" + Layer)
+      .append("label")
+      .text(layer.charAt(0).toUpperCase() + layer.slice(1))
+      .property("title", "Download visible features from " + layer + " layer")
+      .attr("class", "dlLabel")
+      .attr("for", "dl" + layer.charAt(0).toUpperCase() + layer.slice(1) + "Radio");
+  });
 
-  d3.select("#downloadFile")
-    .append("hr")
-    .attr("class", "hr")
-    .style("border-top", "solid 1px");
+  //***Check first radio
+  d3.select("#dlLayersDiv").select("input").attr("checked", true);
 
-  d3.select("#downloadFile")
-    .append("div")
-    .attr("id", "dlCrossings")
-    .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "radio", name: "layer", value: "crossings", id: "dlCrossingsRadio", checked: true})
-    .property("title", "Download visible features from crossings layer")
-    .attr("class", "priorRadio");
-
-  d3.select("#dlCrossings")
-    .append("label")
-    .text("Crossings")
-    .property("title", "Download visible features from crossings layer")
-    .attr("class", "priorLabel")
-    .attr("for", "dlCrossingsRadio");
-    
-  d3.select("#downloadFile")
-    .append("div")
-    .attr("id", "dlStreams")
-    .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "radio", name: "layer", value: "streams", id: "dlStreamsRadio"})
-    .property("title", "Download visible features from streams layer")
-    .attr("class", "priorRadio");
-
-  d3.select("#dlStreams")
-    .append("label")
-    .text("Streams")
-    .property("title", "Download visible features from streams layer")
-    .attr("class", "priorLabel")
-    .attr("for", "dlStreamsRadio");
-
-  d3.select("#downloadFile")
-    .append("div")
-    .attr("id", "dlCatchments")
-    .attr("class", "priorDiv")
-    .append("input")
-    .attr({type: "radio", name: "layer", value: "catchments", id: "dlCatchmentsRadio"})
-    .property("title", "Download visible features from catchments layer")
-    .attr("class", "priorRadio");
-
-  d3.select("#dlCatchments")
-    .append("label")
-    .text("Catchments")
-    .property("title", "Download visible features from catchments layer")
-    .attr("class", "priorLabel")
-    .attr("for", "dlCatchmentsRadio");
-
-  d3.select("#downloadFile")
-    .append("hr")
-    .attr("class", "hr")
-    .style("border-top", "solid 1px");
-
-  d3.select("#downloadFile")
-    .append("div")
-    .attr("id", "dlSelectDiv")
+  //***Add select for download file format
+  d3.select("#dlLayersDiv")
     .append("select")
     .attr("id", "dlSelect")
+    .attr("class", "filterAttrList")
+    .style({"width":"100%", "margin":"10px 0px"})
     .property("title", "Select the download file format");
 
   d3.select("#dlSelect")
@@ -157,21 +104,16 @@ function completeDownload() {
     .text("GeoJSON")
     .property("title", "Geo Javascript Object Notation");
 
-  d3.select("#downloadFile")
-    .append("hr")
-    .attr("class", "hr")
-    .style("border-top", "solid 1px");
-
-  d3.select("#downloadFile")
+  d3.select("#downloadDiv")
     .append("div")
-    .style("text-align", "center")
+    .attr("class", "legendBtn")
+    .property("title", "Save attributes of visible map features for the selected layer to the specified output format")
+    .style({"text-align":"center","margin-top":"10px"})
     .append("a")
     .attr("id", "dlButton")
     .text("Download")
     .property("href", "#")
-    .property("title", "Save attributes of visible map features for the selected layer to the specified output format")
     .on("click", function() { downloadFile(); });
-
 }
 
 
@@ -180,8 +122,23 @@ function completeDownload() {
 //*******Attach to download button
 function downloadFile() {
   var outLayer = document.querySelector('input[name=layer]:checked').value;
- 
-  var outData = topos[outLayer].filter.featureid.top(Infinity);
+
+  if(topos[outLayer].cfGroup["featureid"] == "both") {
+    var tmpGroup = topos[outLayer].cfGroup.all[0];
+  }
+  else {
+    var tmpGroup = topos[outLayer].cfGroup["featureid"];
+  }
+
+  //***Get identifier data of filtered features
+  var filtData = topos[outLayer][tmpGroup].filter.featureid.top(Infinity);
+  var filtIDs = filtData.map(function(d) { return d[topos[outLayer].uniqueID]; });
+  
+
+  //***Get all data for filtered features
+  var tmpData = d3.selectAll("." + outLayer).data();
+  var tmpDataProps = tmpData.map(function(d) { return d.properties; });
+  var outData = tmpDataProps.filter(function(d) { return filtIDs.indexOf(d[topos[outLayer].uniqueID]) > -1; });
 
 
   if (outData.length > 0) {

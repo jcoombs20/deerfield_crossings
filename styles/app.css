@@ -130,10 +130,6 @@ a {
   line-height: 1.5em;
 }
 
-/*.header a:hover {
-  color: #FDFFCC;
-}*/
-
 .header a:visited {
   color: white;
 }
@@ -157,11 +153,6 @@ a {
 }
 
 .huc-container {
-  /*
-  position: absolute;
-  left: 0;
-  top: 0;
-  */
   padding: 10px;
   width: 320px;
   height: 80px;
@@ -173,11 +164,6 @@ a {
 }
 
 .region-container {
-  /*
-  position: absolute;
-  left: 0;
-  top: 90px;
-  */
   padding: 10px;
   width: 320px;
   height: 80px;
@@ -254,11 +240,6 @@ a {
 }
 
 .legend-container {
-  /*position: absolute;
-  top: 0;
-  left: 300px;
-  top: 180px;
-  left: 0px;*/
   background-color: rgba(255, 255, 255, 0.9);
   width: 320px;
   padding: 10px;
@@ -310,7 +291,6 @@ a {
   /*opacity: 0.5;*/
 }
 
-
 #map path.clicked {
   stroke: orangered;
   fill: none;
@@ -320,9 +300,6 @@ a {
 .chart path.highlight {
   opacity: 0.5;
 }
-
-
-
 
 .filters-toolbar {
   padding-bottom: 10px;
@@ -339,7 +316,6 @@ a {
   border: none;
   outline: none;
 }
-
 
 body {
   font-family: "proxima-nova-alt", Helvetica, Arial, sans-serif;
@@ -512,7 +488,6 @@ aside {
   top: 0px;
 }
 
-
 .legend ul {
   list-style-type: none;
   margin: 0;
@@ -568,28 +543,16 @@ aside {
   height: 60px;
   top: 0;
   left: 0;
-  background: rgba(40, 40, 40, 0.5);
+  background: #262c40;
   color: white;
   padding: 10px;
   font-family: 'Open Sans', "proxima-nova-alt", Helvetica, Arial, sans-serif;
-  z-index: 2000;
+  z-index: 800;
 }
 
 .header .brand {
   font-variant: small-caps;
-  font-size: 24pt;
-}
-
-
-#map .tooltip {
-//  color: #222;
-//  background: #fff;
-// padding: .5em;
-//  text-shadow: #f5f5f5 0 1px 0;
-//  border-radius: 2px;
-//  box-shadow: 0px 0px 2px 2px #a6a6a6;
-//  opacity: 0.9;
-//  position: absolute;
+  font-size: 20pt;
 }
 
 ul.dropdown-menu.variables{
@@ -634,7 +597,6 @@ ul.dropdown-menu.variables{
   height:34px;
   overflow:hidden;
 }
-
 
 .datacontrol{
   text-align: left;

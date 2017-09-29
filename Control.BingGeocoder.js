@@ -1,18 +1,8 @@
 L.Control.BingGeocoder = L.Control.extend({
 	options: {
-		collapsed: true,
+		collapsed: false,
 		position: 'topleft',
 		text: 'Locate'
-		/*callback: function (results) {
-			var bbox = results.resourceSets[0].resources[0].bbox,
-				first = new L.LatLng(bbox[0], bbox[1]),
-				second = new L.LatLng(bbox[2], bbox[3]),
-				bounds = new L.LatLngBounds([first, second]);
-			this._map.fitBounds(bounds);
-                     console.log(results.resourceSets[0].resources[0].address);
-                     var tmpPoint = new L.marker(results.resourceSets[0].resources[0].point.coordinates).bindPopup(results.resourceSets[0].resources[0].address.formattedAddress);
-                     this._map.addLayer(tmpPoint);
-		}*/
 	},
 
 	_callbackId: 0,
@@ -30,13 +20,15 @@ L.Control.BingGeocoder = L.Control.extend({
 		L.DomEvent.disableClickPropagation(container);
 
 		var form = this._form = L.DomUtil.create('form', className + '-form');
-              form.title = "Enter location, address, or coordinates (lat, long) to which to zoom";
+                form.title = "Enter location, address, or coordinates (lat, long)";
 
 		var input = this._input = L.DomUtil.create('input', className + '-input', form);
 		input.type = 'text';
+                input.id = 'bingGeocoderInput';
+                input.placeholder = 'Search map...';
 
 		var submit = this._createButton(className, this.options.text);
-              submit.title = "Click to zoom to specified location";
+                submit.title = "Click to zoom to specified location";
 		form.appendChild(submit);
 
 		L.DomEvent.on(form, 'submit', this._geocode, this);
@@ -62,7 +54,8 @@ L.Control.BingGeocoder = L.Control.extend({
 	},
 
 	_createButton: function(css, text) {
-		var btn = '<button type="submit" class="' + css + '-button" />' + text + '</button>';
+		//var btn = '<button type="submit" class="' + css + '-button" />' + text + '</button>';
+		var btn = '<button type="submit" id="bingGeocoderSubmit" class="glyphicon glyphicon-search"></button>';
 
 		var radioFragment = document.createElement('div');
 		radioFragment.innerHTML = btn;

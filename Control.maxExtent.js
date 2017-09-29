@@ -1,6 +1,6 @@
 L.Control.maxExtent = L.Control.extend({
     options: {
-        position: 'topleft',
+        position: 'bottomright',
     },
 
     onAdd: function (map) {
@@ -11,7 +11,7 @@ L.Control.maxExtent = L.Control.extend({
         .addListener(controlDiv, 'click', function () { map.setView(new L.LatLng(42.74, -72.83), 10); });
 
         var controlUI = L.DomUtil.create('div', 'leaflet-control-maxExtent-interior', controlDiv);
-        controlUI.title = 'Zoom to Deerfield watershed extent';
+        controlUI.title = 'Zoom to full extent';
         return controlDiv;
     }
 });

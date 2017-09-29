@@ -33,376 +33,347 @@ function completeAttrSelect() {
   d3.select("#attrSelectDiv")
     .append("div")
     .attr("id", "attrSelectHeader")
-    .html('<img class="pull-left header_icon" src="../images/checkmark.png" ondblclick="toolWindowToggle(&quot;attrSelect&quot;)" title="Double click to hide attribute selection window"></img>');
-
-  d3.select("#attrSelectHeader")
     .append("h4")
     .attr("class", "legTitle")
     .attr("id", "attrSelectTitle")
     .text("Attribute Selection")
-    .property("title", "Select attributes to make them available for mapping and graphing")
+    .property("title", "Select attributes to make them available as options for mapping in the 'Layers' window and graphing in the 'Charts' window")
     .append("span")
-    .html('<span id="attTT" class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="auto right" data-container="body" data-html="true" title="<p><u><b><center>Attribute Selection</center></b></u></p><p>Enables the user to select which attributes are active and available for mapping in the \'Legend\' window and filtering in the \'Charts\' window.</p>"></span>');
+    .html('<span id="attTT" class="glyphicon glyphicon-info-sign help-tooltip" data-toggle="tooltip" data-placement="auto right" data-container="body" data-html="true" title="<p><u><b><center>Attribute Selection</center></b></u></p><p>Enables the user to select which attributes are active and available as options for mapping in the \'Legend\' window and filtering in the \'Charts\' window.<br><br>The layout also tries to convey the data hierarchy for the Crossing attributes, attempting to show that attributes under \'Combined Scores\' are derived from lower order attributes.</p>"></span>');
 
-  d3.select("#attrSelectTitle")
-    .append("span")
-    .attr("class", "glyphicon glyphicon-remove-sign pull-right minimize-button")
-    .property("title", "Click to hide attribute selection window")
-    .on("click", function() { toolWindowToggle("attrSelect"); });
+  d3.select("#attrSelectDiv")
+    .append("div")
+    .attr("id", "attrSelectInfo")
+    .append("p")
+    .text("Selecting an attribute makes it available as a dropdown option for mapping in the 'Layers' window and graphing in the 'Charts' window")
+    .property("title", "Selecting an attribute makes it available as a dropdown option for mapping in the 'Layers' window and graphing in the 'Charts' window");
 
+  //******Add in div for Crossings layer
+  d3.select("#attrSelectDiv")
+    .append("div")
+    .attr("id", "attrSelectLayersDiv")
+    .append("div")
+    .attr("id", "attrSelectCrossings")
+    .append("div")
+    .attr("id", "attrSelectCrossingsHeader")
+    .append("h5")
+    .attr("class", "attrSelectLayerTitle")
+    .text("Crossings")
+    .property("title", "Crossings feature layer")
+    .style("margin-bottom", "0px");
 
+  d3.select("#attrSelectCrossings")
+    .append("div")
+    .attr("id", "attrSelectCrossingsOptions");
 
-  //******Add in divs for layers
-  layers.forEach(function(layer) {
-    //***Add layer header div
-    d3.select("#attrSelectDiv")
+  //******Add in div for Streams & Catchments layers
+  d3.select("#attrSelectLayersDiv")
+    .append("div")
+    .attr("id", "attrSelectStreamsCatchments");
+
+  ["Streams", "Catchments"].forEach(function(layer) {
+    d3.select("#attrSelectStreamsCatchments")
       .append("div")
-      .attr("id", "attrSelectDiv_" + layer)
+      .attr("id", "attrSelect" + layer)
+      .style("margin-bottom", "100px")
+      .append("h5")
+      .attr("class", "attrSelectLayerTitle")
+      .text(layer)
+      .property("title", layer + " feature layer");
+
+    d3.select("#attrSelect" + layer)
       .append("div")
-      .attr("id", "attrSelectDiv_" + layer + "Header");
-
-      d3.select("#attrSelectDiv_" + layer + "Header")
-        .append("div")
-        .attr("class", "horBorder")
-        .append("h5")
-        .attr("id", "attrSelectDiv_" + layer + "Title")
-        .attr("class", "legTitle")
-        .text(layer.charAt(0).toUpperCase() + layer.slice(1))
-        .append("span")
-        .html('<span class="glyphicon glyphicon-info-sign help-tooltip pull-right" data-toggle="tooltip" data-placement="auto right" data-container="body" data-html="true" title="<p><u><b><center>' + layer.charAt(0).toUpperCase() + layer.slice(1,-1) + ' Attributes</center></b></u></p><p>Checked attributes are available for mapping in the \'Legend\' window and filtering in the \'Charts\' window.</p>"></span>');
-
-      d3.select("#attrSelectDiv_" + layer + "Title")
-        .append("span")
-        .attr("class", "glyphicon glyphicon-minus-sign pull-right minimize-button")
-        .attr("id", "attrSelectGlyph_" + layer)
-        .attr("data-toggle", "collapse")
-        .attr("data-target", "#attrSelectDiv_" + layer + "Options")
-        .property("title", "Click to collapse " + layer + " attributes")
-        .on("click", function() { changeGlyph(this); });
-
-    d3.select("#attrSelectDiv_" + layer)
-      .append("div")
-      .attr("id", "attrSelectDiv_" + layer + "Options")
-      .attr("class", "collapse in");
+      .attr("id", "attrSelect" + layer + "Options");
   });
-      
+
 
 
   //******Add crossing attributes
-  d3.select("#attrSelectDiv_crossingsOptions")
-    .html('</div><div id="core"></div><div id="attr"></div>');
+  d3.select("#attrSelectCrossingsOptions")
+    .html('</div><div id="column1"></div><div id="column2"></div>');
 
   //******Add Core Components
-  d3.select("#core")
-    .append("div")
-    .attr("id", "coreComp")
-    .append("div")
-    .attr("class", "priorHeader1")
-    .style("border-right", "1px solid black")
-    .property("title", "Select which ecological disruption and transportation system vulnerability measures are available for use with the 'Legend' and 'Charts' windows")
-    .append("h5")
+  //******Add Combined attributes
+  d3.select("#column1")
+    .append("p")
     .attr("class", "priorTitle")
-    .text("Core Attributes");
+    .text("Combined Scores");
 
   //******Add Crossing Prioritization Score
-  d3.select("#core")
+  d3.select("#column1")
     .append("div")
-    .attr("id", "crossPrior")
-    .append("div")
-    .attr("class", "priorHeader2")
-    .style("border-right", "1px solid black")
+    .attr("class", "attrDiv")
     .property("title", topos.crossings.tooltip.cross_prior)
     .append("label")
     .attr("class", "priorLabel")
-    .html('<input id="chk_cross_prior" type="checkbox" class="priorCheck" value="cross_prior" checked></input><span>' + topos.crossings.title.cross_prior + '</span>');
+    .html('<input id="chk_cross_prior" type="checkbox" class="combCheck" value="cross_prior" checked></input><span>' + topos.crossings.title.cross_prior + '</span><p class="attrSubHead">(Transportation Vulnerability & Ecological Disruption)</p>');
 
-  //******Add ecological connectivity
-  d3.select("#crossPrior")
+  //******Add Transportation Connectivity Score
+  d3.select("#column1")
     .append("div")
-    .attr("id", "midLevel")
-    .append("div")
-    .attr("id", "eco")
-    .append("div")
-    .attr("class", "priorHeader4")
-    .attr("id", "connectEco")
-    .property("title", "Options related to ecological disruption score available to view and filter")
+    .attr("class", "attrDiv")
+    .property("title", topos.crossings.tooltip.trans_vuln)
     .append("label")
     .attr("class", "priorLabel")
-    .html('<span>Ecological Disruption</span>')
+    .html('<input id="chk_trans_vuln" type="checkbox" class="combCheck" value="trans_vuln" checked></input><span>' + topos.crossings.title.trans_vuln + '</span><p class="attrSubHead">(Overall EMS Delay & Overall Risk of Failure)</p>');
 
-  d3.select("#eco")
+
+
+
+  //******Add Ecological Disruption
+  d3.select("#column1")
+    .append("p")
+    .attr("class", "priorTitle")
+    .text("Ecological Disruption");
+
+  //******Add Ecological Disruption attributes
+  ["eco_dis", "impass", "deltaln", "effectln", "anad_rest"].forEach(function(d) {
+    d3.select("#column1")
+      .append("div")
+      .attr("class", "attrDiv")
+      .property("title", topos.crossings.tooltip[d])
+      .append("label")
+      .attr("class", "priorLabel")
+      .html('<input id="chk_' + d + '" type="checkbox" class="ecoCheck" value="' + d + '"></input><span>' + topos.crossings.title[d] + '</span>');
+
+    d3.select("#chk_" + d)
+      .property("checked", function() { return topos.crossings.display[d] == "yes"; });
+  });
+
+  //******Add in Coldwater Restoration options
+  d3.select("#column1")
+    .append("p")
+    .attr("class", "priorSubTitle")
+    .style("color", "lightseagreen")
+    .text("Coldwater Restoration");
+
+  //******Coldwater Current
+  d3.select("#column1")
     .append("div")
-    .attr("class", "priorDiv")
-    .property("title", "Check to select all below attributes")
-    .style("border-bottom", "1px solid black")
+    .attr("id", "coldCurrent")
+    .append("p")
+    .attr("class", "horListTitle")
+    .property("title", "Restoration potential based on current water temperatures")
+    .text("Current");
+  
+  //******Current temps
+  ["16","18","20","22"].forEach(function(d) {
+    d3.select("#coldCurrent")
+      .append("div")
+      .attr("class", "horListDiv")
+      .property("title", topos.crossings.tooltip["effln" + d + "Cur"])
+      .append("label")
+      .attr("class", "priorLabel")
+      .html('<input id="chk_effln' + d + 'Cur" type="checkbox" class="ecoCheck" value="effln' + d + 'Cur"></input><span>' + d + '\xB0 C</span>');
+  });
+
+  //******Coldwater Future
+  d3.select("#column1")
+    .append("div")
+    .attr("id", "coldFuture")
+    .append("p")
+    .attr("class", "horListTitle")
+    .property("title", "Restoration potential based on future water temperatures assumning a 2 degree celsius increase over current water temperatures")
+    .html('<span style="margin-right:7px;">Future</span>');
+
+  //******Future temps
+  ["16","18","20","22"].forEach(function(d) {
+    d3.select("#coldFuture")
+      .append("div")
+      .attr("class", "horListDiv")
+      .property("title", topos.crossings.tooltip["effln" + d + "Fut"])
+      .append("label")
+      .attr("class", "priorLabel")
+      .html('<input id="chk_effln' + d + 'Fut" type="checkbox" class="ecoCheck" value="effln' + d + 'Fut"></input><span>' + d + '\xB0 C</span>');
+  });
+ 
+  //******Add in Select All Div
+  d3.select("#column1")
+    .append("div")
+    .attr("class", "selectAllDiv attrDiv")
+    .property("title", "Check to select all 'Ecological Disruption' attributes")
     .append("label")
     .attr("class", "priorLabel")
     .html('<input id="chk_all_eco" type="checkbox" class="allCheck" value="all"></input><span>Select All</span>');
 
-  d3.select("#eco")
-    .append("div")
-    .attr("id", "ecoDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.int_eco_dis)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_int_eco_dis" type="checkbox" class="ecoCheck" value="int_eco_dis" checked></input><span>' + topos.crossings.title.int_eco_dis + '</span>');
-
-  d3.select("#ecoDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.impassability)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_impassability" type="checkbox" class="ecoCheck" value="impassability"></input><span>' + topos.crossings.title.impassability + '</span>');
-
-  d3.select("#ecoDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.delta_scaled)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_delta_scaled" type="checkbox" class="ecoCheck" value="delta_scaled"></input><span>' + topos.crossings.title.delta_scaled + '</span>');
-
-  d3.select("#ecoDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.effect_scaled)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_effect_scaled" type="checkbox" class="ecoCheck" value="effect_scaled"></input><span>Connectivity Restoration</span>');
-
-  d3.select("#ecoDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .property("title", "Potential for improved aquatic connectivity of coldwater streams via crossing replacement")
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<span id="chk_water_temp" type="checkbox" class="attrCheck glyphicon glyphicon-plus-sign" value="water_temp" data-toggle="collapse" data-target="#coldWaterDiv" onclick="changeGlyph(this)" title="Click to open panel"></span><span>Coldwater Restoration</span>');
-
-  d3.select("#ecoDiv")
-    .append("div")
-    .attr("id", "coldWaterDiv")
-    .attr("class", "collapse")
-    .append("div")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.effect_scaled_16)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_effect_scaled_16" type="checkbox" class="ecoCheck" value="effect_scaled_16"></input><span>16\xB0 C</span>');
-
-  d3.select("#coldWaterDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.effect_scaled_18)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_effect_scaled_18" type="checkbox" class="ecoCheck" value="effect_scaled_18"></input><span>18\xB0 C</span>');
-
-  d3.select("#coldWaterDiv")
-    .append("div")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.effect_scaled_20)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_effect_scaled_20" type="checkbox" class="ecoCheck" value="effect_scaled_20"></input><span>20\xB0 C</span>');
-  
 
 
 
 
 
-  //******Transportation Connectivity
-  d3.select("#midLevel")
-    .append("div")
-    .attr("id", "transport")
-    .append("div")
-    .attr("class", "priorHeader3")
-    .attr("id", "connectTrans")
-    .property("title", topos.crossings.tooltip.trans_vuln)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_trans_vuln" type="checkbox" class="priorCheck" value="trans_vuln" checked></input><span>' + topos.crossings.title.trans_vuln + '</span>');
 
+  //******Add EMS Disruptions Vulnerability
+  d3.select("#column1")
+    .append("p")
+    .attr("class", "priorTitle")
+    .text("Emergency Services Disruption");
 
-  //******Disruption
-  d3.select("#transport")
-    .append("div")
-    .attr("id", "transDiv")
-    .append("div")
-    .attr("id", "disrupt")
-    .append("div")
-    .property("title", "Options related to emergency service disruption score available to view and filter")
-    .attr("class", "priorHeader4")
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<span>Emergency Service Disruption</span>');
+  //******Add Ecological Disruption attributes
+  ["int_del", "ave_del", "aff_del", "max_del"].forEach(function(d) {
+    d3.select("#column1")
+      .append("div")
+      .attr("class", "attrDiv")
+      .property("title", topos.crossings.tooltip[d])
+      .append("label")
+      .attr("class", "priorLabel")
+      .html('<input id="chk_' + d + '" type="checkbox" class="emsCheck" value="' + d + '"></input><span>' + topos.crossings.title[d] + '</span>');
 
-  d3.select("#disrupt")
+    d3.select("#chk_" + d)
+      .property("checked", function() { return topos.crossings.display[d] == "yes"; });
+  });
+
+  //******Add in Select All Div
+  d3.select("#column1")
     .append("div")
-    .attr("class", "priorDiv")
-    .property("title", "Check to select all below attributes")
-    .style("border-bottom", "1px solid black")
+    .attr("class", "selectAllDiv attrDiv")
+    .property("title", "Check to select all 'Emergency Services Disruption' attributes")
     .append("label")
     .attr("class", "priorLabel")
     .html('<input id="chk_all_ems" type="checkbox" class="allCheck" value="all"></input><span>Select All</span>');
 
-  d3.select("#disrupt")
-    .append("div")
-    .attr("id", "disruptInput")
-    .append("div")
-    .attr("id", "disruptComposite")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.ln_comp_del)
+
+
+
+
+
+
+  //******Add Risk of Failure
+  d3.select("#column2")
+    .append("p")
+    .attr("class", "priorTitle")
+    .text("Risk of Failure");
+
+  //******Add Risk of Failure attributes
+  ["max_rof", "struct_rof", "geo_rof"].forEach(function(d) {
+    d3.select("#column2")
+      .append("div")
+      .attr("class", "attrDiv")
+      .property("title", topos.crossings.tooltip[d])
+      .append("label")
+      .attr("class", "priorLabel")
+      .html('<input id="chk_' + d + '" type="checkbox" class="rofCheck" value="' + d + '"></input><span>' + topos.crossings.title[d] + '</span>');
+
+    d3.select("#chk_" + d)
+      .property("checked", function() { return topos.crossings.display[d] == "yes"; });
+  });
+
+  //******Add in Hydraulic ROF options
+  d3.select("#column2")
     .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_ln_comp_del" type="checkbox" class="emsCheck" value="ln_comp_del" checked></input><span>' + topos.crossings.title.ln_comp_del + '</span>');
+    .attr("class", "priorSubTitle")
+    .style("color", "lightseagreen")
+    .text("Hydraulic Risk Models");
+
+  //******Hydraulic ROF Current
+  d3.select("#column2")
+    .append("div")
+    .attr("id", "hydROFCurrent")
+    .append("p")
+    .attr("class", "horListTitle")
+    .property("title", "Current hydraulic risk models")
+    .html('<span style="margin-right:28px;">Current</span>');
   
-  d3.select("#disruptInput")
+  //******Current models
+  var hydModel = ["All","Physical","Statististical"];
+  ["hydCurAll","hydCurPhys","hydCurStat"].forEach(function(d,i) {
+    d3.select("#hydROFCurrent")
+      .append("div")
+      .attr("class", "horListDiv")
+      .property("title", topos.crossings.tooltip[d])
+      .append("label")
+      .attr("class", "priorLabel")
+      .html('<input id="chk_' + d + '" type="checkbox" class="rofCheck" value="' + d + '"></input><span>' + hydModel[i] + '</span>');
+  });
+
+
+  //******Hydraulic ROF Mid-century
+  d3.select("#column2")
     .append("div")
-    .attr("id", "disruptMax")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.max_del)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_max_del" type="checkbox" class="emsCheck" value="max_del"></input><span>' + topos.crossings.title.max_del + '</span>');
+    .attr("id", "hydROFFuture")
+    .append("p")
+    .attr("class", "horListTitle")
+    .property("title", "Mid-century hydraulic risk models")
+    .text("Mid-Century");
+  
+  //******Mid-century temps
+  var hydModel = ["All","Physical"];
+  ["hydMCAll","hydMCPhys"].forEach(function(d,i) {
+    d3.select("#hydROFFuture")
+      .append("div")
+      .attr("class", "horListDiv")
+      .property("title", topos.crossings.tooltip[d])
+      .append("label")
+      .attr("class", "priorLabel")
+      .html('<input id="chk_' + d + '" type="checkbox" class="rofCheck" value="' + d + '"></input><span>' + hydModel[i] + '</span>');
+  });
 
-  d3.select("#disruptInput")
+  //******Add in Select All Div
+  d3.select("#column2")
     .append("div")
-    .attr("id", "disruptAve")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.ave_del)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_ave_del" type="checkbox" class="emsCheck" value="ave_del"></input><span>' + topos.crossings.title.ave_del + '</span>');
-
-  d3.select("#disruptInput")
-    .append("div")
-    .attr("id", "disruptAveAff")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.ave_aff_del)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_ave_aff_del" type="checkbox" class="emsCheck" value="ave_aff_del"></input><span>' + topos.crossings.title.ave_aff_del + '</span>');
-
-
-
-
-  //******Risk of Failure
-  d3.select("#transDiv")
-    .append("div")
-    .attr("id", "rof")
-    .append("div")
-    .property("title", "Options related to crossing risk of failure score available to view and filter")
-    .attr("class", "priorHeader4")
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<span>Crossing Risk of Failure</span>');
-
-  d3.select("#rof")
-    .append("div")
-    .attr("class", "priorDiv")
-    .property("title", "Check to select all below attributes")
-    .style("border-bottom", "1px solid black")
+    .attr("class", "selectAllDiv attrDiv")
+    .property("title", "Check to select all 'Risk of Failure' attributes")
     .append("label")
     .attr("class", "priorLabel")
     .html('<input id="chk_all_rof" type="checkbox" class="allCheck" value="all"></input><span>Select All</span>');
 
-  d3.select("#rof")
-    .append("div")
-    .attr("id", "rofInput")
-    .append("div")
-    .attr("id", "rofInputMax")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.max_rof)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_max_rof" type="checkbox" class="rofCheck" value="max_rof" checked></input><span>' + topos.crossings.title.max_rof + '</span>');
-
-  d3.select("#rofInput")
-    .append("div")
-    .attr("id", "rofInputStruct")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.struct_rof)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_struct_rof" type="checkbox" class="rofCheck" value="struct_rof"></input><span>' + topos.crossings.title.struct_rof + '</span>');
-
-  d3.select("#rofInput")
-    .append("div")
-    .attr("id", "rofInputHydro")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.hydro_rof)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_hydro_rof" type="checkbox" class="rofCheck" value="hydro_rof"></input><span>' + topos.crossings.title.hydro_rof + '</span>');
-
-  d3.select("#rofInput")
-    .append("div")
-    .attr("id", "rofInputGeo")
-    .attr("class", "priorDiv")
-    .property("title", topos.crossings.tooltip.geo_rof)
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_geo_rof" type="checkbox" class="rofCheck" value="geo_rof"></input><span>' + topos.crossings.title.geo_rof + '</span>');
 
 
 
-  //******Attribute selection
-  d3.select("#attr")
-    .append("div")
-    .attr("class", "priorHeader1")
-    .append("h5")
+
+
+
+
+
+  //******Additional Crossing Attributes
+  d3.select("#column2")
+    .append("p")
     .attr("class", "priorTitle")
     .text("Additional Attributes")
-    .property("title", "Choose additional crossing attributes to be available for use with the 'Legend' and 'Charts' windows");
+    .property("title", "Additional crossing attributes available for selection");
 
-  d3.select("#attr")
+  d3.select("#column2")
     .append("div")
-    .attr("class", "attrDiv")
-    .property("title", "Check to select all below attributes")
-    .style("border-bottom", "1px solid black")
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_all_extra" type="checkbox" class="allCheck" value="all"></input><span>Select All</span>');
+    .attr("id", "attrSelDivCrossingsAdd");   
 
-  d3.select("#attr")
-    .append("div")
-    .attr("id", "attrSelDiv");
-    //.on("mousewheel", function() { d3.event.stopPropagation(); });
-   
-
-  var noDisplay = [];
+  var tmpAdd = [];
   topos.crossings.keys.forEach(function(key) {
-    if (topos.crossings.display[key] == "no") {
-      noDisplay.push(key);
+    if (topos.crossings.cfGroup[key] == "additional") {
+      tmpAdd.push(key);
     }
   });
 
-  var tmpDiv = d3.select("#attrSelDiv");
-  noDisplay.forEach(function(key) {
+  var tmpDiv = d3.select("#attrSelDivCrossingsAdd");
+  tmpAdd.forEach(function(key) {
     tmpDiv.append("div")
       .attr("class", "attrDiv")
       .property("title", topos.crossings.tooltip[key])
       .append("label")
       .attr("class", "priorLabel")
-      .html('<input id="chk_' + key + '" type="checkbox" class="extraCheck" value="' + key + '"></input><span>' + topos.crossings.title[key] + '</span>')
+      .html('<input id="chk_' + key + '" type="checkbox" class="addCheck" value="' + key + '"></input><span>' + topos.crossings.title[key] + '</span>')
       .on("click", function() { var tmpChk = d3.select("#chk_" + key); if(tmpChk.property("checked") == true) {topos.crossings.display[tmpChk.property("value")] = "yes"; } else {topos.crossings.display[tmpChk.property("value")] = "no"; } });
   });
+
+  //******Add in Select All Div
+  d3.select("#column2")
+    .append("div")
+    .attr("class", "selectAllDiv attrDiv")
+    .property("title", "Check to select all 'Additional Attributes'")
+    .append("label")
+    .attr("class", "priorLabel")
+    .html('<input id="chk_all_add" type="checkbox" class="allCheck" value="all"></input><span>Select All</span>');
 
 
 
   //******Updating elements
-  d3.select("#attrSelectDiv_crossings").selectAll(".ecoCheck,.emsCheck,.rofCheck,.priorCheck,.attrCheck,.extraCheck,.allCheck")
+  d3.select("#attrSelectCrossings").selectAll(".combCheck,.ecoCheck,.emsCheck,.rofCheck,.priorCheck,.attrCheck,.addCheck,.allCheck")
     .on("click", function() {
       var tmpVal = this.value;
       var tmpSel = d3.select("#crossingsSelect").node().value;
       var tmpChk = d3.select(this); 
       if(tmpChk.classed("allCheck")) {
         switch(tmpChk.attr("id")) {
-          case "chk_all_extra":
-            var allChk = d3.selectAll(".extraCheck");
+          case "chk_all_add":
+            var allChk = d3.selectAll(".addCheck");
             break;
           case "chk_all_eco":
             var allChk = d3.selectAll(".ecoCheck");
@@ -435,45 +406,19 @@ function completeAttrSelect() {
       }
 
       updateLegends(topos.crossings);
-
-      //******Change selected index to checked attribute
-      var tmpSelect = d3.select("#crossingsSelect");
-      var setOpt = tmpSelect.selectAll("option")[0].map(function(d) { return d.value; });
-      var tmpIndex = setOpt.indexOf(tmpVal);
-      if (tmpIndex > -1) {
-        tmpSelect.property("selectedIndex", function() {return tmpIndex;});
-      }
-      else {
-        if (setOpt.length > 1) {
-          tmpIndex = setOpt.indexOf(tmpSel);
-          if (tmpIndex > -1 && tmpSel != "...") {
-            tmpSelect.property("selectedIndex", function() {return tmpIndex;});
-          }
-          else {
-            tmpSelect.property("selectedIndex", function() {return 1;});
-          }
-        }
-        changeStyle(tmpSelect.node().value, topos.crossings);
-      }
     });
 
 
 
 
 
+
+
+
   //******Add in stream attributes
-  d3.select("#attrSelectDiv_streamsOptions")
+  d3.select("#attrSelectStreamsOptions")
     .append("div")
     .attr("id", "attrStreams")
-    .append("div")
-    .attr("class", "attrDiv")
-    .property("title", "Check to select all below attributes")
-    .style("border-bottom", "1px solid black")
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_all_streams" type="checkbox" class="allCheck" value="all" checked></input><span>Select All</span>');
-
-  d3.select("#attrStreams")
     .append("div")
     .attr("id", "attrSelDivStreams");
 
@@ -495,8 +440,19 @@ function completeAttrSelect() {
       .on("click", function() { var tmpChk = d3.select("#chk_" + key); if(tmpChk.property("checked") == true) {topos.streams.display[tmpChk.property("value")] = "yes"; } else {topos.streams.display[tmpChk.property("value")] = "no"; } });
   });
 
+  //******Add in select all option
+  d3.select("#attrStreams")
+    .append("div")
+    .attr("class", "attrDiv")
+    .property("title", "Check to select all above attributes")
+    .style("margin-top", "10px")
+    .append("label")
+    .attr("class", "priorLabel")
+    .html('<input id="chk_all_streams" type="checkbox" class="allCheck" value="all" checked></input><span>Select All</span>');
 
-  d3.select("#attrSelectDiv_streams").selectAll(".streamCheck,.allCheck")
+
+
+  d3.select("#attrSelectStreams").selectAll(".streamCheck,.allCheck")
     .on("click", function() { 
       var tmpVal = this.value;
       var tmpSel = d3.select("#streamsSelect").node().value;
@@ -527,26 +483,6 @@ function completeAttrSelect() {
       }
 
       updateLegends(topos.streams);
-
-      //******Change selected index to checked attribute
-      var tmpSelect = d3.select("#streamsSelect");
-      var setOpt = tmpSelect.selectAll("option")[0].map(function(d) { return d.value; });
-      var tmpIndex = setOpt.indexOf(tmpVal);
-      if (tmpIndex > -1) {
-        tmpSelect.property("selectedIndex", function() {return tmpIndex;});
-      }
-      else {
-        if (setOpt.length > 1) {
-          tmpIndex = setOpt.indexOf(tmpSel);
-          if (tmpIndex > -1 && tmpSel != "...") {
-            tmpSelect.property("selectedIndex", function() {return tmpIndex;});
-          }
-          else {
-            tmpSelect.property("selectedIndex", function() {return 1;});
-          }
-        }
-        changeStyle(tmpSelect.node().value, topos.streams);
-      }
     });
 
 
@@ -555,18 +491,9 @@ function completeAttrSelect() {
 
 
   //******Add in catchment attributes
-  d3.select("#attrSelectDiv_catchmentsOptions")
+  d3.select("#attrSelectCatchmentsOptions")
     .append("div")
     .attr("id", "attrCatchments")
-    .append("div")
-    .attr("class", "attrDiv")
-    .property("title", "Check to select all below attributes")
-    .style("border-bottom", "1px solid black")
-    .append("label")
-    .attr("class", "priorLabel")
-    .html('<input id="chk_all_catchments" type="checkbox" class="allCheck" value="all" checked></input><span>Select All</span>');
-
-  d3.select("#attrCatchments")
     .append("div")
     .attr("id", "attrSelDivCatchments");
 
@@ -589,7 +516,18 @@ function completeAttrSelect() {
   });
 
 
-  d3.select("#attrSelectDiv_catchments").selectAll(".catchmentCheck,.allCheck")
+  //******Add select all option
+  d3.select("#attrCatchments")
+    .append("div")
+    .attr("class", "attrDiv")
+    .property("title", "Check to select all above attributes")
+    .style("margin-top", "10px")
+    .append("label")
+    .attr("class", "priorLabel")
+    .html('<input id="chk_all_catchments" type="checkbox" class="allCheck" value="all" checked></input><span>Select All</span>');
+
+
+  d3.select("#attrSelectCatchments").selectAll(".catchmentCheck,.allCheck")
     .on("click", function() { 
       var tmpVal = this.value;
       var tmpSel = d3.select("#catchmentsSelect").node().value;
@@ -620,27 +558,26 @@ function completeAttrSelect() {
       }
 
       updateLegends(topos.catchments);
-
-      //******Change selected index to checked attribute
-      var tmpSelect = d3.select("#catchmentsSelect");
-      var setOpt = tmpSelect.selectAll("option")[0].map(function(d) { return d.value; });
-      var tmpIndex = setOpt.indexOf(tmpVal);
-      if (tmpIndex > -1) {
-        tmpSelect.property("selectedIndex", function() {return tmpIndex;});
-      }
-      else {
-        if (setOpt.length > 1) {
-          tmpIndex = setOpt.indexOf(tmpSel);
-          if (tmpIndex > -1 && tmpSel != "...") {
-            tmpSelect.property("selectedIndex", function() {return tmpIndex;});
-          }
-          else {
-            tmpSelect.property("selectedIndex", function() {return 1;});
-          }
-        }
-        changeStyle(tmpSelect.node().value, topos.catchments);
-      }
     });
+
+  //******Update feature attributes window
+  d3.select("#attrSelectDiv").selectAll("input")
+    .on("change", function() { updateAttributes(); d3.select("#attrSelectButton").text("Continue with Current Selections"); });
+
+
+
+  //******Add Continue button
+  d3.select("#attrSelectDiv")
+    .append("div")
+    .style({"width":"100%","text-align":"center","padding-top":"5px"})
+    .append("button")
+    .attr("id", "attrSelectButton")
+    .attr("class", "btn legendBtn")
+    .attr("data-toggle", "modal")
+    .attr("data-target", "#attrSelectModal")
+    .property("title", "Click to continue using the selected attributes. This window can be reopened anytime by clicking the 'Select Attributes' button located on the top menu.")
+    .text("Continue with Default Selections")
+    .on("click", function() { if(localStorage.getItem('doneTour') != "yeah!" && disableTutorialSession != true) {startIntro();} });
 }
 
 
@@ -649,6 +586,9 @@ function completeAttrSelect() {
 
 //******Update legend and chart select boxes
 function updateLegends(topo) {
+  //***Store current mapped attribute
+  var tmpAttr = d3.select("#" + topo.class + "Select").property("value");
+
   var display = [];
   topo.keys.forEach(function(key) {
     if (topo.display[key] == "yes") {
@@ -656,17 +596,16 @@ function updateLegends(topo) {
     }
   });
 
+  var valArray = [];
   var tmpOpts = d3.select("#" + topo.class + "Select").selectAll("option")
     .data(display);
-
-  //tmpOpts.splice(0,0, "...");
 
   tmpOpts.exit()
     .remove();
   tmpOpts.enter()
     .append("option")
   tmpOpts
-    .attr("value", function(d) { return d; })
+    .attr("value", function(d) { valArray.push(d); return d; })
     .text(function(d) { return topo.title[d]; });
 
   d3.select("#" + topo.class + "Select")
@@ -674,10 +613,29 @@ function updateLegends(topo) {
     .attr("value", "...")
     .text("...");
 
-  changeStyle(d3.select("#" + topo.class + "Select").node().value, topo);
+  valArray.unshift("...");
+  var i = valArray.indexOf(tmpAttr);
+
+  if(i > 0) {
+    d3.select("#" + topo.class + "Select")
+      .property("selectedIndex", i)
+      .property("value", valArray[i]);
+  }
+  else if(valArray.length > 1) {
+    d3.select("#" + topo.class + "Select")
+      .property("selectedIndex", 1)
+      .property("value", valArray[1]);
+  }
+  else {
+    d3.select("#" + topo.class + "Select")
+      .property("selectedIndex", 0)
+      .property("value", valArray[0]);
+  }
+    
+  changeStyle(d3.select("#" + topo.class + "Select").property("value"), topo);
 
 
- 
+  //******Update charts dropdowns
   if (d3.select("#layerFilterSelect").node().value == topo.class) {
     display.splice(0,0, "...");
     tmpOpts = d3.select("#attributeFilterSelect").selectAll("option")

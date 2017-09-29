@@ -1,0 +1,66 @@
+layer	cfGroup	short_heading	long_heading	unit	direction	data_type	scale	display	rank	tooltip	conversion
+crossings	core	cross_prior	Crossing Prioritization		reverse	decimal	linear	yes	0	Crossing prioritization score that combines the maximum value of the Ecological Disruption and Transportation Vulnerability scores (0 = Low, 1 = High)	
+crossings	core	eco_dis	Ecological Disruption		reverse	decimal	linear	yes	1	Integrated metric that combines overall Connectivity Restoration Potential (for all streams) and Current Coldwater (16 C) Restoration Potential (for cold water streams)	
+crossings	core	trans_vuln	Transportation Vulnerability		reverse	decimal	linear	yes	2	Transportation system vulnerability score that combines the Overall EMS delay score (criticality) and Overall Risk of Failure score (risk)	
+crossings	core	max_rof	Overall Risk		reverse	decimal	linear	yes	3	Maximum value for hydraulic (All models, current conditions), structural, and geomorphic risk of failure (0 = Low, 1 = High)	
+crossings	core	int_del	Overall EMS Delay		reverse	decimal	linear	yes	4	Integrated metric that combines frequency of use by EMS and potential delays for each trip (0 = Least affected, 1 = Most affected) (sum of all logistically converted trip delays transformed by the natural logarithm and scaled to most affected crossing)	
+crossings	eco	impass	Impassability Score		reverse	decimal	linear	not yet	5	The aquatic impassability score for the road-stream crossing (0 = Completely Passable, 1 = Impassable)	
+crossings	eco	deltaln	Connectivity Loss		forward	decimal	linear	not yet	6	Loss of aquatic connectivity caused by crossing impassibility (0 = Low, 1 = High)	
+crossings	eco	effectln	Connectivity Restoration Potential		forward	decimal	linear	not yet	7	Potential for improved aquatic connectivity via crossing replacement (connectivity loss weighted by habitat quality) (0 = Low, 1 = High)	
+crossings	eco	effln16Cur	Coldwater (16 C) Restoration		forward	decimal	linear	not yet	8	Potential for improved aquatic connectivity of coldwater streams (below 16 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality) (0 = Low, 1 = High)	
+crossings	eco	effln18Cur	Coldwater (18 C) Restoration		forward	decimal	linear	not yet	9	Potential for improved aquatic connectivity of coldwater streams (below 18 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality) (0 = Low, 1 = High)	
+crossings	eco	effln20Cur	Coldwater (20 C) Restoration		forward	decimal	linear	not yet	10	Potential for improved aquatic connectivity of coldwater streams (below 20 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality) (0 = Low, 1 = High)	
+crossings	eco	effln22Cur	Coldwater (22 C) Restoration		forward	decimal	linear	not yet	11	Potential for improved aquatic connectivity of coldwater streams (below 22 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality) (0 = Low, 1 = High)	
+crossings	eco	effln16Fut	Coldwater (16 C) Restoration (Future)		forward	decimal	linear	not yet	12	Predicted future potential for improved aquatic connectivity of coldwater streams under an assumed 2 degree temperature increase (below 16 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality) (0 = Low, 1 = High)	
+crossings	eco	effln18Fut	Coldwater (18 C) Restoration (Future)		forward	decimal	linear	not yet	13	Predicted future potential for improved aquatic connectivity of coldwater streams under an assumed 2 degree temperature increase (below 18 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality) (0 = Low, 1 = High)	
+crossings	eco	effln20Fut	Coldwater (20 C) Restoration (Future)		forward	decimal	linear	not yet	14	Predicted future potential for improved aquatic connectivity of coldwater streams under an assumed 2 degree temperature increase (below 20 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality) (0 = Low, 1 = High)	
+crossings	eco	effln22Fut	Coldwater (22 C) Restoration (Future)		forward	decimal	linear	not yet	15	Predicted future potential for improved aquatic connectivity of coldwater streams under an assumed 2 degree temperature increase (below 22 C average summer temperature) via crossing replacement (connectivity loss weighted by habitat quality) (0 = Low, 1 = High)	
+crossings	eco	anad_rest	Anadromous Restoration Potential		forward	decimal	linear	not yet	16	Potential for improved aquatic connectivity for anadromous fish via crossing replacement (0 = Low, 1 = High)	
+crossings	trans	struct_rof	Structural Risk		reverse	decimal	linear	not yet	17	Risk of structural failure for the stream crossing (0 = Low, 1 = High)	
+crossings	trans	geo_rof	Geomorphic Risk		reverse	decimal	linear	not yet	18	Risk of geomorphic failure for the stream crossing (0 = Low, 1 =  High)	
+crossings	trans	hydCurAll	Hydraulic Risk-All		reverse	decimal	linear	not yet	19	Risk of hydraulic failure for the stream crossing under current conditions, based on estimated flows using both physical and statistical hydrologic models (0 = Low, 1 = High)	
+crossings	trans	hydCurPhys	Hydraulic Risk-Physical		reverse	decimal	linear	not yet	20	Risk of hydraulic failure for the stream crossing under current conditions, based on estimated flows using physical hydrologic models (0 = Low, 1 = High)	
+crossings	trans	hydCurStat	Hydraulic Risk-Statistical		reverse	decimal	linear	not yet	21	Risk of hydraulic failure for the stream crossing under current conditions, based on estimated flows using statistical hydrologic models (0 = Low, 1 = High)	
+crossings	trans	hydMCAll	Hydraulic Risk-All (Mid-Century)		reverse	decimal	linear	not yet	22	Risk of hydraulic failure for the stream crossing using estimates of mid-century conditions, based on estimated flows using both physical and statistical hydrologic models (0 = Low, 1 = High)	
+crossings	trans	hydMCPhys	Hydraulic Risk-Physical (Mid-Century)		reverse	decimal	linear	not yet	23	Risk of hydraulic failure for the stream crossing using estimates of mid-century conditions, based on estimated flows using physical hydrologic models (0 = Low, 1 = High)	
+crossings	trans	ave_del	Average EMS Delay	Min.	reverse	decimal	log	not yet	24	Average traffic delay (minutes) for emergency medical services throughout the watershed, if the road is closed due to crossing failure	
+crossings	trans	aff_del	Average Affected EMS Delay	Min.	reverse	decimal	log	not yet	25	Average traffic delay (minutes) for emergency medical services for trips using the crossing, if the road is closed due to crossing failure	
+crossings	trans	max_del	Maximum EMS Delay	Min.	reverse	decimal	log	not yet	26	Maximum traffic delay (minutes) for emergency medical services, if the road is closed due to crossing failure	
+crossings	additional	bar_type	Crossing Type		reverse	text	categorical	no	27	Type of stream crossing (bridge, culvert, multiple culvert, etc.)	{"1":"Culvert","2":"Bridge","3":"Dam"}
+crossings	additional	drain_tot	Drainage Area (Total)	KM^2	forward	decimal	log	no	28	Drainage area (square kilometers) of all upstream reaches	
+crossings	additional	drain_bar	Drainage Area (Connected)	KM^2	forward	decimal	log	no	29	Drainage area (square kilometers) of all upstream reaches to first encountered road-stream crossing	
+crossings	additional	strkm_tot	Stream Length (Total)	KM	forward	decimal	log	no	30	Stream length (kilometers) of all upstream reaches	
+crossings	additional	strkm_bar	Stream Length (Connected)	KM	forward	decimal	log	no	31	Stream length (kilometers) of all upstream reaches to first encountered road-stream crossing	
+crossings	additional	upstr_bars	Structure Count		reverse	integer	log	no	32	Total number of upstream structures crossing the stream	
+crossings	additional	slope_perc	Stream Slope	%	forward	decimal	log	no	33	The slope of the stream reach containing the crossing	
+crossings	additional	Q2_m3_s	Q2 Discharge	M^3/s	forward	decimal	log	no	34	The predicted two-year high discharge value determined using the Jacob's regime equation for gravel dominated stream beds	
+crossings	additional	w_W_m2_ST	Unit Stream Power	W/M	forward	decimal	log	no	35	The total energy exerted by the stream divided by the width of the stream determined using Q2 discharge and bankful width	
+crossings	additional	obs_date	Assessment Date		forward	date	linear	no	36	Date the crossing was field assessed (NA indicates crossing has not been field assessed)	
+crossings	additional	jurisdiction	Road Jurisdiction		forward	text	categorical	no	37	Responsibility for road maintenance at crossing	{"0":"Unaccepted", "1":"Mass DOT", "2":"City/Town", "6":"State Park/Forest"}
+crossings	additional	nhs	National Highway System		forward	text	categorical	no	38	National Highway System status of road at crossing	{"0":"Not on NHS","1":"NHS-Interstate","14":"NHS-Other","15":"NHS-Arterial"}
+crossings	both	featureid	Feature ID		forward	integer	linear	never	39	The unique identifier of the catchment in which the stream crossing is located	
+crossings	both	unique_id	Unique ID		forward	integer	linear	never	40	The unique identifier of the stream crossing	
+crossings	both	crossing_id	Crossing ID		forward	text	linear	never	41	The NAACC XY identifier (culverts and bridges) or TNC identifier (dams) of the stream crossing	
+catchments	core	elevation	Elevation	M	forward	decimal	linear	yes	0	Average elevation (meters) of the catchment	
+catchments	core	slope_pcnt	Catchment Slope	%	forward	decimal	log	yes	1	Average hillside slope (percent) of the catchment	
+catchments	core	forest	Forest Cover	%	forward	decimal	linear	yes	2	Percentage of the catchment covered with forest	
+catchments	core	agriculture	Agriculture	%	reverse	decimal	log	yes	3	Percentage of the catchment used for agriculture	
+catchments	core	water	Water Cover	%	reverse	decimal	log	yes	4	Percentage of the catchment covered with water	
+catchments	core	impervious	Impervious Surface	%	reverse	decimal	log	yes	5	Percentage of the catchment covered with impervious surface	
+catchments	both	featureid	Feature ID		forward	integer	linear	never	6	The unique identifier of the catchment	
+streams	core	str_order	Stream Order		forward	text	categorical	yes	0	Stream order (Strahler method) of stream reach	{"1":"1","2":"2","3":"3","4":"4","5":"5","6":"6"}
+streams	core	occ_cur	Trout Habitat Suitability		reverse	decimal	linear	yes	1	Probability that the stream reach is suitable for brook trout	
+streams	core	T_mean_sum	Stream Temperature	C	forward	decimal	linear	yes	2	Average predicted summer temperature (degrees C) of stream reach	
+streams	core	T_inertia	Stream Temperature Resistance		reverse	decimal	linear	yes	3	Predicted resistance of stream temperature to changes in air temperature (0 = Low, 1 = High)	
+streams	core	from_node	From Node		forward	integer	linear	never	4	The unique identifier of the first point of the stream reach	
+streams	core	to_node	To Node		forward	integer	linear	never	5	The unique identifier of the last point of the stream reach	
+streams	both	unique_id	Unique ID		forward	integer	linear	never	6	The unique identifier of the stream	
+streams	both	featureid	Feature ID		forward	integer	linear	never	7	The unique identifier of the catchment (in which the stream centroid is located)	
+political	core	state	State								
+political	core	county	County								
+political	core	town	Town								
+political	core	dot_district	DOT District								
+political	core	huc12_name	HUC 12								
+political	core	ej_criteria	Environmental Justice								
+political	both	unique_id	Unique ID								
+political	both	featureid	Feature ID								
