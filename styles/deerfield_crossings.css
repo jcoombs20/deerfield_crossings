@@ -210,6 +210,12 @@ h1, h2, h3 {
   top: 3px;
 }
 
+#bingGeocoderSubmit.glyphicon-remove {
+  background":"#ff0040;
+  background: linear-gradient(rgb(255, 0, 64), rgb(179, 0, 45));
+  color: rgb(153, 0, 0);
+}
+
 #bingGeocoderSubmit:hover {
   border-color: white;
 }
@@ -330,7 +336,7 @@ h1, h2, h3 {
 }
 
 .modal-dialog {
-  margin-top: 80px;
+  //margin-top: 80px;
 }
 
 .modal-open {
@@ -345,8 +351,8 @@ h1, h2, h3 {
   border-radius: 4px;
   font-size: 2em;
   align-self: center;
-  //min-height: 490px;
-  //min-width: 882px;
+  min-height: 605px;
+  min-width: 1000px;
 }
 
 #infoDiv p {
@@ -381,7 +387,7 @@ h1, h2, h3 {
   display: inline-block;
   float: left;
   width: calc(100% - 175px);
-  height: calc(100% - 140px);
+  height: calc(100% - 193px);
 }
 
 .helpDivs {
@@ -452,24 +458,45 @@ h1, h2, h3 {
   background: white;
 }
 
-#maDOT {
-  height: 65px;
+#fundingLeftImg {
   float: left;
-  margin-right: 10px;
+  text-align: center;
+  padding-left: 5px;
+}
+
+#maDOT {
+  height: 60px;
   margin-top: 5px;
+  display: block;
+}
+
+#usgs {
+  height: 55px;
+  margin-top: 10px;
+}
+
+#fundingRightImg {
+  float: right;
+  text-align: center;
+  padding-right: 5px;
 }
 
 #doiLogo {
-  height: 80px;
-  float: right;
-  margin-left: 10px;
+  height: 70px;
+  display: block;
+}
+
+#usfs {
+  height: 65px;
+  margin-top: 5px;
 }
 
 #funders {
   text-align: center !important;
   margin-top: 10px !important;
   font-weight: bold;
-  margin-top: 17px !important;
+  margin-top: 10px !important;
+  font-size: 17px !important;
 }
 
 .brand {

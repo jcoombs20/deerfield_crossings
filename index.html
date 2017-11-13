@@ -209,43 +209,47 @@
 
       //***Bing geocoder control
       var tmpPoint = new L.marker;
-      var bingGeocoder = new L.Control.BingGeocoder('At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn', { callback: function (results) {
-        if(results.statusCode == 200) {
-          if(d3.select("#bingGeocoderSubmit").classed("glyphicon-search")) {
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();   
-            });
-            document.getElementById("bingGeocoderInput").blur();
-            var bbox = results.resourceSets[0].resources[0].bbox,
-              first = new L.LatLng(bbox[0], bbox[1]),
-              second = new L.LatLng(bbox[2], bbox[3]),
-              tmpBounds = new L.LatLngBounds([first, second]);
-            this._map.fitBounds(tmpBounds);
-            this._map.removeLayer(tmpPoint);
-            tmpPoint = new L.marker(results.resourceSets[0].resources[0].point.coordinates);  //.bindPopup(results.resourceSets[0].resources[0].address.formattedAddress);
-            this._map.addLayer(tmpPoint);
-            d3.select(".leaflet-marker-icon")
-              .attr("id","mapIcon")
-              .attr("data-toggle", "tooltip")
-              .attr("data-container", "body")
-              .attr("data-placement", "auto top")
-              .attr("data-html", "true")
-              .attr("title", '<p><b><center>' + results.resourceSets[0].resources[0].name + '</center></b></p>');
-            d3.select(tmpPoint)
-              .on("click", function() { clearSearch(); });
-            d3.select("#bingGeocoderSubmit")
-              .classed("glyphicon-search", false)
-              .classed("glyphicon-remove", true)
-              .style({"background":"#ff0040", "background":"linear-gradient(#ff0040, #b3002d)", "color":"#990000"})
-              .property("title", "Click to clear search results");
+      var bingGeocoder = new L.Control.BingGeocoder('At3gymJqaoGjGje-JJ-R5tJOuilUk-gd7SQ0DBZlTXTsRoMfVWU08ZWF1X7QKRRn', { callback: function (results)
+        {
+          if(results.statusCode == 200) {
+            if(d3.select("#bingGeocoderSubmit").classed("glyphicon-search")) {
+              $(document).ready(function(){
+                $('[data-toggle="tooltip"]').tooltip();   
+              });
+              document.getElementById("bingGeocoderInput").blur();
+              var bbox = results.resourceSets[0].resources[0].bbox,
+                first = new L.LatLng(bbox[0], bbox[1]),
+                second = new L.LatLng(bbox[2], bbox[3]),
+                tmpBounds = new L.LatLngBounds([first, second]);
+              this._map.fitBounds(tmpBounds);
+              this._map.removeLayer(tmpPoint);
+              tmpPoint = new L.marker(results.resourceSets[0].resources[0].point.coordinates);  //.bindPopup(results.resourceSets[0].resources[0].address.formattedAddress);
+              this._map.addLayer(tmpPoint);
+              d3.select(".leaflet-marker-icon")
+                .attr("id","mapIcon")
+                .attr("value", results.resourceSets[0].resources[0].name)
+                .attr("data-toggle", "tooltip")
+                .attr("data-container", "body")
+                .attr("data-placement", "auto top")
+                .attr("data-html", "true")
+                .attr("title", '<p><b><center>' + results.resourceSets[0].resources[0].name + '</center></b></p>');
+              d3.select(tmpPoint)
+                .on("click", function() { clearSearch(); });
+              d3.select("#bingGeocoderSubmit")
+                .classed("glyphicon-search", false)
+                .classed("glyphicon-remove", true)
+                .property("title", "Click to clear search results");
+            }
+            else {
+              clearSearch();
+            }
           }
           else {
-            clearSearch();
+            d3.select("#bingGeocoderInput").property("value","No matching results");            
           }
         }
-        }
       });
-      //bingGeocoder.addTo(map);
+
      
 
       //******Clear the results of the geo search
@@ -484,6 +488,32 @@
       //bingGeocoder._container.remove();
       //$('#bingGeoLocate').appendChild(bingGeocoder.onAdd(map));
       document.getElementById('bingGeoLocate').appendChild(bingGeocoder.onAdd(map));
+      d3.select("#bingGeocoderInput")
+        .on("mouseup", function() { if(this.value == "No matching results") { this.value = ""; } else { $(this).select(); } })
+        .on("blur", function() { modifySearch(this, "blur"); })
+        .on("keyup", function() { modifySearch(this, "key"); }); // if(d3.event.keyCode == 13) { if(d3.select("#bingGeocoderSubmit").classed("glyphicon-remove") == true) { $("#bingGeocoderSubmit").click(); } } });
+
+
+
+      function modifySearch(tmpEl, tmpEvent) {
+        if(tmpEvent == "blur") {
+          if((tmpEl.value == "" || tmpEl.value == "No matching results") && document.getElementById("mapIcon")) { 
+            tmpEl.value = d3.select("#mapIcon").attr("value"); 
+            d3.select("#bingGeocoderSubmit").classed("glyphicon-remove", true).classed("glyphicon-search", false);
+          }
+          else if(tmpEl.value == "No matching results" && !document.getElementById("mapIcon")) {
+            tmpEl.value = "";
+          }
+        } 
+        else if(document.getElementById("mapIcon")) {
+          if(tmpEl.value != d3.select("#mapIcon").attr("value")) {
+            d3.select("#bingGeocoderSubmit").classed("glyphicon-remove", false).classed("glyphicon-search", true);
+          }
+          else {
+            d3.select("#bingGeocoderSubmit").classed("glyphicon-remove", true).classed("glyphicon-search", false);
+          }
+        }
+      }
 
 
 
@@ -1299,7 +1329,7 @@
        d3.select("#infoDiv")
          .append("div")
          .attr("id", "helpFunding")
-         .html('<a href="http://www.massdot.state.ma.us/" target="_blank"><img id="maDOT" src="images/MassDOT-Formal_Logo.jpg" title="Massachusetts Department of Transportation"></a><a href="https://www.doi.gov/hurricanesandy" target="_blank"><img id="doiLogo" src="images/doi_logo.png" title="Department of the Interior"></a><p id="funders">This project was funded by the <a href="http://www.massdot.state.ma.us/" target="_blank">Massachusetts Department of Transportation</a><br>and the <a href="https://www.doi.gov/hurricanesandy" target="_blank">Department of the Interior Hurricane Sandy Mitigation Fund</a>.</p>');
+         .html('<div id="fundingLeftImg"><a href="http://www.massdot.state.ma.us/" target="_blank"><img id="maDOT" src="images/MassDOT-Formal_Logo.jpg" title="Massachusetts Department of Transportation"></a><a href="https://www.usgs.gov/" target="_blank"><img id="usgs" src="images/logo-usgs.png" title="U.S. Geological Survey"</a></div><div id="fundingRightImg"><a href="https://www.doi.gov/hurricanesandy" target="_blank"><img id="doiLogo" src="images/doi_logo.png" title="Department of the Interior"></a><a href="https://www.fs.fed.us/" target="_blank"><img id="usfs" src="images/shield_color.png" title="U.S. Forest Service"></a></div><p id="funders">This project was funded by the <a href="http://www.massdot.state.ma.us/" target="_blank">Massachusetts Department of Transportation</a><br>and the <a href="https://www.doi.gov/hurricanesandy" target="_blank">Department of the Interior Hurricane Sandy Mitigation Fund</a>.<br><br>Additional support was provided by the <a href="https://www.usgs.gov/" target="_blank">U.S. Geological Survey</a>,<br>the <a href="https://www.fs.fed.us/" target="_blank">U.S. Forest Service</a>, and the <a href="http://www.umass.edu/" target="_blank">University of Massachusetts, Amherst</a>.</p>');
 
 
 
