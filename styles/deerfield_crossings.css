@@ -152,6 +152,7 @@ h1, h2, h3 {
   font-size: 13px;
   z-index: 2000;
   display: none;
+  box-shadow: 5px 5px 5px rgba(0,0,0,0.3);
 }
 
 #baselayerList {
@@ -176,6 +177,7 @@ h1, h2, h3 {
   font-size: 13px;
   z-index: 2000;
   display: none;
+  box-shadow: 5px 5px 5px rgba(0,0,0,0.3);
 }
 
 .layerName {
@@ -428,11 +430,17 @@ h1, h2, h3 {
   cursor: pointer;
 }
 
-.video-js {
-  width: 600px !important;
-  height: 338px !important;
+.videoDiv {
+  text-align: center;
+  padding-bottom: 20px;
+}
+
+.video-js, .htmlVideo {
+  width: 650px;
+  //height: 338px !important;
   background-color: white;
-  margin: 20px auto 20px auto;
+  margin: auto;
+  //margin: 20px auto 20px auto;
 }
 
 .video-js.vjs-ended .vjs-poster {

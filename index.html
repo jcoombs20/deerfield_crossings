@@ -319,7 +319,7 @@
             .on("mouseover", function(data) { if(d3.select(this).style("opacity") > 0) {showIt(this.id); resizeTooltip();} })
             .on("mousemove", function() { tooltip.style("top", (d3.event.pageY-40) + "px").style("left", (d3.event.pageX+15) + "px"); resizeTooltip(); })
             .on("mouseout", function() { tooltip.style("visibility", "hidden"); })
-            .on("click", function(data) { getAttributes(data.properties, topo, d3.select(this).style("opacity")); resizePanels(); });
+            .on("click", function(data) { getAttributes(data.properties, topo, d3.select(this).style("opacity"), this); resizePanels(); });
         changeStyle(d3.select("#" + topo.class + "Select").node().value, topo);
         filterMap("featureid", topo, true);
       }
@@ -329,6 +329,11 @@
       function removeTopo(topo) {
         var tmpFeats = topo.g.selectAll("." + topo.class);
         tmpFeats.remove();
+        if(d3.select("#attributesDiv").property("data-class") == topo.class) {
+          d3.select("#attrShow").style("display", "none");
+          d3.select("#attValuesTable").style("display", "none");
+          d3.select("#noAttrText").style("display", "block");
+        }
       }
 
 
@@ -1155,7 +1160,12 @@
         .attr("class", "glyphicon glyphicon-remove pull-right minimize-button")
         .attr("data-toggle", "modal")
         .attr("data-target", "#helpDiv")
-        .property("title", "Close help");     
+        .property("title", "Close help");   
+
+      //***Stop playing help videos on modal close
+      $('#helpDiv').on('hide.bs.modal', function() {
+        stopVideos();
+      });  
         
       d3.select("#infoDiv")
         .append("div")
@@ -1224,13 +1234,36 @@
         .append("div")
         .attr("class", "helpDivs")
         .attr("id", "help-videos")
-        .html('<p style="background:red;color:white;"><u>NOTICE:</u> Videos were recorded on the previous version of the app and will be updated soon.</p>'
+        .html('' //<p style="background:red;color:white;"><u>NOTICE:</u> Videos were recorded on the previous version of the app and will be updated soon.</p>'
            + '<h3>Tool Overview</h3>'
-           + '<video id="video1" class="video-js vjs-default-skin" controls preload="auto" poster="images/sce_overview.jpg" data-setup="{}"><source src="video/sce_overview.mp4" type="video/mp4"><p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p></video>'
-           + '<h3>Filters and Spatial Joins</h3>'
-           + '<video id="video2" class="video-js vjs-default-skin" controls preload="auto" poster="images/sce_filtering.jpg" data-setup="{}"><source src="video/sce_filtering.mp4" type="video/mp4"><p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p></video>'
+           + '<div class="videoDiv">'
+             + '<video id="video1" class="htmlVideo" controls preload="auto" poster="images/sce_overview.jpg">'
+               + '<source src="video/sce_overview.mp4" type="video/mp4">'
+               + 'Your browser does not support HTML5 video.'
+             + '</video>'
+           + '</div>'
+
+           + '<h3>Filters & Spatial Joins</h3>'
+           + '<div class="videoDiv">'
+             + '<video id="video2" class="htmlVideo" controls preload="auto" poster="images/sce_filtering.jpg">'
+               + '<source src="video/sce_filtering.mp4" type="video/mp4">'
+               + 'Your browser does not support HTML5 video.'
+             + '</video>'
+           + '</div>'
+
            + '<h3>Case Study Example</h3>'
-           + '<video id="video3" class="video-js vjs-default-skin" controls preload="auto" poster="images/sce_scenario.jpg" data-setup="{}"><source src="video/sce_scenario.mp4" type="video/mp4"><p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p></video>'
+           + '<div class="videoDiv">'
+             + '<video id="video3" class="htmlVideo" controls preload="auto" poster="images/sce_scenario.jpg">'
+               + '<source src="video/sce_scenario.mp4" type="video/mp4">'
+               + 'Your browser does not support HTML5 video.'
+             + '</video>'
+           + '</div>'
+
+           //+ '<video id="video1" class="video-js vjs-default-skin" controls preload="auto" poster="images/sce_overview.jpg" data-setup="{}"><source src="video/sce_overview.mp4" type="video/mp4"><p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p></video>'
+           //+ '<h3>Filters and Spatial Joins</h3>'
+           //+ '<video id="video2" class="video-js vjs-default-skin" controls preload="auto" poster="images/sce_filtering.jpg" data-setup="{}"><source src="video/sce_filtering.mp4" type="video/mp4"><p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p></video>'
+           //+ '<h3>Case Study Example</h3>'
+           //+ '<video id="video3" class="video-js vjs-default-skin" controls preload="auto" poster="images/sce_scenario.jpg" data-setup="{}"><source src="video/sce_scenario.mp4" type="video/mp4"><p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p></video>'
            );       
 
       d3.select("#helpContent")
@@ -1333,13 +1366,26 @@
 
 
 
+
       function changePill(tmpID) {
         d3.select("#helpMenu").selectAll("li").classed("active", false);
         d3.select(tmpID).classed("active", true);
         d3.selectAll(".helpDivs").style("display", "none");
         d3.select("#help-" + tmpID.id).style("display", "inline-block");
+        if(d3.select("#help-videos").style("display") != "inline-block") {
+          stopVideos();
+        }
       }
 
+
+
+
+
+      function stopVideos() {
+        d3.selectAll(".htmlVideo")[0].forEach(function(d) {
+          d.pause();
+        });
+      }
 
 
 
@@ -1398,13 +1444,13 @@
         .defer(d3.json, 'crossings_topo.json')
         .defer(d3.json, 'streams_topo.json')
         .defer(d3.json, 'catchments_topo.json')
-        .defer(d3.tsv, 'crossings_covariates_combined_09182017.tsv')
+        .defer(d3.tsv, 'crossings_covariates_combined_01122018.tsv')
         .defer(d3.tsv, 'streams_covariates_new.tsv')
         .defer(d3.tsv, 'catchments_covariates.tsv')
         .defer(d3.tsv, 'crossings_political.tsv')
         .defer(d3.tsv, 'streams_political.tsv')
         .defer(d3.tsv, 'catchments_political.tsv')
-        .defer(d3.tsv, 'covariate_info_07-02-17.tsv')
+        .defer(d3.tsv, 'covariate_info_01-12-18.tsv')
         .await(displayIt);
 
 
@@ -1673,21 +1719,89 @@
         if (d3.select("#" + tmpDiv + "Div").style("opacity") == "1") {
           d3.select("#" + tmpDiv + "Div").transition().style({"opacity":"0", "visibility":"hidden"});
           d3.select("#hc" + tmpDiv.charAt(0).toUpperCase() + tmpDiv.slice(1) + "Div").property("title", "Click to show " + toggleWords[tmpDiv] + " window");
-          
+          if(tmpDiv == "attributes") {
+            styleActiveFeature(false);
+          }
         }
         else {
           d3.select("#" + tmpDiv + "Div").transition().duration(500).ease("cubic").style({"opacity":"1", "display":"block", "visibility":"visible"});            
           d3.select("#hc" + tmpDiv.charAt(0).toUpperCase() + tmpDiv.slice(1) + "Div").property("title", "Click to hide " + toggleWords[tmpDiv] + " window");
           setZ(d3.select("#" + tmpDiv + "Div")[0][0]);
+          if(tmpDiv == "attributes") {
+            styleActiveFeature(true);
+          }
         }
       }
 
 
 
 
+
+
+      //******Changes feature style for active attribute based on whether the attributesDiv window is visible or hidden
+      function styleActiveFeature(tmpBool) {
+        if(tmpBool == true) {
+          d3.select(d3.select("#attributesDiv").property("data-svg")).style({"stroke": "aqua", "stroke-width": "4px"});
+        }
+        else {
+          if(d3.select("#attributesDiv").property("data-class") == "streams") {
+            d3.select(d3.select("#attributesDiv").property("data-svg")).style({"stroke": d3.select("#attributesDiv").property("data-strokeColor"), "stroke-width": ""});
+          }
+          else if(d3.select("#attributesDiv").property("data-class") == "catchments") {
+            if(d3.select("#catchmentsSelect").property("value") == "...") {
+              d3.select(d3.select("#attributesDiv").property("data-svg")).style({"stroke": "gray", "stroke-width": ""});
+            }
+            else {
+              d3.select(d3.select("#attributesDiv").property("data-svg")).style({"stroke": "", "stroke-width": ""});
+            }
+          }
+          else if(d3.select("#attributesDiv").property("data-class") == "crossings") {
+            if(d3.select("#crossingsSelect").property("value") == "...") {
+              d3.select(d3.select("#attributesDiv").property("data-svg")).style({"stroke": "gray", "stroke-width": ""});
+            }
+            else {
+              d3.select(d3.select("#attributesDiv").property("data-svg")).style({"stroke": "black", "stroke-width": ""});
+            }
+          }
+        }
+      }
+
+
+
+
+
+
+
       //******Add attribute names and values to table
-      function getAttributes(tmpFeat, topo, opacity) {
+      function getAttributes(tmpFeat, topo, opacity, tmpSVG) {
         if (opacity == 0) {return;}
+        
+        d3.select(d3.select("#attributesDiv").property("data-svg")).style({"stroke": d3.select("#attributesDiv").property("data-strokeColor"), "stroke-width": ""});
+        
+        d3.select("#attributesDiv").property("data-svg", tmpSVG);
+
+        if(topo.class == "catchments") {
+          if(d3.select("#catchmentsSelect").property("value") == "...") {
+            d3.select("#attributesDiv").property("data-strokeColor", "gray");
+          }
+          else {
+            d3.select("#attributesDiv").property("data-strokeColor", "");
+          }
+        }
+        else if(topo.class == "crossings") {
+          if(d3.select("#crossingsSelect").property("value") == "...") {
+            d3.select("#attributesDiv").property("data-strokeColor", "gray");
+          }
+          else {
+            d3.select("#attributesDiv").property("data-strokeColor", "black");
+          }
+        }
+        else {
+          d3.select("#attributesDiv").property("data-strokeColor", d3.select(tmpSVG).style("stroke"));
+        }
+
+        d3.select("#attributesDiv").property("data-class", topo.class);
+        d3.select(tmpSVG).style({"stroke": "aqua", "stroke-width": "4px"});
 
         d3.select("#noAttrText").style("display", "none");
         d3.select("#attValuesTable").style("display", "table");
@@ -2472,6 +2586,9 @@
           d3.select("#" + topo.class + "-list-inline").selectAll("li")
             .style({"border-top-color":"gray", "color":"white"})
             .property("title", "");
+
+          //***Change selected feature style if catchments
+          d3.select("#attributesDiv").property("data-strokeColor", "gray");
         }
         else {
           //*******Get data for passed in attribute
@@ -2514,9 +2631,14 @@
               }
               else {return "gray"}; 
             });
+            tmpFeat.style("stroke-width", "");
+            //***Change selected feature style if catchments
+            if(d3.select("#attributesDiv").property("data-class") == "streams") {
+              d3.select("#attributesDiv").property("data-strokeColor", d3.select(d3.select("#attributesDiv").property("data-svg")).style("stroke"));
+            }
           }
           else {
-            tmpFeat.style({"stroke":"","fill-opacity":""});
+            tmpFeat.style({"stroke":"", "stroke-width": "", "fill-opacity":""});
             tmpFeat.style("fill", function(d) {
               if (d.properties[tmpAtt] > -9999) { 
                 var tVal = transformData(topo.scale[tmpAtt], [d.properties[tmpAtt]], maxVal);
@@ -2524,6 +2646,13 @@
               }
               else {return "gray"}; 
             });
+            //***Change selected feature style if catchments
+            if(d3.select("#attributesDiv").property("data-class") == "catchments") {
+              d3.select("#attributesDiv").property("data-strokeColor", "lightgray");
+            }
+            else {
+              d3.select("#attributesDiv").property("data-strokeColor", "black");
+            }
           }
 
           tmpFeat.attr("id", function(d) { 
@@ -2588,6 +2717,10 @@
               }  
             })
             .property("title", function() {return d3.select(this).text();});
+        }
+
+        if(d3.select("#attributesDiv").style("visibility") == "visible") {
+          styleActiveFeature(true);
         }
       }
 
